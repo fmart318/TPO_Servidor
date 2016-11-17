@@ -1182,4 +1182,73 @@ public void recibir(ViajeDTO v)
 			c.setIdCarga(idCarga);
 			hbtDAO.borrar(c);			
 		}
+
+
+		@Override
+		public void crearPedido(PedidoDTO pe) throws RemoteException {
+			// TODO Auto-generated method stub
+			Pedido p=new Pedido();
+			Direccion dC=new Direccion();
+			Direccion dD=new Direccion();
+			dC.setCalle(pe.getDireccionCarga().getCalle());
+			dC.setCP(pe.getDireccionCarga().getCP());
+			dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
+			dC.setNumero(pe.getDireccionCarga().getNumero());
+			dC.setPiso(pe.getDireccionCarga().getPiso());
+			
+			dD.setCalle(pe.getDireccionDestino().getCalle());
+			dD.setCP(pe.getDireccionDestino().getCP());
+			dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
+			dD.setNumero(pe.getDireccionDestino().getNumero());
+			dD.setPiso(pe.getDireccionDestino().getPiso());
+			
+			hbtDAO.guardar(dD);
+			hbtDAO.guardar(dC);
+			ArrayList<Carga> cargas=new ArrayList<Carga>(); 
+			List<CargaDTO> cargasDTO=hbtDAO.getInstancia().listarCargas();
+			for (int i=0;i<cargasDTO.size();i++){
+				if (pe.getCargas().get(i).getIdCarga()==cargasDTO.get(i).getIdCarga()){
+					Carga carga=new Carga();
+					carga.setIdCarga(cargasDTO.get(i).getIdCarga());
+					carga.setAlto(cargasDTO.get(i).getAlto());
+					carga.setAncho(cargasDTO.get(i).getAncho());
+					carga.setApilable(cargasDTO.get(i).getApilable());
+					carga.setCondiciones(cargasDTO.get(i).getCondiciones());
+					carga.setDespachado(cargasDTO.get(i).isDespachado());
+					carga.setFragilidad(cargasDTO.get(i).getFragilidad());
+					carga.setMercaderia(cargasDTO.get(i).getTipoMercaderia());
+					carga.setPeso(cargasDTO.get(i).getPeso());
+					carga.setProfundidad(cargasDTO.get(i).getProfundidad());
+					carga.setRefrigerable(cargasDTO.get(i).isRefrigerable());
+					carga.setTratamiento(cargasDTO.get(i).getTratamiento());
+					carga.setVolumen(cargasDTO.get(i).getVolumen());
+					cargas.add(carga);
+				}
+			}
+			
+			List<EmpresaDTO> empresas=hbtDAO.getInstancia().obtenerClientesEmpresa();
+			for (EmpresaDTO e: empresas){
+				if(e.getIdCliente()==pe.getCliente().getIdCliente()){
+					Empresa empresa=new Empresa();
+					empresa.setIdCliente(e.getIdCliente());
+					p.setCliente(empresa);
+				}
+			}
+			List<ParticularDTO> particulares=hbtDAO.getInstancia().obtenerClientesParticular();
+			for (ParticularDTO pa: particulares){
+				if(pa.getIdCliente()==pe.getCliente().getIdCliente()){
+					Particular particular=new Particular();
+					particular.setIdCliente(pe.getCliente().getIdCliente());
+					p.setCliente(particular);
+				}
+			}
+	
+			p.setHoraInicio(1);
+			p.setCargas(cargas);
+			p.setDireccionCarga(dC);
+			p.setDireccionDestino(dD);
+			hbtDAO.guardar(p);
+			
+			
+		}
 }
