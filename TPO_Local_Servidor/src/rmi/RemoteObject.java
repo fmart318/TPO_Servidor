@@ -1129,10 +1129,57 @@ public void recibir(ViajeDTO v)
 			hbtDAO.borrar(p);
 			
 		}
-
-
 		@Override
 		public List<CargaDTO> listarCargas() throws RemoteException {
 			return hbtDAO.listarCargas();
+		}
+
+
+		@Override
+		public void createCarga(CargaDTO cd) throws RemoteException {
+			Carga c=new Carga();
+			c.setAlto(cd.getAlto());
+			c.setAncho(cd.getAncho());
+			c.setApilable(cd.getApilable());
+			c.setCondiciones(cd.getCondiciones());
+			c.setDespachado(cd.isDespachado());
+			c.setFragilidad(cd.getFragilidad());
+			c.setMercaderia(cd.getTipoMercaderia());
+			c.setPeso(cd.getPeso());
+			c.setProfundidad(cd.getProfundidad());
+			c.setRefrigerable(cd.isRefrigerable());
+			c.setTratamiento(cd.getTratamiento());
+			c.setVolumen(cd.getVolumen());
+			hbtDAO.guardar(c);
+		}
+
+
+		@Override
+		public void updateCarga(CargaDTO cd) throws RemoteException {
+			// TODO Auto-generated method stub
+			Carga c=new Carga();
+			c.setIdCarga(cd.getIdCarga());
+			c.setAlto(cd.getAlto());
+			c.setAncho(cd.getAncho());
+			c.setApilable(cd.getApilable());
+			c.setCondiciones(cd.getCondiciones());
+			c.setDespachado(cd.isDespachado());
+			c.setFragilidad(cd.getFragilidad());
+			c.setMercaderia(cd.getTipoMercaderia());
+			c.setPeso(cd.getPeso());
+			c.setProfundidad(cd.getProfundidad());
+			c.setRefrigerable(cd.isRefrigerable());
+			c.setTratamiento(cd.getTratamiento());
+			c.setVolumen(cd.getVolumen());
+			hbtDAO.modificar(c);
+		}
+
+
+		@Override
+		public void deleteCarga(int idCarga) throws RemoteException {
+			// TODO Auto-generated method stub
+			Carga c=new Carga();
+			c.setIdCarga(idCarga);
+			hbtDAO.borrar(c);			
 		}
 }
