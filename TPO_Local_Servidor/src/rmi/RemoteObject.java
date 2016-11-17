@@ -268,9 +268,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public float SeleccionarViaje(int idViaje){
 		return hbtDAO.seleccionarViaje(idViaje);	
 	}
-	public List<SucursalDTO> obtenerSucursales() throws RemoteException {
-		return hbtDAO.obtenerSucursales();
-	}
 	public List<ViajeDTO> obtenerViajes() throws RemoteException {
 		return hbtDAO.obtenerViajes();
 	}
@@ -993,7 +990,7 @@ public void recibir(ViajeDTO v)
 			entities.Empresa e=new Empresa();
 			e.setNombre("Empresa 1");
 			e.setCUIT(234234);
-			e.setDetallePoliticas("Detalle Política 1");
+			e.setDetallePoliticas("Detalle Polï¿½tica 1");
 			e.setTipo("Tipo 1");
 			e.setSaldoCuentaCorriente(15000);
 			hbtDAO.guardar(e);
@@ -1043,7 +1040,7 @@ public void recibir(ViajeDTO v)
 			carga.setCondiciones("Apilable hasta 2 Pallets");
 			carga.setDespachado(false);
 			carga.setFragilidad("Normal");
-			carga.setMercaderia("Electrónico");
+			carga.setMercaderia("Electrï¿½nico");
 			carga.setPeso(20);
 			carga.setProfundidad(2);
 			carga.setRefrigerable(false);
@@ -1058,7 +1055,7 @@ public void recibir(ViajeDTO v)
 			carga2.setCondiciones("No se recomienda Apilar");
 			carga2.setDespachado(false);
 			carga2.setFragilidad("Normal");
-			carga2.setMercaderia("Electrónico");
+			carga2.setMercaderia("Electrï¿½nico");
 			carga2.setPeso(80);
 			carga2.setProfundidad(6);
 			carga2.setRefrigerable(false);
@@ -1134,5 +1131,42 @@ public void recibir(ViajeDTO v)
 		@Override
 		public List<CargaDTO> listarCargas() throws RemoteException {
 			return hbtDAO.listarCargas();
+		}
+
+		
+		//Sucursal
+		
+		public List<SucursalDTO> obtenerSucursales() throws RemoteException {
+			return hbtDAO.obtenerSucursales();
+		}
+
+		@Override
+		public void altaSucursal(SucursalDTO sucursalDto) throws RemoteException {
+			Sucursal sucursal = new Sucursal();			
+			sucursal = SucursalToEntity(sucursalDto);
+			hbtDAO.guardar(sucursal);
+		}
+		
+		@Override
+		public void deleteSucursal(int idSucursal) throws RemoteException {
+			Sucursal sucursal = new Sucursal();
+			sucursal.setIdSucursal(idSucursal);
+			hbtDAO.borrar(sucursal);
+		}
+
+		@Override
+		public void updateSucursal(SucursalDTO sucursalDto) throws RemoteException {
+			Sucursal sucursal = new Sucursal();
+			sucursal.setIdSucursal(sucursalDto.getIdSucursal());
+			sucursal.setNombre(sucursalDto.getNombre());
+			sucursal.setUbicacion(DireccionToEntity(sucursalDto.getUbicacion()));
+			
+			List<Viaje> viajes = new ArrayList<Viaje>();
+			for(ViajeDTO viaje : sucursalDto.getViajes()){
+				viajes.add(ViajeToEntity(viaje));
+			}
+			sucursal.setViajes(viajes);
+
+			hbtDAO.modificar(sucursal);
 		}
 }
