@@ -1133,7 +1133,6 @@ public void recibir(ViajeDTO v)
 			return hbtDAO.listarCargas();
 		}
 
-		
 		//Sucursal
 		
 		public List<SucursalDTO> obtenerSucursales() throws RemoteException {
@@ -1168,5 +1167,42 @@ public void recibir(ViajeDTO v)
 			sucursal.setViajes(viajes);
 
 			hbtDAO.modificar(sucursal);
+		}
+		
+		//Trayecto
+
+		@Override
+		public List<TrayectoDTO> obtenerTrayectos() throws RemoteException {
+			// Mirar obtenerTodosLosTrayectos(). Puede ser que sirva hacerlo de esta manera en el futuro
+			return hbtDAO.obtenerTrayectos();
+		}
+
+
+		@Override
+		public void altaTrayecto(TrayectoDTO trayectDto) throws RemoteException {
+			Trayecto trayecto = new Trayecto();			
+			trayecto = TrayectoToEntity(trayectDto);
+			hbtDAO.guardar(trayecto);	
+		}
+
+
+		@Override
+		public void updateTrayecto(TrayectoDTO trayectDto) throws RemoteException {
+			Trayecto trayecto = new Trayecto();
+			trayecto.setIdTrayecto(trayectDto.getIdTrayecto());
+			trayecto.setKm(trayectDto.getKm());
+			trayecto.setPrecio(trayectDto.getPrecio());
+			trayecto.setSucursalDestino(SucursalToEntity(trayectDto.getSucursalDestino()));
+			trayecto.setSucursalOrigen(SucursalToEntity(trayectDto.getSucursalOrigen()));
+			trayecto.setTiempo(trayectDto.getTiempo());
+			hbtDAO.modificar(trayecto);
+		}
+
+
+		@Override
+		public void deleteTrayecto(int idTrayecto) throws RemoteException {
+			Trayecto trayecto = new Trayecto();	
+			trayecto.setIdTrayecto(idTrayecto);
+			hbtDAO.borrar(trayecto);
 		}
 }
