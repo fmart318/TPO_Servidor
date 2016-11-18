@@ -1,8 +1,5 @@
 package dao;
 
-import hbt.HibernateUtil;
-import hbt.PersistentObject;
-
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,6 +39,8 @@ import entities.Transporte;
 import entities.Trayecto;
 import entities.Vehiculo;
 import entities.Viaje;
+import hbt.HibernateUtil;
+import hbt.PersistentObject;
 
 public class HibernateDAO {
 
@@ -83,8 +82,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			t.rollback();
 			System.out.println(e);
-			System.out.println("ErrorDAO: " + entidad.getClass().getName()
-					+ ".guardar");
+			System.out.println("ErrorDAO: " + entidad.getClass().getName() + ".guardar");
 		}
 	}
 
@@ -101,8 +99,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			t.rollback();
 			System.out.println(e);
-			System.out.println("ErrorDAO: " + entidad.getClass().getName()
-					+ ".borrar");
+			System.out.println("ErrorDAO: " + entidad.getClass().getName() + ".borrar");
 		}
 	}
 
@@ -119,8 +116,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			t.rollback();
 			System.out.println(e);
-			System.out.println("ErrorDAO: " + entidad.getClass().getName()
-					+ ".modificar");
+			System.out.println("ErrorDAO: " + entidad.getClass().getName() + ".modificar");
 		}
 	}
 
@@ -138,8 +134,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			t.rollback();
 			System.out.println(e);
-			System.out.println("ErrorDAO: " + entidad.getClass().getName()
-					+ ".mergear");
+			System.out.println("ErrorDAO: " + entidad.getClass().getName() + ".mergear");
 		}
 	}
 
@@ -166,9 +161,7 @@ public class HibernateDAO {
 		int dias = 0;
 		Session s = this.getSession();
 		try {
-			Date fechaLlegada = (Date) s
-					.createQuery(
-							"Select v.fechaLlegada from Viaje v where v.=:id ")
+			Date fechaLlegada = (Date) s.createQuery("Select v.fechaLlegada from Viaje v where v.=:id ")
 					.setParameter("id", idViaje).uniqueResult();
 			Calendar cal = Calendar.getInstance();
 			dias = (int) (fechaLlegada.getTime() - cal.getTime().getTime()) / 86400000;
@@ -193,6 +186,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return sucursalesDTO;
 	}
+
 	public List<CargaDTO> listarCargas() {
 		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
@@ -228,8 +222,7 @@ public class HibernateDAO {
 		ParticularDTO particularDTO = new ParticularDTO();
 		Session s = this.getSession();
 		try {
-			Particular particular = (Particular) s
-					.createQuery("FROM Particular p where p.DNI=:dni")
+			Particular particular = (Particular) s.createQuery("FROM Particular p where p.DNI=:dni")
 					.setParameter("dni", DNI).uniqueResult();
 			particularDTO = particular.toDTO();
 		} catch (Exception e) {
@@ -244,9 +237,7 @@ public class HibernateDAO {
 		List<SeguroDTO> segurosDTO = new ArrayList<SeguroDTO>();
 		Session s = this.getSession();
 		try {
-			List<Seguro> seguros = s
-					.createQuery(
-							"FROM Seguro s where s.tipoMercaderia=:tipoMercaderia")
+			List<Seguro> seguros = s.createQuery("FROM Seguro s where s.tipoMercaderia=:tipoMercaderia")
 					.setParameter("tipoMercaderia", tipoMercaderia).list();
 			for (Seguro seguro : seguros) {
 				segurosDTO.add(seguro.toDTO());
@@ -277,8 +268,7 @@ public class HibernateDAO {
 		VehiculoDTO vehiculoDTO = new VehiculoDTO();
 		Session s = this.getSession();
 		try {
-			Vehiculo vehiculo = (Vehiculo) s
-					.createQuery("FROM Vehiculo v where v.id = :vehiculo")
+			Vehiculo vehiculo = (Vehiculo) s.createQuery("FROM Vehiculo v where v.id = :vehiculo")
 					.setParameter("vehiculo", id).uniqueResult();
 
 			vehiculoDTO = vehiculo.toDTO();
@@ -297,8 +287,7 @@ public class HibernateDAO {
 		Session s = this.getSession();
 		try {
 			PlanDeMantenimiento planDeMantenimiento = (PlanDeMantenimiento) s
-					.createQuery(
-							"Select v.planDeMantenimiento FROM Vehiculo v where v.idVehiculo=:id")
+					.createQuery("Select v.planDeMantenimiento FROM Vehiculo v where v.idVehiculo=:id")
 					.setParameter("id", idVehiculo).list();
 			planDeMantenimientoDTO = planDeMantenimiento.toDTO();
 		} catch (Exception e) {
@@ -312,10 +301,8 @@ public class HibernateDAO {
 		SucursalDTO sucursalDTO = new SucursalDTO();
 		Session s = this.getSession();
 		try {
-			Sucursal suc = (Sucursal) s
-					.createQuery(" FROM Sucursal s where s.idSucursal=:id")
-					.setParameter("id", sucursalOrigen.getIdSucursal())
-					.uniqueResult();
+			Sucursal suc = (Sucursal) s.createQuery(" FROM Sucursal s where s.idSucursal=:id")
+					.setParameter("id", sucursalOrigen.getIdSucursal()).uniqueResult();
 			sucursalDTO = suc.toDTO();
 		} catch (Exception e) {
 			System.out.println(e);
@@ -328,9 +315,8 @@ public class HibernateDAO {
 		SucursalDTO sucursalDTO = new SucursalDTO();
 		Session s = this.getSession();
 		try {
-			Sucursal suc = (Sucursal) s
-					.createQuery(" FROM Sucursal s where s.nombre=:id")
-					.setParameter("id", nombre).uniqueResult();
+			Sucursal suc = (Sucursal) s.createQuery(" FROM Sucursal s where s.nombre=:id").setParameter("id", nombre)
+					.uniqueResult();
 			sucursalDTO = suc.toDTO();
 		} catch (Exception e) {
 			System.out.println(e);
@@ -344,9 +330,7 @@ public class HibernateDAO {
 		int id = vehiculo.getIdVehiculo();
 		Session s = this.getSession();
 		try {
-			Viaje v = (Viaje) s
-					.createQuery(
-							" FROM Viaje v where v.vehiculo.id =:idVehiculo")
+			Viaje v = (Viaje) s.createQuery(" FROM Viaje v where v.vehiculo.id =:idVehiculo")
 					.setParameter("idVehiculo", id).uniqueResult();
 
 			viaje = v.toDTO();
@@ -373,8 +357,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			t.rollback();
 			System.out.println(e);
-			System.out.println("ErrorDAO: " + viaje.getClass().getName()
-					+ ".modificar");
+			System.out.println("ErrorDAO: " + viaje.getClass().getName() + ".modificar");
 		}
 	}
 
@@ -382,9 +365,7 @@ public class HibernateDAO {
 		List<PedidoDTO> pedidosDTO = new ArrayList<PedidoDTO>();
 		Session s = this.getSession();
 		try {
-			List<Pedido> pedidos = s
-					.createQuery(
-							"from Pedido p where p.cliente.idCliente =:id ")
+			List<Pedido> pedidos = s.createQuery("from Pedido p where p.cliente.idCliente =:id ")
 					.setParameter("id", idCliente).list();
 			for (Pedido pedido : pedidos) {
 				pedidosDTO.add(pedido.toDTO());
@@ -405,8 +386,7 @@ public class HibernateDAO {
 		for (int i = 0; i < pedidosDTO.size(); i++) {
 			x = pedidosDTO.get(i).getIdPedido();
 			try {
-				aux = s.createQuery(
-						"Select e.viajes from Envio e where e.pedido.idPedido IN (:id) ")
+				aux = s.createQuery("Select e.viajes from Envio e where e.pedido.idPedido IN (:id) ")
 						.setParameter("id", x).list();
 
 				for (Viaje viaje : aux) {
@@ -426,9 +406,8 @@ public class HibernateDAO {
 		Session s = this.getSession();
 		ViajeDTO viajeDTO = new ViajeDTO();
 		try {
-			Viaje v = (Viaje) s
-					.createQuery("FROM Viaje v JOIN v.envios.idEnvio=:idEnvio ")
-					.setParameter("idEnvio", id).uniqueResult();
+			Viaje v = (Viaje) s.createQuery("FROM Viaje v JOIN v.envios.idEnvio=:idEnvio ").setParameter("idEnvio", id)
+					.uniqueResult();
 
 			viajeDTO = v.toDTO();
 			System.out.println(viajeDTO.getIdViaje());
@@ -445,8 +424,8 @@ public class HibernateDAO {
 		ViajeDTO viajeDTO = new ViajeDTO();
 		Session s = this.getSession();
 		try {
-			Viaje v = (Viaje) s.createQuery("FROM Viaje v where v.id = :viaje")
-					.setParameter("viaje", id).uniqueResult();
+			Viaje v = (Viaje) s.createQuery("FROM Viaje v where v.id = :viaje").setParameter("viaje", id)
+					.uniqueResult();
 
 			viajeDTO = v.toDTO();
 			this.closeSession();
@@ -458,8 +437,7 @@ public class HibernateDAO {
 		return null;
 	}
 
-	public List<TransporteDTO> obtenerTransportesDeTerceros(CargaDTO c,
-			TransporteDTO tr) {
+	public List<TransporteDTO> obtenerTransportesDeTerceros(CargaDTO c, TransporteDTO tr) {
 		List<TransporteDTO> transportesDTO = new ArrayList<TransporteDTO>();
 		String mercaderia = c.getTipoMercaderia();
 		String trans = tr.getTipoTransporte();
@@ -471,8 +449,7 @@ public class HibernateDAO {
 			List<Transporte> transportes = s
 					.createQuery(
 							"Select p.Transporte from Proveedor p  where p.tipoMercaderia=(:mer) and p.Transporte.tipoTransporte=(:trans) ")
-					.setParameter("mer", mercaderia)
-					.setParameter("trans", trans).list();
+					.setParameter("mer", mercaderia).setParameter("trans", trans).list();
 			for (Transporte transporte : transportes) {
 				transportesDTO.add(transporte.toDTO());
 			}
@@ -508,8 +485,7 @@ public class HibernateDAO {
 			Trayecto tr = (Trayecto) s
 					.createQuery(
 							"FROM Trayecto t where t.idSucursalOrigen.idSucursal =:idOrigen and t.idSucursalDestino.idSucursal=:idDestino")
-					.setParameter("idOrigen", idOrigen)
-					.setParameter("idDestino", idDestino).uniqueResult();
+					.setParameter("idOrigen", idOrigen).setParameter("idDestino", idDestino).uniqueResult();
 
 			t = tr.toDTO();
 			this.closeSession();
@@ -550,6 +526,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return clientesDTO;
 	}
+
 	public List<EmpresaDTO> obtenerClientesEmpresa() {
 		List<EmpresaDTO> clientesDTO = new ArrayList<EmpresaDTO>();
 		Session s = this.getSession();
@@ -564,6 +541,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return clientesDTO;
 	}
+
 	public List<ParticularDTO> obtenerClientesParticular() {
 		List<ParticularDTO> clientesDTO = new ArrayList<ParticularDTO>();
 		Session s = this.getSession();
@@ -583,9 +561,7 @@ public class HibernateDAO {
 		ClienteDTO cl = new ClienteDTO();
 		Session s = this.getSession();
 		try {
-			Cliente c = (Cliente) s
-					.createQuery("FROM Cliente c where c.id=:id")
-					.setParameter("id", id).uniqueResult();
+			Cliente c = (Cliente) s.createQuery("FROM Cliente c where c.id=:id").setParameter("id", id).uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
 
@@ -603,9 +579,8 @@ public class HibernateDAO {
 		Session s = this.getSession();
 
 		try {
-			e = (Envio) s
-					.createQuery(" from Envio e where e.pedido.idPedido=:id  ")
-					.setParameter("id", idPedido).uniqueResult();
+			e = (Envio) s.createQuery(" from Envio e where e.pedido.idPedido=:id  ").setParameter("id", idPedido)
+					.uniqueResult();
 
 			if (e.equals(null)) {
 				envioDTO = null;
@@ -629,9 +604,7 @@ public class HibernateDAO {
 		List<CargaDTO> cargasDTO = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
 		try {
-			List<Carga> cargas = s
-					.createQuery(
-							"SELECT p.cargas FROM Pedido p JOIN p.cargas WHERE p.idPedido=:id")
+			List<Carga> cargas = s.createQuery("SELECT p.cargas FROM Pedido p JOIN p.cargas WHERE p.idPedido=:id")
 					.setParameter("id", pedido.getIdPedido()).list();
 			for (Carga c : cargas) {
 				cargasDTO.add(c.toDTO());
@@ -647,9 +620,8 @@ public class HibernateDAO {
 		PedidoDTO pedidoDTO = new PedidoDTO();
 		Session s = this.getSession();
 		try {
-			Pedido pedido = (Pedido) s
-					.createQuery("FROM Pedido p WHERE p.idPedido=:id")
-					.setParameter("id", idPedido).uniqueResult();
+			Pedido pedido = (Pedido) s.createQuery("FROM Pedido p WHERE p.idPedido=:id").setParameter("id", idPedido)
+					.uniqueResult();
 			pedidoDTO = pedido.toDTO();
 		} catch (Exception e) {
 			System.out.println(e);
@@ -662,8 +634,7 @@ public class HibernateDAO {
 		List<HabilitadoDTO> habilitadosDTO = new ArrayList<HabilitadoDTO>();
 		Session s = this.getSession();
 		try {
-			List<Habilitado> habilitados = s.createQuery("FROM Habilitado")
-					.list();
+			List<Habilitado> habilitados = s.createQuery("FROM Habilitado").list();
 			for (Habilitado h : habilitados) {
 				habilitadosDTO.add(h.toDTO());
 			}
@@ -679,10 +650,8 @@ public class HibernateDAO {
 		Session s = this.getSession();
 		try {
 			string = (String) s
-					.createQuery(
-							"Select c.type FROM Credential c WHERE c.username=:username and c.password=:password")
-					.setParameter("username", username)
-					.setParameter("password", password).uniqueResult();
+					.createQuery("Select c.type FROM Credential c WHERE c.username=:username and c.password=:password")
+					.setParameter("username", username).setParameter("password", password).uniqueResult();
 
 		} catch (Exception e) {
 			System.out.println(e);
@@ -695,8 +664,7 @@ public class HibernateDAO {
 		List<TransporteDTO> transportesDTO = new ArrayList<TransporteDTO>();
 		Session s = this.getSession();
 		try {
-			List<Transporte> transportes = s.createQuery("FROM Transporte")
-					.list();
+			List<Transporte> transportes = s.createQuery("FROM Transporte").list();
 			for (Transporte t : transportes) {
 				transportesDTO.add(t.toDTO());
 			}
@@ -717,8 +685,7 @@ public class HibernateDAO {
 			for (Envio e : envios) {
 				for (Pedido p : pedidos) {
 
-					if (p.getCliente().getNombre().equals(nombre)
-							&& e.getPedido().getIdPedido() == p.getIdPedido()) {
+					if (p.getCliente().getNombre().equals(nombre) && e.getPedido().getIdPedido() == p.getIdPedido()) {
 						enviosDTO.add(e.toDTO());
 						System.out.println("IF");
 					}
@@ -732,4 +699,18 @@ public class HibernateDAO {
 		return enviosDTO;
 	}
 
+	public List<TrayectoDTO> obtenerTrayectos() {
+		List<TrayectoDTO> trayectoDtos = new ArrayList<TrayectoDTO>();
+		Session s = this.getSession();
+		try {
+			List<Trayecto> trayectos = s.createQuery("FROM Trayecto").list();
+			for (Trayecto trayecto : trayectos) {
+				trayectoDtos.add(trayecto.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return trayectoDtos;
+	}
 }

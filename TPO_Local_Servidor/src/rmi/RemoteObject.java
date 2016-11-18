@@ -1172,8 +1172,8 @@ public void recibir(ViajeDTO v)
 		@Override
 		public List<TrayectoDTO> obtenerTrayectos() throws RemoteException {
 			// Mirar obtenerTodosLosTrayectos(). Puede ser que sirva hacerlo de esta manera en el futuro
-			//return hbtDAO.obtenerTrayectos();
-			return null;
+
+			return hbtDAO.obtenerTrayectos();
 		}
 
 		@Override
@@ -1357,7 +1357,6 @@ public void recibir(ViajeDTO v)
 			p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
 			p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
 			hbtDAO.guardar(p);
-			
-			
+
 		}
 }
