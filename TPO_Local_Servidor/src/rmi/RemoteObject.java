@@ -1177,14 +1177,12 @@ public void recibir(ViajeDTO v)
 			return hbtDAO.obtenerTrayectos();
 		}
 
-
 		@Override
 		public void altaTrayecto(TrayectoDTO trayectDto) throws RemoteException {
 			Trayecto trayecto = new Trayecto();			
 			trayecto = TrayectoToEntity(trayectDto);
 			hbtDAO.guardar(trayecto);	
 		}
-
 
 		@Override
 		public void updateTrayecto(TrayectoDTO trayectDto) throws RemoteException {
@@ -1198,11 +1196,46 @@ public void recibir(ViajeDTO v)
 			hbtDAO.modificar(trayecto);
 		}
 
-
 		@Override
 		public void deleteTrayecto(int idTrayecto) throws RemoteException {
 			Trayecto trayecto = new Trayecto();	
 			trayecto.setIdTrayecto(idTrayecto);
 			hbtDAO.borrar(trayecto);
+		}
+
+		//Ruta
+		
+		@Override
+		public List<RutaDTO> obtenerRutas() throws RemoteException {
+			return hbtDAO.obtenerRutas();
+		}
+
+		@Override
+		public void altaRuta(RutaDTO rutaDto) throws RemoteException {
+			Ruta ruta = new Ruta();			
+			ruta = RutaToEntity(rutaDto);
+			hbtDAO.guardar(ruta);	
+		}
+
+		@Override
+		public void updateRuta(RutaDTO rutaDto) throws RemoteException {
+			Ruta ruta = new Ruta();
+			ruta.setIdRuta(rutaDto.getIdRuta());
+			ruta.setPrecio(rutaDto.getPrecio());
+			
+			List<Trayecto> trayectos = new ArrayList<Trayecto>();
+			for(TrayectoDTO trayecto : rutaDto.getTrayectos()){
+				trayectos.add(TrayectoToEntity(trayecto));
+			}
+			ruta.setTrayectos(trayectos);
+			
+			hbtDAO.modificar(ruta);
+		}
+
+		@Override
+		public void deleteRuta(int idRuta) throws RemoteException {
+			Ruta ruta = new Ruta();	
+			ruta.setIdRuta(idRuta);
+			hbtDAO.borrar(ruta);
 		}
 }

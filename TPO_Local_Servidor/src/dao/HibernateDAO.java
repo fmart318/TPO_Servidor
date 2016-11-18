@@ -713,5 +713,4 @@ public class HibernateDAO {
 		this.closeSession();
 		return trayectoDtos;
 	}
-
 }
