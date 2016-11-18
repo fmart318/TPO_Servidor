@@ -1172,7 +1172,6 @@ public void recibir(ViajeDTO v)
 		@Override
 		public List<TrayectoDTO> obtenerTrayectos() throws RemoteException {
 			// Mirar obtenerTodosLosTrayectos(). Puede ser que sirva hacerlo de esta manera en el futuro
-
 			return hbtDAO.obtenerTrayectos();
 		}
 
@@ -1286,60 +1285,77 @@ public void recibir(ViajeDTO v)
 			hbtDAO.borrar(c);			
 		}
 
+
 		@Override
 		public void crearPedido(PedidoDTO pe) throws RemoteException {
 			// TODO Auto-generated method stub
-			Pedido p=new Pedido();
-			Direccion dC=new Direccion();
-			Direccion dD=new Direccion();
+			Pedido p = new Pedido();
+			Direccion dC = new Direccion();
+			Direccion dD = new Direccion();
 			dC.setCalle(pe.getDireccionCarga().getCalle());
 			dC.setCP(pe.getDireccionCarga().getCP());
 			dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
 			dC.setNumero(pe.getDireccionCarga().getNumero());
 			dC.setPiso(pe.getDireccionCarga().getPiso());
-			
+
 			dD.setCalle(pe.getDireccionDestino().getCalle());
 			dD.setCP(pe.getDireccionDestino().getCP());
 			dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
 			dD.setNumero(pe.getDireccionDestino().getNumero());
 			dD.setPiso(pe.getDireccionDestino().getPiso());
-			
+
 			hbtDAO.guardar(dD);
 			hbtDAO.guardar(dC);
-			ArrayList<Carga> cargas=new ArrayList<Carga>(); 
-			List<CargaDTO> cargasDTO=hbtDAO.getInstancia().listarCargas();
-			for (int i=0;i<cargasDTO.size();i++){
-				if (pe.getCargas().get(i).getIdCarga()==cargasDTO.get(i).getIdCarga()){
-					Carga carga=new Carga();
-					carga.setIdCarga(cargasDTO.get(i).getIdCarga());
-					carga.setAlto(cargasDTO.get(i).getAlto());
-					carga.setAncho(cargasDTO.get(i).getAncho());
-					carga.setApilable(cargasDTO.get(i).getApilable());
-					carga.setCondiciones(cargasDTO.get(i).getCondiciones());
-					carga.setDespachado(cargasDTO.get(i).isDespachado());
-					carga.setFragilidad(cargasDTO.get(i).getFragilidad());
-					carga.setMercaderia(cargasDTO.get(i).getTipoMercaderia());
-					carga.setPeso(cargasDTO.get(i).getPeso());
-					carga.setProfundidad(cargasDTO.get(i).getProfundidad());
-					carga.setRefrigerable(cargasDTO.get(i).isRefrigerable());
-					carga.setTratamiento(cargasDTO.get(i).getTratamiento());
-					carga.setVolumen(cargasDTO.get(i).getVolumen());
-					cargas.add(carga);
+			ArrayList<Carga> cargas=new ArrayList<Carga>();
+			
+			for (CargaDTO c: pe.getCargas()){
+
+					cargas.add(CargaToEntity(c));
+					System.out.println("id cargadto"+c.getIdCarga());
+				
+			}
+			p.setCargas(cargas);
+			/*
+			if (pe.getCargas().size()>0){
+				ArrayList<Carga> cargas = new ArrayList<Carga>();
+				List<CargaDTO> cargasDTO = hbtDAO.getInstancia().listarCargas();
+				for (int i = 0; i < cargasDTO.size(); i++) {
+					if (pe.getCargas().get(i).getIdCarga() == cargasDTO.get(i).getIdCarga()) {
+						Carga carga = new Carga();
+						carga.setIdCarga(cargasDTO.get(i).getIdCarga());
+						carga.setAlto(cargasDTO.get(i).getAlto());
+						carga.setAncho(cargasDTO.get(i).getAncho());
+						carga.setApilable(cargasDTO.get(i).getApilable());
+						carga.setCondiciones(cargasDTO.get(i).getCondiciones());
+						carga.setDespachado(cargasDTO.get(i).isDespachado());
+						carga.setFragilidad(cargasDTO.get(i).getFragilidad());
+						carga.setMercaderia(cargasDTO.get(i).getTipoMercaderia());
+						carga.setPeso(cargasDTO.get(i).getPeso());
+						carga.setProfundidad(cargasDTO.get(i).getProfundidad());
+						carga.setRefrigerable(cargasDTO.get(i).isRefrigerable());
+						carga.setTratamiento(cargasDTO.get(i).getTratamiento());
+						carga.setVolumen(cargasDTO.get(i).getVolumen());
+						cargas.add(carga);
+						System.out.println("indice :"+i);
+					}
 				}
+				p.setCargas(cargas);
+				System.out.println("pe.getCargas().size()>0)"+pe.getCargas().size());
 			}
 			
-			List<EmpresaDTO> empresas=hbtDAO.getInstancia().obtenerClientesEmpresa();
-			for (EmpresaDTO e: empresas){
-				if(e.getIdCliente()==pe.getCliente().getIdCliente()){
-					Empresa empresa=new Empresa();
+			*/
+			List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
+			for (EmpresaDTO e : empresas) {
+				if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
+					Empresa empresa = new Empresa();
 					empresa.setIdCliente(e.getIdCliente());
 					p.setCliente(empresa);
 				}
 			}
-			List<ParticularDTO> particulares=hbtDAO.getInstancia().obtenerClientesParticular();
-			for (ParticularDTO pa: particulares){
-				if(pa.getIdCliente()==pe.getCliente().getIdCliente()){
-					Particular particular=new Particular();
+			List<ParticularDTO> particulares = hbtDAO.getInstancia().obtenerClientesParticular();
+			for (ParticularDTO pa : particulares) {
+				if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
+					Particular particular = new Particular();
 					particular.setIdCliente(pe.getCliente().getIdCliente());
 					p.setCliente(particular);
 				}
@@ -1348,7 +1364,7 @@ public void recibir(ViajeDTO v)
 			p.setFechaMaxima(pe.getFechaMaxima());
 			p.setHoraInicio(pe.getHoraInicio());
 			p.setHoraFin(pe.getHoraFin());
-			p.setCargas(cargas);
+			
 			p.setDireccionCarga(dC);
 			p.setDireccionDestino(dD);
 			p.setPrecio(pe.getPrecio());
@@ -1358,5 +1374,13 @@ public void recibir(ViajeDTO v)
 			p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
 			hbtDAO.guardar(p);
 
+		}
+
+
+		@Override
+		public CargaDTO buscarCargaPorId(int idCarga) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+			return hbtDAO.buscarCargaPorId(idCarga);
 		}
 }

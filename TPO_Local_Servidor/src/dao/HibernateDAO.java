@@ -713,4 +713,19 @@ public class HibernateDAO {
 		this.closeSession();
 		return trayectoDtos;
 	}
+	public CargaDTO buscarCargaPorId(int idCarga){
+		CargaDTO cl = new CargaDTO();
+		Session s = this.getSession();
+		try {
+			Carga c = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
+			cl = c.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
+	}
 }
