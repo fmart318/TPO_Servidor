@@ -1002,18 +1002,18 @@ public void recibir(ViajeDTO v)
 			hbtDAO.guardar(p);
 			
 			entities.Direccion dO=new entities.Direccion();
-			dO.setCalle("Calle 16");
+			dO.setCalle("Av. Rigolleau");
 			dO.setCP("1884");
 			dO.setDepartamento("F");
-			dO.setNumero(5403);
+			dO.setNumero(1405);
 			dO.setPiso(2);
 			hbtDAO.guardar(dO);
 			
 			entities.Direccion dD=new entities.Direccion();
-			dD.setCalle("Calle 16");
-			dD.setCP("1884");
-			dD.setDepartamento("F");
-			dD.setNumero(5403);
+			dD.setCalle("Av. Mitre");
+			dD.setCP("1883");
+			dD.setDepartamento("A");
+			dD.setNumero(9230);
 			dD.setPiso(2);
 			hbtDAO.guardar(dD);
 			
@@ -1462,5 +1462,33 @@ public void recibir(ViajeDTO v)
 		public List<CargaDTO> listarCargasSinDespachar() throws RemoteException {
 			// TODO Auto-generated method stub
 			return hbtDAO.listarCargasSinDespachar();
+		}
+
+
+		@Override
+		public List<DireccionDTO> listarDirecciones() throws RemoteException {
+			// TODO Auto-generated method stub
+			return hbtDAO.obtenerDirecciones();
+		}
+
+
+		@Override
+		public void crearDireccion(DireccionDTO d) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.guardar(DireccionToEntity(d));
+		}
+
+
+		@Override
+		public void modificarDireccion(DireccionDTO d) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.borrar(DireccionToEntity(d));
+		}
+
+
+		@Override
+		public void eliminarDireccion(DireccionDTO d) throws RemoteException {
+			// TODO Auto-generated method stub
+			
 		}
 }

@@ -11,6 +11,7 @@ import org.hibernate.Transaction;
 
 import dto.CargaDTO;
 import dto.ClienteDTO;
+import dto.DireccionDTO;
 import dto.EmpresaDTO;
 import dto.EnvioDTO;
 import dto.HabilitadoDTO;
@@ -26,6 +27,7 @@ import dto.VehiculoDTO;
 import dto.ViajeDTO;
 import entities.Carga;
 import entities.Cliente;
+import entities.Direccion;
 import entities.Empresa;
 import entities.Envio;
 import entities.Habilitado;
@@ -201,6 +203,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
+	
 	public List<CargaDTO> listarCargasSinDespachar() {
 		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
@@ -214,6 +217,20 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cargas;
+	}
+	public List<DireccionDTO> obtenerDirecciones() {
+		List<DireccionDTO> direcciones = new ArrayList<DireccionDTO>();
+		Session s = this.getSession();
+		try {
+			List<Direccion> cs = s.createQuery("FROM Direccion").list();
+			for (Direccion c : cs) {
+				direcciones.add(c.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return direcciones;
 	}
 
 	public List<ViajeDTO> obtenerViajes() {
