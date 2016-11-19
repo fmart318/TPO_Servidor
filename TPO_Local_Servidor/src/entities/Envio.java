@@ -47,6 +47,17 @@ public class Envio extends PersistentObject {
 
 	@Column(columnDefinition = "varchar(40)", nullable = true)
 	private String sucursalOrigen;
+	
+	@Column(columnDefinition = "varchar(40)", nullable = true)
+	private String sucursalDestino;
+
+	public String getSucursalDestino() {
+		return sucursalDestino;
+	}
+
+	public void setSucursalDestino(String sucursalDestino) {
+		this.sucursalDestino = sucursalDestino;
+	}
 
 	public String getSucursalOrigen() {
 		return sucursalOrigen;
@@ -135,6 +146,7 @@ public class Envio extends PersistentObject {
 		EnvioDTO envioDTO = new EnvioDTO(idEnvio, fechaSalida, fechaLlegada,
 				cumpleCondicionesCarga, estado, pedido.toDTO(), prioridad);
 		envioDTO.setSucursalOrigen(sucursalOrigen);
+		envioDTO.setSucursalDestino(sucursalDestino);
 		return envioDTO;
 	}
 }
