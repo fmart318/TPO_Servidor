@@ -1315,35 +1315,6 @@ public void recibir(ViajeDTO v)
 				
 			}
 			p.setCargas(cargas);
-			/*
-			if (pe.getCargas().size()>0){
-				ArrayList<Carga> cargas = new ArrayList<Carga>();
-				List<CargaDTO> cargasDTO = hbtDAO.getInstancia().listarCargas();
-				for (int i = 0; i < cargasDTO.size(); i++) {
-					if (pe.getCargas().get(i).getIdCarga() == cargasDTO.get(i).getIdCarga()) {
-						Carga carga = new Carga();
-						carga.setIdCarga(cargasDTO.get(i).getIdCarga());
-						carga.setAlto(cargasDTO.get(i).getAlto());
-						carga.setAncho(cargasDTO.get(i).getAncho());
-						carga.setApilable(cargasDTO.get(i).getApilable());
-						carga.setCondiciones(cargasDTO.get(i).getCondiciones());
-						carga.setDespachado(cargasDTO.get(i).isDespachado());
-						carga.setFragilidad(cargasDTO.get(i).getFragilidad());
-						carga.setMercaderia(cargasDTO.get(i).getTipoMercaderia());
-						carga.setPeso(cargasDTO.get(i).getPeso());
-						carga.setProfundidad(cargasDTO.get(i).getProfundidad());
-						carga.setRefrigerable(cargasDTO.get(i).isRefrigerable());
-						carga.setTratamiento(cargasDTO.get(i).getTratamiento());
-						carga.setVolumen(cargasDTO.get(i).getVolumen());
-						cargas.add(carga);
-						System.out.println("indice :"+i);
-					}
-				}
-				p.setCargas(cargas);
-				System.out.println("pe.getCargas().size()>0)"+pe.getCargas().size());
-			}
-			
-			*/
 			List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
 			for (EmpresaDTO e : empresas) {
 				if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
@@ -1382,5 +1353,26 @@ public void recibir(ViajeDTO v)
 			// TODO Auto-generated method stub
 			
 			return hbtDAO.buscarCargaPorId(idCarga);
+		}
+
+
+		@Override
+		public void crearVehiculo(VehiculoDTO v) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.guardar(VehiculoToEntity(v));
+		}
+
+
+		@Override
+		public void modificarVehiculo(VehiculoDTO v) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.modificar(VehiculoToEntity(v));
+		}
+
+
+		@Override
+		public void eliminarVehiculo(VehiculoDTO v) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.borrar(VehiculoToEntity(v));
 		}
 }
