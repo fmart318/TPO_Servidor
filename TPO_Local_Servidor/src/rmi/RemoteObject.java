@@ -1034,30 +1034,30 @@ public void recibir(ViajeDTO v)
 			pedido.setSolicitaTransporteDirecto(false);
 			ArrayList<entities.Carga> cargas=new ArrayList<entities.Carga>();
 			entities.Carga carga=new entities.Carga();
-			carga.setAlto(2);
-			carga.setAncho(3);
+			carga.setAlto(1);
+			carga.setAncho(2);
 			carga.setApilable(4);
-			carga.setCondiciones("Apilable hasta 2 Pallets");
-			carga.setDespachado(false);
+			carga.setCondiciones("Apilable");
+			carga.setDespachado(true);
 			carga.setFragilidad("Normal");
-			carga.setMercaderia("Electrï¿½nico");
+			carga.setMercaderia("Electrónico");
 			carga.setPeso(20);
-			carga.setProfundidad(2);
+			carga.setProfundidad(1);
 			carga.setRefrigerable(false);
 			carga.setTratamiento("Normal");
 			carga.setVolumen(carga.getAlto()*carga.getAncho()*carga.getProfundidad());
 			hbtDAO.guardar(carga);
 			cargas.add(carga);
 			entities.Carga carga2=new entities.Carga();
-			carga2.setAlto(3);
-			carga2.setAncho(6);
+			carga2.setAlto(1);
+			carga2.setAncho(2);
 			carga2.setApilable(2);
-			carga2.setCondiciones("No se recomienda Apilar");
-			carga2.setDespachado(false);
+			carga2.setCondiciones("No apilable");
+			carga2.setDespachado(true);
 			carga2.setFragilidad("Normal");
-			carga2.setMercaderia("Electrï¿½nico");
-			carga2.setPeso(80);
-			carga2.setProfundidad(6);
+			carga2.setMercaderia("Electrónico");
+			carga2.setPeso(30);
+			carga2.setProfundidad(1);
 			carga2.setRefrigerable(false);
 			carga2.setTratamiento("Normal");
 			carga2.setVolumen(carga2.getAlto()*carga2.getAncho()*carga2.getProfundidad());
@@ -1065,6 +1065,88 @@ public void recibir(ViajeDTO v)
 			hbtDAO.guardar(carga2);
 			pedido.setCargas(cargas);
 			hbtDAO.guardar(pedido);
+			
+			Carga carga3=new Carga();
+			carga3.setAlto(2);
+			carga3.setAncho(6);
+			carga3.setApilable(0);
+			carga3.setCondiciones("A granel");
+			carga3.setDespachado(false);
+			carga3.setFragilidad("Normal");
+			carga3.setMercaderia("A Granel");
+			carga3.setPeso(3000);
+			carga3.setProfundidad(6);
+			carga3.setRefrigerable(false);
+			carga3.setTratamiento("Normal");
+			carga3.setVolumen(carga3.getAlto()*carga3.getAncho()*carga3.getProfundidad());
+			hbtDAO.guardar(carga3);
+			Carga carga4=new Carga();
+			carga4.setAlto(2);
+			carga4.setAncho(4);
+			carga4.setApilable(0);
+			carga4.setCondiciones("A granel");
+			carga4.setDespachado(false);
+			carga4.setFragilidad("Normal");
+			carga4.setMercaderia("A Granel");
+			carga4.setPeso(100);
+			carga4.setProfundidad(6);
+			carga4.setRefrigerable(false);
+			carga4.setTratamiento("Normal");
+			carga4.setVolumen(carga4.getAlto()*carga4.getAncho()*carga4.getProfundidad());
+			hbtDAO.guardar(carga4);
+			
+			
+			PlanDeMantenimiento pm=new PlanDeMantenimiento();
+			pm.setDiasDemora(0);
+			pm.setDiasProxControl(0);
+			pm.setKmProxControl(0);
+			hbtDAO.guardar(pm);
+			
+			PlanDeMantenimiento pm1=new PlanDeMantenimiento();
+			pm1.setDiasDemora(1);
+			pm1.setDiasProxControl(28);
+			pm1.setKmProxControl(20000);
+			hbtDAO.guardar(pm1);
+			
+			PlanDeMantenimiento pm2=new PlanDeMantenimiento();
+			pm2.setDiasDemora(2);
+			pm2.setDiasProxControl(30);
+			pm2.setKmProxControl(100000);
+			hbtDAO.guardar(pm2);
+			
+			Vehiculo v=new Vehiculo();
+			v.setAlto(2);
+			v.setAncho(2);
+			v.setProfundidad(3);
+			v.setVolumen(v.getAlto()*v.getAncho()*v.getProfundidad());
+			v.setEnGarantia(true);
+			v.setEstado("Libre");
+			v.setFechaUltimoControl(null);
+			v.setKilometraje(10200);
+			v.setPeso(3500);
+			v.setTara(1500);
+			v.setTipo("Propio");
+			v.setTrabajoEspecifico(false);
+			v.setPlanDeMantenimiento(pm);
+			hbtDAO.guardar(v);
+			
+			Vehiculo v2=new Vehiculo();
+			v2.setAlto(4);
+			v2.setAncho(2);
+			v2.setProfundidad(8);
+			v2.setVolumen(v.getAlto()*v.getAncho()*v.getProfundidad());
+			v2.setEnGarantia(true);
+			v2.setEstado("Contrado");
+			v2.setFechaUltimoControl(null);
+			v2.setKilometraje(90000);
+			v2.setPeso(10000);
+			v2.setTara(3000);
+			v2.setTipo("Tercero");
+			v2.setTrabajoEspecifico(true);
+			v2.setPlanDeMantenimiento(pm);
+			hbtDAO.guardar(v2);
+			
+			
 		}
 
 
@@ -1307,12 +1389,10 @@ public void recibir(ViajeDTO v)
 			hbtDAO.guardar(dD);
 			hbtDAO.guardar(dC);
 			ArrayList<Carga> cargas=new ArrayList<Carga>();
-			
 			for (CargaDTO c: pe.getCargas()){
-
-					cargas.add(CargaToEntity(c));
-					System.out.println("id cargadto"+c.getIdCarga());
-				
+				Carga carg=CargaToEntity(c);
+				carg.setDespachado(true);
+				cargas.add(carg);
 			}
 			p.setCargas(cargas);
 			List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
@@ -1344,6 +1424,7 @@ public void recibir(ViajeDTO v)
 			p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
 			p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
 			hbtDAO.guardar(p);
+			
 
 		}
 
@@ -1374,5 +1455,12 @@ public void recibir(ViajeDTO v)
 		public void eliminarVehiculo(VehiculoDTO v) throws RemoteException {
 			// TODO Auto-generated method stub
 			hbtDAO.borrar(VehiculoToEntity(v));
+		}
+
+
+		@Override
+		public List<CargaDTO> listarCargasSinDespachar() throws RemoteException {
+			// TODO Auto-generated method stub
+			return hbtDAO.listarCargasSinDespachar();
 		}
 }

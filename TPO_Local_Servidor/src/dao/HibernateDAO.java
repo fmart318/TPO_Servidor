@@ -201,6 +201,20 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
+	public List<CargaDTO> listarCargasSinDespachar() {
+		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
+		Session s = this.getSession();
+		try {
+			List<entities.Carga> cs = s.createQuery("FROM Carga as c where c.despachado=:desp").setParameter("desp", false).list();
+			for (entities.Carga c : cs) {
+				cargas.add(c.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return cargas;
+	}
 
 	public List<ViajeDTO> obtenerViajes() {
 		List<ViajeDTO> viajesDTO = new ArrayList<ViajeDTO>();
