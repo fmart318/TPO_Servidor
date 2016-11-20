@@ -439,6 +439,7 @@ public class HibernateDAO {
 		Session session = this.getSession();
 		ViajeDTO viajeDTO = null;
 		try {
+			
 			Viaje viaje = (Viaje) session.createQuery("FROM Viaje v JOIN v.envios.idEnvio=:idEnvio ").setParameter("idEnvio", idEnvio)
 					.uniqueResult();
 
@@ -604,16 +605,14 @@ public class HibernateDAO {
 
 	public EnvioDTO obtenerEnvioDePedido(int idPedido) {
 		
-		EnvioDTO envioDTO = null;
-		Envio envio = new Envio();
+		EnvioDTO envioDto = null;
 		Session session = this.getSession();
-
 		try {
-			envio = (Envio) session.createQuery(" from Envio e where e.pedido.idPedido=:id  ").setParameter("id", idPedido)
+			
+			Envio envio = (Envio) session.createQuery(" from Envio e where e.pedido.idPedido=:id  ").setParameter("id", idPedido)
 					.uniqueResult();
-
 			if (envio != null) {
-				envioDTO = envio.toDTO();
+				envioDto = envio.toDTO();
 			}
 		}
 		catch (Exception ex) {
@@ -622,7 +621,7 @@ public class HibernateDAO {
 			return null;
 		}
 		this.closeSession();
-		return envioDTO;
+		return envioDto;
 	}
 
 	public List<CargaDTO> obtenerCargasDeUnPedido(PedidoDTO pedido) {

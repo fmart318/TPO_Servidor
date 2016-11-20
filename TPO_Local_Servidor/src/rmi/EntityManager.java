@@ -77,6 +77,7 @@ public class EntityManager {
 				envioDTO.isCumpleCondicionesCarga(), envioDTO.getEstado(), PedidoToEntity(envioDTO.getPedido()),
 				envioDTO.getPrioridad());
 		envio.setSucursalOrigen(envioDTO.getSucursalOrigen());
+		envio.setSucursalDestino(envioDTO.getSucursalDestino());
 		return envio;
 	}
 

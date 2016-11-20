@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import dto.RutaDTO;
+import dto.SucursalDTO;
 import dto.TrayectoDTO;
 
 @Entity
@@ -111,4 +112,5 @@ public class Ruta extends PersistentObject {
 	public Sucursal getDestino() {
 		return sucursalDestino;
 	}
+
 }

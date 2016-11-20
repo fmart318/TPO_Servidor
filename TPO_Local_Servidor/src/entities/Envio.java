@@ -78,7 +78,6 @@ public class Envio extends PersistentObject {
 		this.estado = estado;
 		this.pedido = pedido;
 		this.prioridad = prioridad;
-
 	}
 
 	public Envio() {

@@ -3,16 +3,20 @@ package rmi;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import dao.HibernateDAO;
 import dto.EnvioDTO;
 import dto.MapaDeRutaDTO;
+import dto.PedidoDTO;
 import dto.RutaDTO;
 import dto.SucursalDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoDTO;
+import dto.ViajeDTO;
 
 public class RemoteObjectHelper {
 	
@@ -25,7 +29,7 @@ public class RemoteObjectHelper {
 		cargarMapaDeRuta();
 	}
 	
-	public void cargarMapaDeRuta() {
+	public static void cargarMapaDeRuta() {
 		List<RutaDTO> rutas = hbtDAO.obtenerRutas();
 		mapadeRuta = new MapaDeRutaDTO();
 		mapadeRuta.setRutas(rutas);
@@ -37,6 +41,7 @@ public class RemoteObjectHelper {
 		float precioMin = -1;
 		int kmMin = -1;
 
+		cargarMapaDeRuta();
 		for (RutaDTO ruta : mapadeRuta.getRutas()) {
 			if (ruta.getOrigen().getIdSucursal() == origen.getIdSucursal()
 					&& ruta.getDestino().getIdSucursal() == destino.getIdSucursal()) {
@@ -83,8 +88,7 @@ public class RemoteObjectHelper {
 	public static SucursalDTO obtenerSucursal(String nombre) {
 		List<SucursalDTO> sucursales = hbtDAO.obtenerSucursales();
 		for (SucursalDTO sucursal : sucursales) {
-			int nombreId = Integer.parseInt(nombre);
-			if (sucursal.getIdSucursal() == nombreId) {
+			if (sucursal.getNombre().equals(nombre)) {
 				return sucursal;
 			}
 		}
@@ -113,10 +117,11 @@ public class RemoteObjectHelper {
 		ArrayList<ArrayList<EnvioDTO>> respuestasPosiblesConDestinoCompartido = new ArrayList<ArrayList<EnvioDTO>>();
 		
 		for (ArrayList<EnvioDTO> respuesta : respuestasPosibles) {
-			SucursalDTO sucursalDestino = obtenerSucursal(respuesta.get(0).getPedido().getSucursalDestino());
+			EnvioDTO envioDto = respuesta.get(0);
+			SucursalDTO sucursalDestino = obtenerSucursal(envioDto.getSucursalDestino());
 			boolean todosCompartenElMismoDestino = true;
 			for (EnvioDTO envio : respuesta) {
-				SucursalDTO sucursalDestinoActual = obtenerSucursal(envio.getPedido().getSucursalDestino());
+				SucursalDTO sucursalDestinoActual = obtenerSucursal(envio.getSucursalDestino());
 				if (sucursalDestinoActual.getIdSucursal() != sucursalDestino.getIdSucursal()) {
 					todosCompartenElMismoDestino = false;
 					break;
@@ -132,7 +137,7 @@ public class RemoteObjectHelper {
 
 	private static ArrayList<EnvioDTO> obtenerRespuestaMasGrande(ArrayList<ArrayList<EnvioDTO>> respuestasPosibles) {
 		int max = -1;
-		ArrayList<EnvioDTO> respuestaMax = null;
+		ArrayList<EnvioDTO> respuestaMax = new ArrayList<EnvioDTO>();
 		for (ArrayList<EnvioDTO> respuesta : respuestasPosibles) {
 			if (max == -1 || max < respuesta.size()) {
 				max = respuesta.size();
@@ -183,5 +188,43 @@ public class RemoteObjectHelper {
 			}
 		}
 		return vehiculosDisponibles;
+	}
+	
+	public static ViajeDTO obtenerViajeDelEnvio(EnvioDTO envioDto) {
+		List<ViajeDTO> viajes = hbtDAO.obtenerViajes();
+		ViajeDTO viajeDelEnvio = null;
+		for (ViajeDTO viaje : viajes) {
+			for (EnvioDTO envio : viaje.getEnvios()) {
+				if (envio.getIdEnvio() == envioDto.getIdEnvio()) {
+					viajeDelEnvio = viaje;
+					break;
+				}
+			}
+		}
+		return viajeDelEnvio;
+	}
+	
+	public static List<PedidoDTO> ordenarPedidosPorPrioridad(List<PedidoDTO> pedidos) {
+		
+		List<PedidoDTO> pedidosAux = new ArrayList<PedidoDTO>();
+
+		// Ordeno pedidos por fecha de carga
+		Collections.sort(pedidos, new Comparator<PedidoDTO>() {
+			public int compare(PedidoDTO pedido1, PedidoDTO pedido2) {
+				Date fechaCargaPedido1 = pedido1.getFechaCarga();
+				Date fechaCargaPedido2 = pedido2.getFechaCarga();
+				return fechaCargaPedido1.before(fechaCargaPedido2) ? -1 : 1;
+			}
+		});
+
+		// ELimino vacios
+		for (int i = 0 ; i < pedidos.size() ; i++) {
+			PedidoDTO pedido = pedidos.get(i);
+			if (pedido != null) {
+				pedidosAux.add(pedido);
+			}
+		}
+
+		return pedidosAux;
 	}
 }

@@ -27,11 +27,6 @@ public class MainServer extends RmiStarter {
 	public static void main(String[] args) throws RemoteException {
 		new MainServer();
 		RemoteObject remoteObject = new RemoteObject();
-		// remoteObject.enviar();
-		// remoteObject.enviar();
-		// ViajeDTO v=new ViajeDTO();
-		// v.setIdViaje(2);
-		// remoteObject.recibir(v);
 	}
 
 }
