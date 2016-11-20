@@ -53,6 +53,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	private static HibernateDAO hbtDAO;
 	public static MapaDeRutaDTO mapadeRuta;
 	private PoliticaMantenimiento politicaMantenimiento;
+	private RemoteObjectHelper remoteObjectHelper;
 
 	public void InicializarMapaDeRuta() {
 		cargarMapaDeRuta();
@@ -61,6 +62,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public RemoteObject() throws RemoteException {
 		super();
 		hbtDAO = HibernateDAO.getInstancia();
+		remoteObjectHelper = new RemoteObjectHelper();
 	}
 
 	public void altaPedido(PedidoDTO pedidoDTO) {
@@ -927,9 +929,13 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		Ruta rutaB = new Ruta(2, trayectosB, 200, sucursal1, sucursal3);
 		hbtDAO.guardar(rutaB);
 		
-		Vehiculo vehiculoA = new Vehiculo(1, "camion", 500, 200, 200, 200, 200, 200, 200, "En Deposito", true, false, new Date(), null);
-		hbtDAO.guardar(vehiculoA);
+		PlanDeMantenimiento planDeMantenimiento = new PlanDeMantenimiento(4, 0, 0, 0);
+		hbtDAO.guardar(planDeMantenimiento);
 		
+		Vehiculo vehiculoA = new Vehiculo(3, "Propio", 12, 3500, 2, 2, 3, 1500, 10200, "Libre", true, false, null, planDeMantenimiento);
+		hbtDAO.guardar(vehiculoA);
+		Vehiculo vehiculoB = new Vehiculo(4, "Propio", 12, 3500, 2, 2, 3, 1500, 10200, "Libre", true, false, null, planDeMantenimiento);
+		hbtDAO.guardar(vehiculoB);
 	}
 
 	@Override

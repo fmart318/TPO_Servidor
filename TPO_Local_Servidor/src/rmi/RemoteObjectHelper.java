@@ -178,7 +178,7 @@ public class RemoteObjectHelper {
 		List<VehiculoDTO> vehiculosDisponibles = new ArrayList<VehiculoDTO>();
 		List<VehiculoDTO> vehiculos = hbtDAO.obtenerVehiculos();
 		for (VehiculoDTO vehiculo : vehiculos) {
-			if (vehiculo.getEstado().equals("En Deposito")) {
+			if (vehiculo.getEstado().equals("Libre")) {
 				vehiculosDisponibles.add(vehiculo);
 			}
 		}
