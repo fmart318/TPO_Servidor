@@ -729,6 +729,19 @@ public class HibernateDAO {
 		this.closeSession();
 		return enviosDTO;
 	}
+	public List<EnvioDTO> listarEnvios() {
+		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
+		Session s = this.getSession();
+		try {
+			List<Envio> envios = s.createQuery("FROM Envio").list();
+			for (Envio e : envios) 
+				enviosDTO.add(e.toDTO());
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		this.closeSession();
+		return enviosDTO;
+	}
 
 	public List<TrayectoDTO> obtenerTrayectos() {
 		List<TrayectoDTO> trayectoDtos = new ArrayList<TrayectoDTO>();

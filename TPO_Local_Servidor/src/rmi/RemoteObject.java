@@ -1156,6 +1156,26 @@ public void recibir(ViajeDTO v)
 			v2.setPlanDeMantenimiento(pm);
 			hbtDAO.guardar(v2);
 			
+			Envio envio =new Envio();
+			envio.setCumpleCondicionesCarga(true);
+			envio.setEstado("Normal");
+			envio.setFechaLlegada(new Date(+10));
+			envio.setFechaSalida(new Date());
+			envio.setPedido(pedido);
+			envio.setPrioridad(1);
+			envio.setSucursalOrigen(so.getNombre());
+			hbtDAO.guardar(envio);
+			
+			Viaje viaje=new Viaje();
+			ArrayList<Envio> envios=new ArrayList<Envio>();
+			envios.add(envio);
+			viaje.setEnvios(envios);
+			viaje.setFechaLlegada(new Date());
+			viaje.setFinalizado(true);
+			viaje.setSucursalOrigen(so);
+			viaje.setSucursalDestino(s);
+			viaje.setVehiculo(v);
+			hbtDAO.guardar(viaje);
 			
 		}
 
@@ -1492,13 +1512,27 @@ public void recibir(ViajeDTO v)
 		@Override
 		public void modificarDireccion(DireccionDTO d) throws RemoteException {
 			// TODO Auto-generated method stub
-			hbtDAO.borrar(DireccionToEntity(d));
+			hbtDAO.modificar(DireccionToEntity(d));
 		}
 
 
 		@Override
 		public void eliminarDireccion(DireccionDTO d) throws RemoteException {
 			// TODO Auto-generated method stub
-			
+			hbtDAO.borrar(DireccionToEntity(d));
+		}
+
+
+		@Override
+		public List<EnvioDTO> listarEnvios() throws RemoteException {
+			// TODO Auto-generated method stub
+			return hbtDAO.listarEnvios();
+		}
+
+
+		@Override
+		public List<ViajeDTO> listarViajes() throws RemoteException {
+			// TODO Auto-generated method stub
+			return hbtDAO.obtenerViajes();
 		}
 }
