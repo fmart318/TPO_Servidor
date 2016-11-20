@@ -16,6 +16,7 @@ import Strategy.PoliticaMantenimiento;
 import dao.HibernateDAO;
 import dto.CargaDTO;
 import dto.ClienteDTO;
+import dto.DireccionDTO;
 import dto.EmpresaDTO;
 import dto.EnvioDTO;
 import dto.FacturaDTO;
@@ -39,6 +40,7 @@ import entities.Direccion;
 import entities.Empresa;
 import entities.Particular;
 import entities.Pedido;
+import entities.PlanDeMantenimiento;
 import entities.Ruta;
 import entities.Sucursal;
 import entities.Trayecto;
@@ -721,92 +723,168 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	@Override
 	public void cargarDatosIniciales() throws RemoteException {
 
-		entities.Empresa e = new Empresa();
-		e.setNombre("Empresa 1");
-		e.setCUIT(234234);
-		e.setDetallePoliticas("Detalle Pol�tica 1");
-		e.setTipo("Tipo 1");
-		e.setSaldoCuentaCorriente(15000);
-		hbtDAO.guardar(e);
-
-		entities.Particular p = new Particular();
-		p.setNombre("Elio");
-		p.setApellido("Mollo");
-		p.setDNI(9418723);
-		hbtDAO.guardar(p);
-
-		entities.Direccion dO = new entities.Direccion();
-		dO.setCalle("Calle 16");
-		dO.setCP("1884");
-		dO.setDepartamento("F");
-		dO.setNumero(5403);
-		dO.setPiso(2);
-		hbtDAO.guardar(dO);
-
-		entities.Direccion dD = new entities.Direccion();
-		dD.setCalle("Calle 16");
-		dD.setCP("1884");
-		dD.setDepartamento("F");
-		dD.setNumero(5403);
-		dD.setPiso(2);
-		hbtDAO.guardar(dD);
-
-		entities.Pedido pedido = new entities.Pedido();
-		pedido.setCliente(p);
-		pedido.setDireccionCarga(dO);
-		pedido.setDireccionDestino(dD);
-		Date hoy = new Date();
-		pedido.setFechaCarga(hoy);
-		Date fmax = new Date(hoy.getTime() + (1000 * 60 * 60 * 24));
-		pedido.setFechaMaxima(fmax);
-		pedido.setHoraInicio(12);
-		pedido.setHoraFin(13);
-		pedido.setPrecio(1500);
-		pedido.setSucursalOrigen("Berazategui");
-		pedido.setSucursalDestino("Quilmes");
-		pedido.setSolicitaAvionetaParticular(false);
-		pedido.setSolicitaTransporteDirecto(false);
-		ArrayList<entities.Carga> cargas = new ArrayList<entities.Carga>();
-		entities.Carga carga = new entities.Carga();
-		carga.setAlto(2);
-		carga.setAncho(3);
-		carga.setApilable(4);
-		carga.setCondiciones("Apilable hasta 2 Pallets");
-		carga.setDespachado(false);
-		carga.setFragilidad("Normal");
-		carga.setMercaderia("Electr�nico");
-		carga.setPeso(20);
-		carga.setProfundidad(2);
-		carga.setRefrigerable(false);
-		carga.setTratamiento("Normal");
-		carga.setVolumen(carga.getAlto() * carga.getAncho() * carga.getProfundidad());
-		hbtDAO.guardar(carga);
-		cargas.add(carga);
-		entities.Carga carga2 = new entities.Carga();
-		carga2.setAlto(3);
-		carga2.setAncho(6);
-		carga2.setApilable(2);
-		carga2.setCondiciones("No se recomienda Apilar");
-		carga2.setDespachado(false);
-		carga2.setFragilidad("Normal");
-		carga2.setMercaderia("Electr�nico");
-		carga2.setPeso(80);
-		carga2.setProfundidad(6);
-		carga2.setRefrigerable(false);
-		carga2.setTratamiento("Normal");
-		carga2.setVolumen(carga2.getAlto() * carga2.getAncho() * carga2.getProfundidad());
-		cargas.add(carga2);
-		hbtDAO.guardar(carga2);
-		pedido.setCargas(cargas);
-		/*hbtDAO.guardar(pedido);
-		
-		pedido.setFechaCarga(new Date(hoy.getTime() + (1000 * 60 * 60 * 24)));
-		hbtDAO.guardar(pedido);*/
-		pedido.setFechaCarga(new Date(hoy.getTime() + (1000 * 60 * 60 * 50)));
-		hbtDAO.guardar(pedido);
-		
-		datosInicialesParaEnvios();
-	}
+			entities.Empresa e=new Empresa();
+			e.setNombre("Empresa 1");
+			e.setCUIT(234234);
+			e.setDetallePoliticas("Detalle Pol�tica 1");
+			e.setTipo("Tipo 1");
+			e.setSaldoCuentaCorriente(15000);
+			hbtDAO.guardar(e);
+			
+			entities.Particular p=new Particular();
+			p.setNombre("Elio");
+			p.setApellido("Mollo");
+			p.setDNI(9418723);
+			hbtDAO.guardar(p);
+			
+			entities.Direccion dO=new entities.Direccion();
+			dO.setCalle("Av. Rigolleau");
+			dO.setCP("1884");
+			dO.setDepartamento("F");
+			dO.setNumero(1405);
+			dO.setPiso(2);
+			hbtDAO.guardar(dO);
+			
+			entities.Direccion dD=new entities.Direccion();
+			dD.setCalle("Av. Mitre");
+			dD.setCP("1883");
+			dD.setDepartamento("A");
+			dD.setNumero(9230);
+			dD.setPiso(2);
+			hbtDAO.guardar(dD);
+			
+			entities.Pedido pedido=new entities.Pedido();
+			pedido.setCliente(p);
+			pedido.setDireccionCarga(dO);
+			pedido.setDireccionDestino(dD);
+			Date hoy=new Date();
+			pedido.setFechaCarga(hoy);
+			Date fmax=new Date(hoy.getTime() + (1000 * 60 * 60 * 24));
+			pedido.setFechaMaxima(fmax);
+			pedido.setHoraInicio(12);
+			pedido.setHoraFin(13);
+			pedido.setPrecio(1500);
+			pedido.setSucursalOrigen("Berazategui");
+			pedido.setSucursalDestino("Quilmes");
+			pedido.setSolicitaAvionetaParticular(false);
+			pedido.setSolicitaTransporteDirecto(false);
+			ArrayList<entities.Carga> cargas=new ArrayList<entities.Carga>();
+			entities.Carga carga=new entities.Carga();
+			carga.setAlto(1);
+			carga.setAncho(2);
+			carga.setApilable(4);
+			carga.setCondiciones("Apilable");
+			carga.setDespachado(true);
+			carga.setFragilidad("Normal");
+			carga.setMercaderia("Electr�nico");
+			carga.setPeso(20);
+			carga.setProfundidad(1);
+			carga.setRefrigerable(false);
+			carga.setTratamiento("Normal");
+			carga.setVolumen(carga.getAlto()*carga.getAncho()*carga.getProfundidad());
+			hbtDAO.guardar(carga);
+			cargas.add(carga);
+			entities.Carga carga2=new entities.Carga();
+			carga2.setAlto(1);
+			carga2.setAncho(2);
+			carga2.setApilable(2);
+			carga2.setCondiciones("No apilable");
+			carga2.setDespachado(true);
+			carga2.setFragilidad("Normal");
+			carga2.setMercaderia("Electr�nico");
+			carga2.setPeso(30);
+			carga2.setProfundidad(1);
+			carga2.setRefrigerable(false);
+			carga2.setTratamiento("Normal");
+			carga2.setVolumen(carga2.getAlto()*carga2.getAncho()*carga2.getProfundidad());
+			cargas.add(carga2);
+			hbtDAO.guardar(carga2);
+			pedido.setCargas(cargas);
+			hbtDAO.guardar(pedido);
+			
+			Carga carga3=new Carga();
+			carga3.setAlto(2);
+			carga3.setAncho(6);
+			carga3.setApilable(0);
+			carga3.setCondiciones("A granel");
+			carga3.setDespachado(false);
+			carga3.setFragilidad("Normal");
+			carga3.setMercaderia("A Granel");
+			carga3.setPeso(3000);
+			carga3.setProfundidad(6);
+			carga3.setRefrigerable(false);
+			carga3.setTratamiento("Normal");
+			carga3.setVolumen(carga3.getAlto()*carga3.getAncho()*carga3.getProfundidad());
+			hbtDAO.guardar(carga3);
+			Carga carga4=new Carga();
+			carga4.setAlto(2);
+			carga4.setAncho(4);
+			carga4.setApilable(0);
+			carga4.setCondiciones("A granel");
+			carga4.setDespachado(false);
+			carga4.setFragilidad("Normal");
+			carga4.setMercaderia("A Granel");
+			carga4.setPeso(100);
+			carga4.setProfundidad(6);
+			carga4.setRefrigerable(false);
+			carga4.setTratamiento("Normal");
+			carga4.setVolumen(carga4.getAlto()*carga4.getAncho()*carga4.getProfundidad());
+			hbtDAO.guardar(carga4);
+			
+			PlanDeMantenimiento pm=new PlanDeMantenimiento();
+			pm.setDiasDemora(0);
+			pm.setDiasProxControl(0);
+			pm.setKmProxControl(0);
+			hbtDAO.guardar(pm);
+			
+			PlanDeMantenimiento pm1=new PlanDeMantenimiento();
+			pm1.setDiasDemora(1);
+			pm1.setDiasProxControl(28);
+			pm1.setKmProxControl(20000);
+			hbtDAO.guardar(pm1);
+			
+			PlanDeMantenimiento pm2=new PlanDeMantenimiento();
+			pm2.setDiasDemora(2);
+			pm2.setDiasProxControl(30);
+			pm2.setKmProxControl(100000);
+			hbtDAO.guardar(pm2);
+			
+			Vehiculo v=new Vehiculo();
+			v.setAlto(2);
+			v.setAncho(2);
+			v.setProfundidad(3);
+			v.setVolumen(v.getAlto()*v.getAncho()*v.getProfundidad());
+			v.setEnGarantia(true);
+			v.setEstado("Libre");
+			v.setFechaUltimoControl(null);
+			v.setKilometraje(10200);
+			v.setPeso(3500);
+			v.setTara(1500);
+			v.setTipo("Propio");
+			v.setTrabajoEspecifico(false);
+			v.setPlanDeMantenimiento(pm);
+			hbtDAO.guardar(v);
+			
+			Vehiculo v2=new Vehiculo();
+			v2.setAlto(4);
+			v2.setAncho(2);
+			v2.setProfundidad(8);
+			v2.setVolumen(v.getAlto()*v.getAncho()*v.getProfundidad());
+			v2.setEnGarantia(true);
+			v2.setEstado("Contrado");
+			v2.setFechaUltimoControl(null);
+			v2.setKilometraje(90000);
+			v2.setPeso(10000);
+			v2.setTara(3000);
+			v2.setTipo("Tercero");
+			v2.setTrabajoEspecifico(true);
+			v2.setPlanDeMantenimiento(pm);
+			hbtDAO.guardar(v2);
+			
+			datosInicialesParaEnvios();
+			
+			
+		}
 
 	private void datosInicialesParaEnvios() {
 		
@@ -1019,124 +1097,183 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.modificar(ruta);
 	}
 
-	@Override
-	public void deleteRuta(int idRuta) throws RemoteException {
-		Ruta ruta = new Ruta();
-		ruta.setIdRuta(idRuta);
-		hbtDAO.borrar(ruta);
-	}
-
-	@Override
-	public void createCarga(CargaDTO cd) throws RemoteException {
-		Carga c = new Carga();
-		c.setAlto(cd.getAlto());
-		c.setAncho(cd.getAncho());
-		c.setApilable(cd.getApilable());
-		c.setCondiciones(cd.getCondiciones());
-		c.setDespachado(cd.isDespachado());
-		c.setFragilidad(cd.getFragilidad());
-		c.setMercaderia(cd.getTipoMercaderia());
-		c.setPeso(cd.getPeso());
-		c.setProfundidad(cd.getProfundidad());
-		c.setRefrigerable(cd.isRefrigerable());
-		c.setTratamiento(cd.getTratamiento());
-		c.setVolumen(cd.getVolumen());
-		hbtDAO.guardar(c);
-	}
-
-	@Override
-	public void updateCarga(CargaDTO cd) throws RemoteException {
-		// TODO Auto-generated method stub
-		Carga c = new Carga();
-		c.setIdCarga(cd.getIdCarga());
-		c.setAlto(cd.getAlto());
-		c.setAncho(cd.getAncho());
-		c.setApilable(cd.getApilable());
-		c.setCondiciones(cd.getCondiciones());
-		c.setDespachado(cd.isDespachado());
-		c.setFragilidad(cd.getFragilidad());
-		c.setMercaderia(cd.getTipoMercaderia());
-		c.setPeso(cd.getPeso());
-		c.setProfundidad(cd.getProfundidad());
-		c.setRefrigerable(cd.isRefrigerable());
-		c.setTratamiento(cd.getTratamiento());
-		c.setVolumen(cd.getVolumen());
-		hbtDAO.modificar(c);
-	}
-
-	@Override
-	public void deleteCarga(int idCarga) throws RemoteException {
-		// TODO Auto-generated method stub
-		Carga c = new Carga();
-		c.setIdCarga(idCarga);
-		hbtDAO.borrar(c);
-	}
-
-	@Override
-	public void crearPedido(PedidoDTO pe) throws RemoteException {
-		// TODO Auto-generated method stub
-		Pedido p = new Pedido();
-		Direccion dC = new Direccion();
-		Direccion dD = new Direccion();
-		dC.setCalle(pe.getDireccionCarga().getCalle());
-		dC.setCP(pe.getDireccionCarga().getCP());
-		dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
-		dC.setNumero(pe.getDireccionCarga().getNumero());
-		dC.setPiso(pe.getDireccionCarga().getPiso());
-
-		dD.setCalle(pe.getDireccionDestino().getCalle());
-		dD.setCP(pe.getDireccionDestino().getCP());
-		dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
-		dD.setNumero(pe.getDireccionDestino().getNumero());
-		dD.setPiso(pe.getDireccionDestino().getPiso());
-
-		hbtDAO.guardar(dD);
-		hbtDAO.guardar(dC);
-		ArrayList<Carga> cargas = new ArrayList<Carga>();
-		List<CargaDTO> cargasDTO = hbtDAO.getInstancia().listarCargas();
-		for (int i = 0; i < cargasDTO.size(); i++) {
-			if (pe.getCargas().get(i).getIdCarga() == cargasDTO.get(i).getIdCarga()) {
-				Carga carga = new Carga();
-				carga.setIdCarga(cargasDTO.get(i).getIdCarga());
-				carga.setAlto(cargasDTO.get(i).getAlto());
-				carga.setAncho(cargasDTO.get(i).getAncho());
-				carga.setApilable(cargasDTO.get(i).getApilable());
-				carga.setCondiciones(cargasDTO.get(i).getCondiciones());
-				carga.setDespachado(cargasDTO.get(i).isDespachado());
-				carga.setFragilidad(cargasDTO.get(i).getFragilidad());
-				carga.setMercaderia(cargasDTO.get(i).getTipoMercaderia());
-				carga.setPeso(cargasDTO.get(i).getPeso());
-				carga.setProfundidad(cargasDTO.get(i).getProfundidad());
-				carga.setRefrigerable(cargasDTO.get(i).isRefrigerable());
-				carga.setTratamiento(cargasDTO.get(i).getTratamiento());
-				carga.setVolumen(cargasDTO.get(i).getVolumen());
-				cargas.add(carga);
-			}
+		@Override
+		public void deleteRuta(int idRuta) throws RemoteException {
+			Ruta ruta = new Ruta();	
+			ruta.setIdRuta(idRuta);
+			hbtDAO.borrar(ruta);
+		}
+		
+		@Override
+		public void createCarga(CargaDTO cd) throws RemoteException {
+			Carga c=new Carga();
+			c.setAlto(cd.getAlto());
+			c.setAncho(cd.getAncho());
+			c.setApilable(cd.getApilable());
+			c.setCondiciones(cd.getCondiciones());
+			c.setDespachado(cd.isDespachado());
+			c.setFragilidad(cd.getFragilidad());
+			c.setMercaderia(cd.getTipoMercaderia());
+			c.setPeso(cd.getPeso());
+			c.setProfundidad(cd.getProfundidad());
+			c.setRefrigerable(cd.isRefrigerable());
+			c.setTratamiento(cd.getTratamiento());
+			c.setVolumen(cd.getVolumen());
+			hbtDAO.guardar(c);
 		}
 
-		List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
-		for (EmpresaDTO e : empresas) {
-			if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
-				Empresa empresa = new Empresa();
-				empresa.setIdCliente(e.getIdCliente());
-				p.setCliente(empresa);
-			}
-		}
-		List<ParticularDTO> particulares = hbtDAO.getInstancia().obtenerClientesParticular();
-		for (ParticularDTO pa : particulares) {
-			if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
-				Particular particular = new Particular();
-				particular.setIdCliente(pe.getCliente().getIdCliente());
-				p.setCliente(particular);
-			}
+
+		@Override
+		public void updateCarga(CargaDTO cd) throws RemoteException {
+			// TODO Auto-generated method stub
+			Carga c=new Carga();
+			c.setIdCarga(cd.getIdCarga());
+			c.setAlto(cd.getAlto());
+			c.setAncho(cd.getAncho());
+			c.setApilable(cd.getApilable());
+			c.setCondiciones(cd.getCondiciones());
+			c.setDespachado(cd.isDespachado());
+			c.setFragilidad(cd.getFragilidad());
+			c.setMercaderia(cd.getTipoMercaderia());
+			c.setPeso(cd.getPeso());
+			c.setProfundidad(cd.getProfundidad());
+			c.setRefrigerable(cd.isRefrigerable());
+			c.setTratamiento(cd.getTratamiento());
+			c.setVolumen(cd.getVolumen());
+			hbtDAO.modificar(c);
 		}
 
-		p.setHoraInicio(1);
-		p.setCargas(cargas);
-		p.setDireccionCarga(dC);
-		p.setDireccionDestino(dD);
-		hbtDAO.guardar(p);
 
-	}
+		@Override
+		public void deleteCarga(int idCarga) throws RemoteException {
+			// TODO Auto-generated method stub
+			Carga c=new Carga();
+			c.setIdCarga(idCarga);
+			hbtDAO.borrar(c);			
+		}
+
+
+		@Override
+		public void crearPedido(PedidoDTO pe) throws RemoteException {
+			// TODO Auto-generated method stub
+			Pedido p = new Pedido();
+			Direccion dC = new Direccion();
+			Direccion dD = new Direccion();
+			dC.setCalle(pe.getDireccionCarga().getCalle());
+			dC.setCP(pe.getDireccionCarga().getCP());
+			dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
+			dC.setNumero(pe.getDireccionCarga().getNumero());
+			dC.setPiso(pe.getDireccionCarga().getPiso());
+
+			dD.setCalle(pe.getDireccionDestino().getCalle());
+			dD.setCP(pe.getDireccionDestino().getCP());
+			dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
+			dD.setNumero(pe.getDireccionDestino().getNumero());
+			dD.setPiso(pe.getDireccionDestino().getPiso());
+
+			hbtDAO.guardar(dD);
+			hbtDAO.guardar(dC);
+			ArrayList<Carga> cargas=new ArrayList<Carga>();
+			for (CargaDTO c: pe.getCargas()){
+				Carga carg=EntityManager.CargaToEntity(c);
+				carg.setDespachado(true);
+				cargas.add(carg);
+			}
+
+			p.setCargas(cargas);
+			List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
+			for (EmpresaDTO e : empresas) {
+				if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
+					Empresa empresa = new Empresa();
+					empresa.setIdCliente(e.getIdCliente());
+					p.setCliente(empresa);
+				}
+			}
+			List<ParticularDTO> particulares = hbtDAO.getInstancia().obtenerClientesParticular();
+			for (ParticularDTO pa : particulares) {
+				if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
+					Particular particular = new Particular();
+					particular.setIdCliente(pe.getCliente().getIdCliente());
+					p.setCliente(particular);
+				}
+			}
+			p.setFechaCarga(pe.getFechaCarga());
+			p.setFechaMaxima(pe.getFechaMaxima());
+			p.setHoraInicio(pe.getHoraInicio());
+			p.setHoraFin(pe.getHoraFin());
+			
+			p.setDireccionCarga(dC);
+			p.setDireccionDestino(dD);
+			p.setPrecio(pe.getPrecio());
+			p.setSucursalOrigen(pe.getSucursalOrigen());
+			p.setSucursalDestino(pe.getSucursalDestino());
+			p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
+			p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
+			hbtDAO.guardar(p);
+
+		}
+
+		@Override
+		public CargaDTO buscarCargaPorId(int idCarga) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+			return hbtDAO.buscarCargaPorId(idCarga);
+		}
+
+
+		@Override
+		public void crearVehiculo(VehiculoDTO v) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.guardar(EntityManager.VehiculoToEntity(v));
+		}
+
+
+		@Override
+		public void modificarVehiculo(VehiculoDTO v) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.modificar(EntityManager.VehiculoToEntity(v));
+		}
+
+
+		@Override
+		public void eliminarVehiculo(VehiculoDTO v) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.borrar(EntityManager.VehiculoToEntity(v));
+		}
+
+
+		@Override
+		public List<CargaDTO> listarCargasSinDespachar() throws RemoteException {
+			// TODO Auto-generated method stub
+			return hbtDAO.listarCargasSinDespachar();
+		}
+
+
+		@Override
+		public List<DireccionDTO> listarDirecciones() throws RemoteException {
+			// TODO Auto-generated method stub
+			return hbtDAO.obtenerDirecciones();
+		}
+
+
+		@Override
+		public void crearDireccion(DireccionDTO d) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.guardar(EntityManager.DireccionToEntity(d));
+		}
+
+
+		@Override
+		public void modificarDireccion(DireccionDTO d) throws RemoteException {
+			// TODO Auto-generated method stub
+			hbtDAO.borrar(EntityManager.DireccionToEntity(d));
+		}
+
+
+		@Override
+		public void eliminarDireccion(DireccionDTO d) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
 
 }

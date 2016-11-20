@@ -11,6 +11,7 @@ import org.hibernate.Transaction;
 
 import dto.CargaDTO;
 import dto.ClienteDTO;
+import dto.DireccionDTO;
 import dto.EmpresaDTO;
 import dto.EnvioDTO;
 import dto.HabilitadoDTO;
@@ -26,6 +27,7 @@ import dto.VehiculoDTO;
 import dto.ViajeDTO;
 import entities.Carga;
 import entities.Cliente;
+import entities.Direccion;
 import entities.Empresa;
 import entities.Envio;
 import entities.Habilitado;
@@ -202,6 +204,35 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cargas;
+	}
+	
+	public List<CargaDTO> listarCargasSinDespachar() {
+		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
+		Session s = this.getSession();
+		try {
+			List<entities.Carga> cs = s.createQuery("FROM Carga as c where c.despachado=:desp").setParameter("desp", false).list();
+			for (entities.Carga c : cs) {
+				cargas.add(c.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return cargas;
+	}
+	public List<DireccionDTO> obtenerDirecciones() {
+		List<DireccionDTO> direcciones = new ArrayList<DireccionDTO>();
+		Session s = this.getSession();
+		try {
+			List<Direccion> cs = s.createQuery("FROM Direccion").list();
+			for (Direccion c : cs) {
+				direcciones.add(c.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return direcciones;
 	}
 
 	public List<ViajeDTO> obtenerViajes() {
@@ -707,7 +738,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return trayectoDtos;
 	}
-	
+
 	public List<EnvioDTO> obtenerEnvios() {
 		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
 		Session session = this.getSession();
@@ -721,5 +752,21 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return enviosDTO;
+	}
+
+	public CargaDTO buscarCargaPorId(int idCarga){
+		CargaDTO cl = new CargaDTO();
+		Session s = this.getSession();
+		try {
+			Carga c = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
+			cl = c.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
 	}
 }
