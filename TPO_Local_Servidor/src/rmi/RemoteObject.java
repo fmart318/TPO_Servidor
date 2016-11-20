@@ -37,6 +37,7 @@ import dto.SeguroDTO;
 import dto.SucursalDTO;
 import dto.TransporteDTO;
 import dto.TrayectoDTO;
+import dto.VehiculoAMantenerDTO;
 import dto.VehiculoDTO;
 import dto.ViajeDTO;
 import entities.Carga;
@@ -984,6 +985,7 @@ public void recibir(ViajeDTO v)
 		}
 
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void cargarDatosIniciales() throws RemoteException {
 		
@@ -1105,13 +1107,6 @@ public void recibir(ViajeDTO v)
 			carga4.setVolumen(carga4.getAlto()*carga4.getAncho()*carga4.getProfundidad());
 			hbtDAO.guardar(carga4);
 			
-			
-			PlanDeMantenimiento pm=new PlanDeMantenimiento();
-			pm.setDiasDemora(0);
-			pm.setDiasProxControl(0);
-			pm.setKmProxControl(0);
-			hbtDAO.guardar(pm);
-			
 			PlanDeMantenimiento pm1=new PlanDeMantenimiento();
 			pm1.setDiasDemora(1);
 			pm1.setDiasProxControl(28);
@@ -1125,35 +1120,37 @@ public void recibir(ViajeDTO v)
 			hbtDAO.guardar(pm2);
 			
 			Vehiculo v=new Vehiculo();
+			v.setIdVehiculo(1);
 			v.setAlto(2);
 			v.setAncho(2);
 			v.setProfundidad(3);
 			v.setVolumen(v.getAlto()*v.getAncho()*v.getProfundidad());
 			v.setEnGarantia(true);
 			v.setEstado("Libre");
-			v.setFechaUltimoControl(null);
+			v.setFechaUltimoControl(new java.sql.Date(2016,  05,  23));
 			v.setKilometraje(10200);
 			v.setPeso(3500);
 			v.setTara(1500);
 			v.setTipo("Propio");
 			v.setTrabajoEspecifico(false);
-			v.setPlanDeMantenimiento(pm);
+			v.setPlanDeMantenimiento(pm1);
 			hbtDAO.guardar(v);
 			
 			Vehiculo v2=new Vehiculo();
+			v2.setIdVehiculo(2);
 			v2.setAlto(4);
 			v2.setAncho(2);
 			v2.setProfundidad(8);
 			v2.setVolumen(v.getAlto()*v.getAncho()*v.getProfundidad());
-			v2.setEnGarantia(true);
+			v2.setEnGarantia(false);
 			v2.setEstado("Contrado");
-			v2.setFechaUltimoControl(null);
-			v2.setKilometraje(90000);
+			v2.setFechaUltimoControl(new java.sql.Date(2015,  05,  23));
+			v2.setKilometraje(20800);
 			v2.setPeso(10000);
 			v2.setTara(3000);
 			v2.setTipo("Tercero");
 			v2.setTrabajoEspecifico(true);
-			v2.setPlanDeMantenimiento(pm);
+			v2.setPlanDeMantenimiento(pm2);
 			hbtDAO.guardar(v2);
 			
 			Envio envio =new Envio();
@@ -1534,5 +1531,28 @@ public void recibir(ViajeDTO v)
 		public List<ViajeDTO> listarViajes() throws RemoteException {
 			// TODO Auto-generated method stub
 			return hbtDAO.obtenerViajes();
+		}
+		
+		//Planes de Mantenimiento
+		@Override
+		public List<PlanDeMantenimientoDTO> listarPlanesDeMantenimiento() throws RemoteException {
+			return hbtDAO.listarPlanesDeMantenimiento();
+		}
+
+		@Override
+		public void deletePlanDeMantenimiento(int idPlan) throws RemoteException {
+			PlanDeMantenimiento plan = new PlanDeMantenimiento();
+			plan.setIdPlanDeMantenimiento(idPlan);
+			hbtDAO.borrar(plan);
+		}
+
+		@Override
+		public void updatePlanDeMantenimiento(PlanDeMantenimientoDTO plan) throws RemoteException {
+			hbtDAO.modificar(PlanDeMantenimientoToEntity(plan));
+		}
+
+		@Override
+		public List<VehiculoAMantenerDTO> getVehiculosAMantener() throws RemoteException {
+			return hbtDAO.getVehiculosAMantener();
 		}
 }
