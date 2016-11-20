@@ -747,6 +747,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			dO.setPiso(2);
 			hbtDAO.guardar(dO);
 			
+			Sucursal so=new Sucursal();
+			so.setNombre("Sucursal Berazategui");
+			so.setUbicacion(dO);
+			hbtDAO.guardar(so);
+			
 			entities.Direccion dD=new entities.Direccion();
 			dD.setCalle("Av. Mitre");
 			dD.setCP("1883");
@@ -754,6 +759,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			dD.setNumero(9230);
 			dD.setPiso(2);
 			hbtDAO.guardar(dD);
+			
+			Sucursal s=new Sucursal();
+			s.setNombre("Sucursal Quilmes");
+			s.setUbicacion(dD);
+			hbtDAO.guardar(s);
 			
 			entities.Pedido pedido=new entities.Pedido();
 			pedido.setCliente(p);
