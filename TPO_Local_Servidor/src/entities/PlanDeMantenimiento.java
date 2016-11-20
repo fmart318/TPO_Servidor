@@ -39,6 +39,14 @@ public class PlanDeMantenimiento extends PersistentObject {
 		this.kmProxControl = kmProxControl;
 	}
 
+	public int getIdPlanDeMantenimiento() {
+		return idPlanDeMantenimiento;
+	}
+
+	public void setIdPlanDeMantenimiento(int idPlanDeMantenimiento) {
+		this.idPlanDeMantenimiento = idPlanDeMantenimiento;
+	}
+
 	public int getDiasProxControl() {
 		return diasProxControl;
 	}
