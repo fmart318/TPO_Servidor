@@ -32,6 +32,7 @@ import dto.SeguroDTO;
 import dto.SucursalDTO;
 import dto.TransporteDTO;
 import dto.TrayectoDTO;
+import dto.VehiculoAMantenerDTO;
 import dto.VehiculoDTO;
 import dto.ViajeDTO;
 import entities.Carga;
@@ -165,10 +166,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 				vehiculoDTO.getPlanDeMantenimiento().setDiasProxControl(60);
 				hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculoDTO));
 			}
-			/*
-			 * Me fijo si la fecha calculada al principio esta antes que la de
-			 * hoy, si lo esta, mando mantenimiento
-			 */
 			else if (fecha.before(new Date())) {
 				Boolean = true;
 				if (vehiculoDTO.isEnGarantia()) {
@@ -470,6 +467,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public ClienteDTO obtenerClientePorID(int id) {
 		return hbtDAO.obtenerClientePorID(id);
 	}
+	
+	// Datos Iniciales
 
 	@Override
 	public void cargarDatosIniciales() throws RemoteException {
@@ -698,6 +697,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		System.out.println("-----Fin Cargo de Datos Iniciales Para Envios-----");
 	}
+	
+	// Cliente Empresa
 
 	@Override
 	public void altaClienteEmpresa(EmpresaDTO empresaDto) throws RemoteException {
@@ -709,16 +710,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		e.setTipo(empresaDto.getTipo());
 		hbtDAO.guardar(e);
 	}
-
-	@Override
-	public void altaClienteParticular(ParticularDTO particularDto) throws RemoteException {
-		Particular c = new Particular();
-		c.setApellido(particularDto.getApellido());
-		c.setDNI(particularDto.getDNI());
-		c.setNombre(particularDto.getNombre());
-		hbtDAO.guardar(c);
-	}
-
+	
 	@Override
 	public void updateClienteEmpresa(EmpresaDTO empresaDto) throws RemoteException {
 		Empresa e = new Empresa();
@@ -730,6 +722,23 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		e.setTipo(empresaDto.getTipo());
 		hbtDAO.modificar(e);
 	}
+	
+	public void deleteClienteEmpresa(int idCliente) throws RemoteException {
+		Empresa e = new Empresa();
+		e.setIdCliente(idCliente);
+		hbtDAO.borrar(e);
+	}
+	
+	// Cliente Particular
+
+	@Override
+	public void altaClienteParticular(ParticularDTO particularDto) throws RemoteException {
+		Particular c = new Particular();
+		c.setApellido(particularDto.getApellido());
+		c.setDNI(particularDto.getDNI());
+		c.setNombre(particularDto.getNombre());
+		hbtDAO.guardar(c);
+	}
 
 	public void updateClienteParticular(ParticularDTO particularDto) throws RemoteException {
 		Particular p = new Particular();
@@ -740,21 +749,10 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.modificar(p);
 	}
 
-	public void deleteClienteEmpresa(int idCliente) throws RemoteException {
-		Empresa e = new Empresa();
-		e.setIdCliente(idCliente);
-		hbtDAO.borrar(e);
-	}
-
 	public void deleteClienteParticular(int idCliente) throws RemoteException {
 		Particular p = new Particular();
 		p.setIdCliente(idCliente);
 		hbtDAO.borrar(p);
-	}
-
-	@Override
-	public List<CargaDTO> listarCargas() throws RemoteException {
-		return hbtDAO.listarCargas();
 	}
 
 	// Sucursal
@@ -861,7 +859,95 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		ruta.setIdRuta(idRuta);
 		hbtDAO.borrar(ruta);
 	}
+	
+	// Pedido
 
+	@Override
+	public void crearPedido(PedidoDTO pe) throws RemoteException {
+		// TODO Auto-generated method stub
+		Pedido p = new Pedido();
+		Direccion dC = new Direccion();
+		Direccion dD = new Direccion();
+		dC.setCalle(pe.getDireccionCarga().getCalle());
+		dC.setCP(pe.getDireccionCarga().getCP());
+		dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
+		dC.setNumero(pe.getDireccionCarga().getNumero());
+		dC.setPiso(pe.getDireccionCarga().getPiso());
+
+		dD.setCalle(pe.getDireccionDestino().getCalle());
+		dD.setCP(pe.getDireccionDestino().getCP());
+		dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
+		dD.setNumero(pe.getDireccionDestino().getNumero());
+		dD.setPiso(pe.getDireccionDestino().getPiso());
+
+		hbtDAO.guardar(dD);
+		hbtDAO.guardar(dC);
+		ArrayList<Carga> cargas = new ArrayList<Carga>();
+		for (CargaDTO c : pe.getCargas()) {
+			Carga carg = EntityManager.CargaToEntity(c);
+			carg.setDespachado(true);
+			cargas.add(carg);
+		}
+
+		p.setCargas(cargas);
+
+		List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
+		for (EmpresaDTO e : empresas) {
+			if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
+				Empresa empresa = new Empresa();
+				empresa.setIdCliente(e.getIdCliente());
+				p.setCliente(empresa);
+			}
+		}
+
+		List<ParticularDTO> particulares = hbtDAO.getInstancia().obtenerClientesParticular();
+		for (ParticularDTO pa : particulares) {
+			if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
+				Particular particular = new Particular();
+				particular.setIdCliente(pe.getCliente().getIdCliente());
+				p.setCliente(particular);
+			}
+		}
+
+		p.setFechaCarga(pe.getFechaCarga());
+		p.setFechaMaxima(pe.getFechaMaxima());
+		p.setHoraInicio(pe.getHoraInicio());
+		p.setHoraFin(pe.getHoraFin());
+
+		p.setDireccionCarga(dC);
+		p.setDireccionDestino(dD);
+		p.setPrecio(pe.getPrecio());
+		p.setSucursalOrigen(pe.getSucursalOrigen());
+		p.setSucursalDestino(pe.getSucursalDestino());
+		p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
+		p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
+		hbtDAO.guardar(p);
+	}
+	
+	// Vehiculo
+
+	@Override
+	public void crearVehiculo(VehiculoDTO v) throws RemoteException {
+		hbtDAO.guardar(EntityManager.VehiculoToEntity(v));
+	}
+
+	@Override
+	public void modificarVehiculo(VehiculoDTO v) throws RemoteException {
+		hbtDAO.modificar(EntityManager.VehiculoToEntity(v));
+	}
+
+	@Override
+	public void eliminarVehiculo(VehiculoDTO v) throws RemoteException {
+		hbtDAO.borrar(EntityManager.VehiculoToEntity(v));
+	}
+	
+	// Cargas
+	
+	@Override
+	public List<CargaDTO> listarCargas() throws RemoteException {
+		return hbtDAO.listarCargas();
+	}
+	
 	@Override
 	public void createCarga(CargaDTO cd) throws RemoteException {
 		Carga c = new Carga();
@@ -906,90 +992,18 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		c.setIdCarga(idCarga);
 		hbtDAO.borrar(c);
 	}
-
-	@Override
-	public void crearPedido(PedidoDTO pe) throws RemoteException {
-		// TODO Auto-generated method stub
-		Pedido p = new Pedido();
-		Direccion dC = new Direccion();
-		Direccion dD = new Direccion();
-		dC.setCalle(pe.getDireccionCarga().getCalle());
-		dC.setCP(pe.getDireccionCarga().getCP());
-		dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
-		dC.setNumero(pe.getDireccionCarga().getNumero());
-		dC.setPiso(pe.getDireccionCarga().getPiso());
-
-		dD.setCalle(pe.getDireccionDestino().getCalle());
-		dD.setCP(pe.getDireccionDestino().getCP());
-		dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
-		dD.setNumero(pe.getDireccionDestino().getNumero());
-		dD.setPiso(pe.getDireccionDestino().getPiso());
-
-		hbtDAO.guardar(dD);
-		hbtDAO.guardar(dC);
-		ArrayList<Carga> cargas = new ArrayList<Carga>();
-		for (CargaDTO c : pe.getCargas()) {
-			Carga carg = EntityManager.CargaToEntity(c);
-			carg.setDespachado(true);
-			cargas.add(carg);
-		}
-
-		p.setCargas(cargas);
-		List<EmpresaDTO> empresas = hbtDAO.getInstancia().obtenerClientesEmpresa();
-		for (EmpresaDTO e : empresas) {
-			if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
-				Empresa empresa = new Empresa();
-				empresa.setIdCliente(e.getIdCliente());
-				p.setCliente(empresa);
-			}
-		}
-		List<ParticularDTO> particulares = hbtDAO.getInstancia().obtenerClientesParticular();
-		for (ParticularDTO pa : particulares) {
-			if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
-				Particular particular = new Particular();
-				particular.setIdCliente(pe.getCliente().getIdCliente());
-				p.setCliente(particular);
-			}
-		}
-		p.setFechaCarga(pe.getFechaCarga());
-		p.setFechaMaxima(pe.getFechaMaxima());
-		p.setHoraInicio(pe.getHoraInicio());
-		p.setHoraFin(pe.getHoraFin());
-
-		p.setDireccionCarga(dC);
-		p.setDireccionDestino(dD);
-		p.setPrecio(pe.getPrecio());
-		p.setSucursalOrigen(pe.getSucursalOrigen());
-		p.setSucursalDestino(pe.getSucursalDestino());
-		p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
-		p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
-		hbtDAO.guardar(p);
-	}
-
+	
 	@Override
 	public CargaDTO buscarCargaPorId(int idCarga) throws RemoteException {
 		return hbtDAO.buscarCargaPorId(idCarga);
 	}
 
 	@Override
-	public void crearVehiculo(VehiculoDTO v) throws RemoteException {
-		hbtDAO.guardar(EntityManager.VehiculoToEntity(v));
-	}
-
-	@Override
-	public void modificarVehiculo(VehiculoDTO v) throws RemoteException {
-		hbtDAO.modificar(EntityManager.VehiculoToEntity(v));
-	}
-
-	@Override
-	public void eliminarVehiculo(VehiculoDTO v) throws RemoteException {
-		hbtDAO.borrar(EntityManager.VehiculoToEntity(v));
-	}
-
-	@Override
 	public List<CargaDTO> listarCargasSinDespachar() throws RemoteException {
 		return hbtDAO.listarCargasSinDespachar();
 	}
+	
+	// Direcciones
 
 	@Override
 	public List<DireccionDTO> listarDirecciones() throws RemoteException {
@@ -1003,12 +1017,49 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public void modificarDireccion(DireccionDTO d) throws RemoteException {
-		hbtDAO.borrar(EntityManager.DireccionToEntity(d));
+		hbtDAO.modificar(EntityManager.DireccionToEntity(d));
 	}
 
 	@Override
 	public void eliminarDireccion(DireccionDTO d) throws RemoteException {
 		hbtDAO.borrar(EntityManager.DireccionToEntity(d));
+	}
+	
+	// Envios
+
+	@Override
+	public List<EnvioDTO> listarEnvios() throws RemoteException {
+		return hbtDAO.listarEnvios();
+	}
+	
+	// Viajes
+
+	@Override
+	public List<ViajeDTO> listarViajes() throws RemoteException {
+		return hbtDAO.obtenerViajes();
+	}
+
+	// Planes de Mantenimiento
+	@Override
+	public List<PlanDeMantenimientoDTO> listarPlanesDeMantenimiento() throws RemoteException {
+		return hbtDAO.listarPlanesDeMantenimiento();
+	}
+
+	@Override
+	public void deletePlanDeMantenimiento(int idPlan) throws RemoteException {
+		PlanDeMantenimiento plan = new PlanDeMantenimiento();
+		plan.setIdPlanDeMantenimiento(idPlan);
+		hbtDAO.borrar(plan);
+	}
+
+	@Override
+	public void updatePlanDeMantenimiento(PlanDeMantenimientoDTO plan) throws RemoteException {
+		hbtDAO.modificar(EntityManager.PlanDeMantenimientoToEntity(plan));
+	}
+
+	@Override
+	public List<VehiculoAMantenerDTO> getVehiculosAMantener() throws RemoteException {
+		return hbtDAO.getVehiculosAMantener();
 	}
 
 }

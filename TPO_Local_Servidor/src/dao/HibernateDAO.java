@@ -23,6 +23,7 @@ import dto.SeguroDTO;
 import dto.SucursalDTO;
 import dto.TransporteDTO;
 import dto.TrayectoDTO;
+import dto.VehiculoAMantenerDTO;
 import dto.VehiculoDTO;
 import dto.ViajeDTO;
 import entities.Carga;
@@ -722,6 +723,19 @@ public class HibernateDAO {
 		this.closeSession();
 		return enviosDTO;
 	}
+	public List<EnvioDTO> listarEnvios() {
+		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
+		Session s = this.getSession();
+		try {
+			List<Envio> envios = s.createQuery("FROM Envio").list();
+			for (Envio e : envios) 
+				enviosDTO.add(e.toDTO());
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		this.closeSession();
+		return enviosDTO;
+	}
 
 	public List<TrayectoDTO> obtenerTrayectos() {
 		List<TrayectoDTO> trayectoDtos = new ArrayList<TrayectoDTO>();
@@ -767,5 +781,84 @@ public class HibernateDAO {
 		this.closeSession();
 		return cl;
 		
+	}
+	
+	//Plan de Mantenimiento
+	@SuppressWarnings("unchecked")
+	public List<PlanDeMantenimientoDTO> listarPlanesDeMantenimiento() {
+		List<PlanDeMantenimientoDTO> planesDto = new ArrayList<PlanDeMantenimientoDTO>();
+		Session s = this.getSession();
+		try {
+			List<PlanDeMantenimiento> planes = s.createQuery("FROM PlanDeMantenimiento").list();
+			for (PlanDeMantenimiento plan : planes) {
+				planesDto.add(plan.toDTO());
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return planesDto;
+	}
+	
+	public void updatePlanDeMantenimiento(PersistentObject plan) {
+		Transaction t = null;
+		Session s = sessionFactory.getCurrentSession();
+		try {
+			t = s.beginTransaction();
+			s.update(plan);
+			t.commit();
+
+		} catch (Exception e) {
+			t.rollback();
+			System.out.println(e);
+			System.out.println("ErrorDAO: " + plan.getClass().getName() + ".modificar");
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<VehiculoAMantenerDTO> getVehiculosAMantener() {
+		List<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
+		List<VehiculoAMantenerDTO> mantener = new ArrayList<VehiculoAMantenerDTO>();
+		VehiculoAMantenerDTO aMantener;
+		Session s = this.getSession();
+		try {
+			vehiculos = s.createQuery("FROM Vehiculo").list();
+			for (Vehiculo vehiculo : vehiculos) {
+				if (hayQueMantener(vehiculo)) {
+					aMantener = new VehiculoAMantenerDTO();
+					aMantener.setIdVehiculo(vehiculo.getIdVehiculo());
+					aMantener.setHayQueMantener("Si");
+					aMantener.setTipoDeTrabajo(getTipoTrabajo(vehiculo));
+					//aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
+					mantener.add(aMantener);
+				}
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mantener;
+	}
+
+	private boolean hayQueMantener(Vehiculo vehiculo) {
+		PlanDeMantenimiento plan = vehiculo.getPlanDeMantenimiento();
+		long time = Calendar.getInstance().getTimeInMillis();
+		long planTime = plan.getDiasProxControl() + vehiculo.getFechaUltimoControl().getTime();
+		if (vehiculo.getKilometraje() >= 10000
+				|| vehiculo.getKilometraje() >= plan.getKmProxControl()
+				|| time >= planTime) {
+			return true;
+		}
+		return false;
+	}
+	
+	private String getTipoTrabajo(Vehiculo vehiculo) {
+		String tipo;
+		if (vehiculo.isEnGarantia()) {
+			tipo = "En Garantia: Llevar a la agencia oficial";
+		} else if (vehiculo.isTrabajoEspecifico()) {
+			tipo = "Trabajo Especifico: Llevar a taller";
+		} else {
+			tipo = "Trabajo General: Llevar a lubricentro";
+		}
+		return tipo;
 	}
 }
