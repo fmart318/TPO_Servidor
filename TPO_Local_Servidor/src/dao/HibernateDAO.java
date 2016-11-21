@@ -828,7 +828,8 @@ public class HibernateDAO {
 					aMantener.setIdVehiculo(vehiculo.getIdVehiculo());
 					aMantener.setHayQueMantener("Si");
 					aMantener.setTipoDeTrabajo(getTipoTrabajo(vehiculo));
-					//aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
+//					aMantener.setPuntoAControlar(vehiculo.getPlanDeMantenimiento().getPuntoAControlar());
+//					aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
 					mantener.add(aMantener);
 				}
 			}
@@ -841,8 +842,13 @@ public class HibernateDAO {
 	private boolean hayQueMantener(Vehiculo vehiculo) {
 		PlanDeMantenimiento plan = vehiculo.getPlanDeMantenimiento();
 		long time = Calendar.getInstance().getTimeInMillis();
-		long planTime = plan.getDiasProxControl() + vehiculo.getFechaUltimoControl().getTime();
-		if (vehiculo.getKilometraje() >= 10000
+		long planTime;
+		if (vehiculo.getFechaUltimoControl() != null) {
+			planTime = plan.getDiasProxControl() + vehiculo.getFechaUltimoControl().getTime();
+		} else {
+			planTime = time + 1;
+		}
+		if (vehiculo.getKilometraje() % 10000 == 0
 				|| vehiculo.getKilometraje() >= plan.getKmProxControl()
 				|| time >= planTime) {
 			return true;
