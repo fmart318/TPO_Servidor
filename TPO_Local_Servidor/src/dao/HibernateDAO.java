@@ -19,6 +19,7 @@ import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
 import dto.PrecioVehiculoDTO;
+import dto.ProductoDTO;
 import dto.RutaDTO;
 import dto.SeguroDTO;
 import dto.SucursalDTO;
@@ -200,6 +201,34 @@ public class HibernateDAO {
 		try {
 			List<entities.Carga> cs = s.createQuery("FROM Carga").list();
 			for (entities.Carga c : cs) {
+				cargas.add(c.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return cargas;
+	}
+	public List<HabilitadoDTO> listarHabilitados() {
+		List<HabilitadoDTO> cargas = new ArrayList<HabilitadoDTO>();
+		Session s = this.getSession();
+		try {
+			List<entities.Habilitado> cs = s.createQuery("FROM Habilitado").list();
+			for (entities.Habilitado c : cs) {
+				cargas.add(c.toDTO());
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return cargas;
+	}
+	public List<ProductoDTO> listarProducto() {
+		List<ProductoDTO> cargas = new ArrayList<ProductoDTO>();
+		Session s = this.getSession();
+		try {
+			List<entities.Producto> cs = s.createQuery("FROM Producto").list();
+			for (entities.Producto c : cs) {
 				cargas.add(c.toDTO());
 			}
 		} catch (Exception e) {
@@ -774,6 +803,81 @@ public class HibernateDAO {
 		Session s = this.getSession();
 		try {
 			Carga c = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
+			cl = c.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
+	}
+	public VehiculoDTO buscarVehiculoPorId(int idVehiculo){
+		VehiculoDTO cl = new VehiculoDTO();
+		Session s = this.getSession();
+		try {
+			Vehiculo v = (Vehiculo) s.createQuery("FROM Vehiculo c where c.id=:id").setParameter("id", idVehiculo).uniqueResult();
+			cl = v.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
+	}
+	public SucursalDTO buscarSucursalPorID(int idSucursal){
+		SucursalDTO cl = new SucursalDTO();
+		Session s = this.getSession();
+		try {
+			Sucursal c = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id").setParameter("id", idSucursal).uniqueResult();
+			cl = c.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
+	}
+	public PedidoDTO buscarPedidoPorId(int idPedido){
+		PedidoDTO cl = new PedidoDTO();
+		Session s = this.getSession();
+		try {
+			Pedido c = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido).uniqueResult();
+			cl = c.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
+	}
+	public EnvioDTO buscarEnvioPorId(int idEnvio){
+		EnvioDTO cl = new EnvioDTO();
+		Session s = this.getSession();
+		try {
+			Envio c = (Envio) s.createQuery("FROM Envio c where c.id=:id").setParameter("id", idEnvio).uniqueResult();
+			cl = c.toDTO();
+		} catch (Exception e) {
+
+			System.out.println(e);
+
+		}
+		this.closeSession();
+		return cl;
+		
+	}
+	public PrecioVehiculoDTO buscarPrecioVehiculoDTO(int idPrecioVehiculo){
+		PrecioVehiculoDTO cl = new PrecioVehiculoDTO();
+		Session s = this.getSession();
+		try {
+			PrecioVehiculo c = (PrecioVehiculo) s.createQuery("FROM PrecioVehiculo c where c.id=:id").setParameter("id", idPrecioVehiculo).uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
 

@@ -26,6 +26,7 @@ import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
 import dto.PrecioVehiculoDTO;
+import dto.ProductoDTO;
 import dto.ProveedorDTO;
 import dto.RemitoDTO;
 import dto.RutaDTO;
@@ -40,10 +41,13 @@ import entities.Carga;
 import entities.Cliente;
 import entities.Direccion;
 import entities.Empresa;
+import entities.Envio;
+import entities.Habilitado;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
 import entities.PrecioVehiculo;
+import entities.Producto;
 import entities.Ruta;
 import entities.Sucursal;
 import entities.Trayecto;
@@ -475,19 +479,57 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	@Override
 	public void cargarDatosIniciales() throws RemoteException {
 
+		/*Producto prod=new Producto();
+		prod.setNombre("Electrodomésticos");
+		prod.setTipo("Electrónico");
+		hbtDAO.guardar(prod);
+		Producto prod2=new Producto();
+		prod2.setNombre("Cereal");
+		prod2.setTipo("A Granel");
+		hbtDAO.guardar(prod2);
+		
+		ArrayList<Producto> prods=new ArrayList<Producto>();
+		prods.add(prod2);*/
+		
 		entities.Empresa e = new Empresa();
-		e.setNombre("Empresa 1");
-		e.setCUIT(234234);
-		e.setDetallePoliticas("Detalle Polítca 1");
-		e.setTipo("Tipo 1");
+		e.setNombre("Distribución BS AS SA");
+		e.setCUIT(2342342);
+		e.setDetallePoliticas("Detalle Polítca");
+		e.setTipo("SA");
 		e.setSaldoCuentaCorriente(15000);
+		//e.setProductos(prods);
 		hbtDAO.guardar(e);
-
+		
+		entities.Empresa e2 = new Empresa();
+		e2.setNombre("Fabella SRL");
+		e2.setCUIT(234234);
+		e2.setDetallePoliticas("Detalle Polítca");
+		e2.setTipo("SRL");
+		e2.setSaldoCuentaCorriente(15000);
+		hbtDAO.guardar(e2);
+		
+	
+		
+		
+		Habilitado h=new Habilitado();
+		h.setDniHabilitado(String.valueOf("9418723"));
+		h.setNombre("REBA");
+		hbtDAO.guardar(h);
+		ArrayList<Habilitado> hs=new ArrayList<Habilitado>();
+		hs.add(h);
 		entities.Particular p = new Particular();
 		p.setNombre("Elio");
 		p.setApellido("Mollo");
 		p.setDNI(9418723);
+		p.setHabilitados(hs);
 		hbtDAO.guardar(p);
+		entities.Particular p2 = new Particular();
+		p2.setNombre("Felipe");
+		p2.setApellido("Mart");
+		p2.setDNI(2303040);
+		hbtDAO.guardar(p2);
+	
+		
 
 		entities.Direccion dO = new entities.Direccion();
 		dO.setCalle("Av. Rigolleau");
@@ -1098,20 +1140,122 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	@Override
-	public void crearEnvioDirecto(PedidoDTO p) throws RemoteException {
+	public void crearEnvioDirecto(int idPedido, int idPrecioVehiculo) throws RemoteException {
 		// TODO Auto-generated method stub
+		entities.Viaje v=new entities.Viaje();
+		PedidoDTO p=hbtDAO.buscarPedidoPorId(idPedido);
+		PrecioVehiculoDTO pv=hbtDAO.buscarPrecioVehiculoDTO(idPrecioVehiculo);
+		for (SucursalDTO suc: hbtDAO.obtenerSucursales()){
+			if(suc.getNombre().equals(p.getSucursalOrigen())){
+				v.setSucursalOrigen(EntityManager.SucursalToEntity(suc));
+			}
+			if(suc.getNombre().equals(p.getSucursalDestino())){
+				v.setSucursalDestino(EntityManager.SucursalToEntity(suc));				
+			}
+		}
 		entities.Envio e=new entities.Envio();
 		e.setCumpleCondicionesCarga(true);
 		e.setEstado("Pendiente");
 		e.setFechaSalida(p.getFechaCarga());
 		e.setFechaLlegada(p.getFechaMaxima());
-		entities.Pedido pe=new entities.Pedido();
-		pe.setIdPedido(p.getIdPedido());
-		e.setPedido(pe);
+		e.setPedido(EntityManager.PedidoToEntity(p));
 		e.setPrioridad(1);
-		e.setSucursalDestino(pe.getSucursalOrigen());
-		e.setSucursalDestino(pe.getSucursalDestino());
+		e.setSucursalOrigen(p.getSucursalOrigen());		
+		e.setSucursalDestino(p.getSucursalDestino());
 		hbtDAO.guardar(e);
+		
+		EnvioDTO env=hbtDAO.getInstancia().buscarEnvioPorId(e.getIdEnvio());
+		ArrayList<Envio> envios=new ArrayList<Envio>();
+		envios.add(EntityManager.EnvioToEntity(env));
+		v.setEnvios(envios);
+		v.setFechaLlegada(p.getFechaMaxima());
+		v.setFinalizado(false);
+		
+		Vehiculo vehiculo=new Vehiculo();
+		vehiculo.setAlto(2);
+		vehiculo.setAncho(10);
+		vehiculo.setProfundidad(2);
+		vehiculo.setVolumen(vehiculo.getAlto() * vehiculo.getAncho() * vehiculo.getProfundidad());
+		vehiculo.setEnGarantia(true);
+		vehiculo.setEstado("En Uso");
+		vehiculo.setFechaUltimoControl(new Date());
+		vehiculo.setKilometraje(10200);
+		vehiculo.setPeso(1500);
+		vehiculo.setTara(600);
+		vehiculo.setTipo(pv.getTipoVehiculo());
+		vehiculo.setTrabajoEspecifico(true);
+		PlanDeMantenimiento pm=new PlanDeMantenimiento();
+		pm.setDiasDemora(0);
+		pm.setDiasProxControl(0);
+		pm.setKmProxControl(0);
+		hbtDAO.guardar(pm);
+		vehiculo.setPlanDeMantenimiento(pm);
+		
+		hbtDAO.guardar(vehiculo);
+		VehiculoDTO ve=new VehiculoDTO();
+		ve=hbtDAO.buscarVehiculoPorId(vehiculo.getIdVehiculo());
+		v.setVehiculo(EntityManager.VehiculoToEntity(ve));
+		hbtDAO.guardar(v);
+	}
+
+	@Override
+	public PedidoDTO buscarPedidoPorId(int idPedido) throws RemoteException {
+		// TODO Auto-generated method stub
+		return hbtDAO.buscarPedidoPorId(idPedido);
+	}
+
+	@Override
+	public PrecioVehiculoDTO buscarPrecioVehiculoDTO(int idPrecioVehiculoDTO) throws RemoteException {
+		// TODO Auto-generated method stub
+		return hbtDAO.buscarPrecioVehiculoDTO(idPrecioVehiculoDTO);
+	}
+
+	@Override
+	public List<HabilitadoDTO> listarHabilitados() throws RemoteException {
+		// TODO Auto-generated method stub
+		return hbtDAO.listarHabilitados();
+	}
+
+	@Override
+	public List<ProductoDTO> listarProductos() throws RemoteException {
+		// TODO Auto-generated method stub
+		return hbtDAO.listarProducto();
+	}
+
+	@Override
+	public void crearHabilitacion(HabilitadoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.guardar(EntityManager.HabilitadoToEntity(v));
+	}
+
+	@Override
+	public void modificarHabilitacion(HabilitadoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.modificar(EntityManager.HabilitadoToEntity(v));
+	}
+
+	@Override
+	public void eliminarHabilitacion(HabilitadoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.borrar(EntityManager.HabilitadoToEntity(v));
+	}
+
+	@Override
+	public void crearProducto(ProductoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.guardar(EntityManager.ProductoToEntity(v));
+	}
+
+	@Override
+	public void modificarProducto(ProductoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.modificar(EntityManager.ProductoToEntity(v));
+	}
+
+	@Override
+	public void eliminarProduct(ProductoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.borrar(EntityManager.ProductoToEntity(v));
 	}
 
 }
