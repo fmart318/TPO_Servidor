@@ -592,9 +592,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.guardar(carga4);
 
 		PlanDeMantenimiento pm = new PlanDeMantenimiento();
-		pm.setDiasDemora(0);
-		pm.setDiasProxControl(0);
-		pm.setKmProxControl(0);
+		pm.setDiasDemora(2);
+		pm.setDiasProxControl(4);
+		pm.setKmProxControl(1);
 		hbtDAO.guardar(pm);
 
 		PlanDeMantenimiento pm1 = new PlanDeMantenimiento();
@@ -616,7 +616,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		v.setVolumen(v.getAlto() * v.getAncho() * v.getProfundidad());
 		v.setEnGarantia(true);
 		v.setEstado("Libre");
-		v.setFechaUltimoControl(null);
+		v.setFechaUltimoControl(new Date(2016, 05, 23));
 		v.setKilometraje(10200);
 		v.setPeso(3500);
 		v.setTara(1500);
@@ -632,7 +632,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		v2.setVolumen(v.getAlto() * v.getAncho() * v.getProfundidad());
 		v2.setEnGarantia(true);
 		v2.setEstado("Contrado");
-		v2.setFechaUltimoControl(null);
+		v2.setFechaUltimoControl(new Date(2016, 11, 15));
 		v2.setKilometraje(90000);
 		v2.setPeso(10000);
 		v2.setTara(3000);
@@ -685,13 +685,13 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		Ruta rutaB = new Ruta(2, trayectosB, 200, sucursal1, sucursal3);
 		hbtDAO.guardar(rutaB);
 
-		PlanDeMantenimiento planDeMantenimiento = new PlanDeMantenimiento(4, 0, 0, 0);
+		PlanDeMantenimiento planDeMantenimiento = new PlanDeMantenimiento(4, 10, 2, 10000);
 		hbtDAO.guardar(planDeMantenimiento);
 
-		Vehiculo vehiculoA = new Vehiculo(3, "Propio", 5, 3500, 2, 2, 3, 1500, 10200, "Libre", true, false, null,
+		Vehiculo vehiculoA = new Vehiculo(3, "Propio", 5, 3500, 2, 2, 3, 1500, 10200, "Libre", false, true, null,
 				planDeMantenimiento);
 		hbtDAO.guardar(vehiculoA);
-		Vehiculo vehiculoB = new Vehiculo(4, "Propio", 5, 3500, 2, 2, 3, 1500, 10200, "Libre", true, false, null,
+		Vehiculo vehiculoB = new Vehiculo(4, "Propio", 5, 3500, 2, 2, 3, 1500, 10200, "Libre", false, false, null,
 				planDeMantenimiento);
 		hbtDAO.guardar(vehiculoB);
 
