@@ -14,11 +14,16 @@ import dto.ClienteDTO;
 import dto.DireccionDTO;
 import dto.EmpresaDTO;
 import dto.EnvioDTO;
+import dto.FacturaDTO;
 import dto.HabilitadoDTO;
 import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
+
 import dto.PrecioVehiculoDTO;
+
+import dto.RemitoDTO;
+
 import dto.RutaDTO;
 import dto.SeguroDTO;
 import dto.SucursalDTO;
@@ -32,11 +37,16 @@ import entities.Cliente;
 import entities.Direccion;
 import entities.Empresa;
 import entities.Envio;
+import entities.Factura;
 import entities.Habilitado;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
+
 import entities.PrecioVehiculo;
+
+import entities.Remito;
+
 import entities.Ruta;
 import entities.Seguro;
 import entities.Sucursal;
@@ -883,4 +893,35 @@ public class HibernateDAO {
 		this.closeSession();
 		return vehiculos;
 	}
+
+	//Facturas
+	public List<FacturaDTO> listarFacturas() {
+		List<FacturaDTO> facturasDTO = new ArrayList<FacturaDTO>();
+		Session s = this.getSession();
+		try {
+			List<Factura> facturas = s.createQuery("FROM Factura").list();
+			for (Factura factura : facturas) {
+				facturasDTO.add(factura.toDTO());
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return facturasDTO;
+	}
+	
+	//Remitos
+	public List<RemitoDTO> listarRemitos() {
+		List<RemitoDTO> remitosDTO = new ArrayList<RemitoDTO>();
+		Session s = this.getSession();
+		try {
+			List<Remito> remitos = s.createQuery("FROM Remito").list();
+			for (Remito remito : remitos) {
+				remitosDTO.add(remito.toDTO());
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return remitosDTO;
+	}
+	
 }
