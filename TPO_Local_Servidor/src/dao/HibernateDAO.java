@@ -837,8 +837,9 @@ public class HibernateDAO {
 					aMantener.setIdVehiculo(vehiculo.getIdVehiculo());
 					aMantener.setHayQueMantener("Si");
 					aMantener.setTipoDeTrabajo(getTipoTrabajo(vehiculo));
-//					aMantener.setPuntoAControlar(vehiculo.getPlanDeMantenimiento().getPuntoAControlar());
-//					aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
+					aMantener.setPuntoAControlar(vehiculo.getPlanDeMantenimiento().getPuntoAControlar());
+					aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
+					aMantener.setEstado(vehiculo.getEstado());
 					mantener.add(aMantener);
 				}
 			}

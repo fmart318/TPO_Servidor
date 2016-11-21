@@ -25,10 +25,10 @@ public class PlanDeMantenimiento extends PersistentObject {
 	private int diasDemora;
 	@Column(name = "kmProxControl", columnDefinition = "int", nullable = true)
 	private int kmProxControl;
-//	@Column(name = "puntoControlar", columnDefinition = "varchar")
-//	private String puntoAControlar;
-//	@Column(name = "tarea", columnDefinition = "varchar")
-//	private String tareas;
+	@Column(name = "puntoControlar", columnDefinition = "varchar")
+	private String puntoAControlar;
+	@Column(name = "tarea", columnDefinition = "varchar")
+	private String tareas;
 
 	public PlanDeMantenimiento() {
 		super();
@@ -75,21 +75,21 @@ public class PlanDeMantenimiento extends PersistentObject {
 		this.kmProxControl = kmProxControl;
 	}
 
-//	public String getPuntoAControlar() {
-//		return puntoAControlar;
-//	}
-//
-//	public void setPuntoAControlar(String puntoAControlar) {
-//		this.puntoAControlar = puntoAControlar;
-//	}
-//
-//	public String getTareas() {
-//		return tareas;
-//	}
-//
-//	public void setTareas(String tareas) {
-//		this.tareas = tareas;
-//	}
+	public String getPuntoAControlar() {
+		return puntoAControlar;
+	}
+
+	public void setPuntoAControlar(String puntoAControlar) {
+		this.puntoAControlar = puntoAControlar;
+	}
+
+	public String getTareas() {
+		return tareas;
+	}
+
+	public void setTareas(String tareas) {
+		this.tareas = tareas;
+	}
 
 	public PlanDeMantenimientoDTO toDTO() {
 		return new PlanDeMantenimientoDTO(idPlanDeMantenimiento,
