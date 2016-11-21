@@ -39,9 +39,11 @@ import entities.Carga;
 import entities.Cliente;
 import entities.Direccion;
 import entities.Empresa;
+import entities.Factura;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
+import entities.Remito;
 import entities.Ruta;
 import entities.Sucursal;
 import entities.Trayecto;
@@ -641,6 +643,17 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		v2.setPlanDeMantenimiento(pm);
 		hbtDAO.guardar(v2);
 
+		Factura factura = new Factura();
+		factura.setIdFactura(1);
+		factura.setPedido(pedido);
+		factura.setPrecio(1000);
+		hbtDAO.guardar(factura);
+		
+		Remito remito = new Remito();
+		remito.setIdRemito(1);
+		remito.setPedido(pedido);
+		hbtDAO.guardar(remito);
+		
 		datosInicialesParaEnvios();
 	}
 
@@ -1060,6 +1073,32 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	@Override
 	public List<VehiculoAMantenerDTO> getVehiculosAMantener() throws RemoteException {
 		return hbtDAO.getVehiculosAMantener();
+	}
+
+	//Facturas
+	@Override
+	public List<FacturaDTO> listarFacturas() throws RemoteException {
+		return hbtDAO.listarFacturas();
+	}
+
+	@Override
+	public void deleteFactura(int idFactura) throws RemoteException {
+		Factura f = new Factura();
+		f.setIdFactura(idFactura);
+		hbtDAO.borrar(f);
+	}
+
+	//Remitos
+	@Override
+	public List<RemitoDTO> listarRemitos() throws RemoteException {
+		return hbtDAO.listarRemitos();
+	}
+
+	@Override
+	public void deleteRemito(int idRemito) throws RemoteException {
+		Remito r = new Remito();
+		r.setIdRemito(idRemito);
+		hbtDAO.borrar(r);
 	}
 
 }
