@@ -18,6 +18,7 @@ import dto.HabilitadoDTO;
 import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
+import dto.PrecioVehiculoDTO;
 import dto.RutaDTO;
 import dto.SeguroDTO;
 import dto.SucursalDTO;
@@ -35,6 +36,7 @@ import entities.Habilitado;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
+import entities.PrecioVehiculo;
 import entities.Ruta;
 import entities.Seguro;
 import entities.Sucursal;
@@ -866,5 +868,19 @@ public class HibernateDAO {
 			tipo = "Trabajo General: Llevar a lubricentro";
 		}
 		return tipo;
+	}
+	
+	public List<PrecioVehiculoDTO> listarVTerceros() {
+		List<PrecioVehiculoDTO> vehiculos = new ArrayList<PrecioVehiculoDTO>();
+		Session s = this.getSession();
+		try {
+			List<PrecioVehiculo> vs = s.createQuery("FROM PrecioVehiculo").list();
+			for (PrecioVehiculo e : vs) 
+				vehiculos.add(e.toDTO());
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		this.closeSession();
+		return vehiculos;
 	}
 }

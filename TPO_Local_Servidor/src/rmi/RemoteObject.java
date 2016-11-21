@@ -25,6 +25,7 @@ import dto.MapaDeRutaDTO;
 import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
+import dto.PrecioVehiculoDTO;
 import dto.ProveedorDTO;
 import dto.RemitoDTO;
 import dto.RutaDTO;
@@ -42,6 +43,7 @@ import entities.Empresa;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
+import entities.PrecioVehiculo;
 import entities.Ruta;
 import entities.Sucursal;
 import entities.Trayecto;
@@ -476,7 +478,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		entities.Empresa e = new Empresa();
 		e.setNombre("Empresa 1");
 		e.setCUIT(234234);
-		e.setDetallePoliticas("Detalle Polï¿½tica 1");
+		e.setDetallePoliticas("Detalle Polítca 1");
 		e.setTipo("Tipo 1");
 		e.setSaldoCuentaCorriente(15000);
 		hbtDAO.guardar(e);
@@ -536,7 +538,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		carga.setCondiciones("Apilable");
 		carga.setDespachado(true);
 		carga.setFragilidad("Normal");
-		carga.setMercaderia("Electrï¿½nico");
+		carga.setMercaderia("Electrónico");
 		carga.setPeso(20);
 		carga.setProfundidad(1);
 		carga.setRefrigerable(false);
@@ -551,7 +553,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		carga2.setCondiciones("No apilable");
 		carga2.setDespachado(true);
 		carga2.setFragilidad("Normal");
-		carga2.setMercaderia("Electrï¿½nico");
+		carga2.setMercaderia("Electrónico");
 		carga2.setPeso(30);
 		carga2.setProfundidad(1);
 		carga2.setRefrigerable(false);
@@ -620,7 +622,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		v.setKilometraje(10200);
 		v.setPeso(3500);
 		v.setTara(1500);
-		v.setTipo("Propio");
+		v.setTipo("Camioneta");
 		v.setTrabajoEspecifico(false);
 		v.setPlanDeMantenimiento(pm);
 		hbtDAO.guardar(v);
@@ -631,15 +633,24 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		v2.setProfundidad(8);
 		v2.setVolumen(v.getAlto() * v.getAncho() * v.getProfundidad());
 		v2.setEnGarantia(true);
-		v2.setEstado("Contrado");
+		v2.setEstado("Libre");
 		v2.setFechaUltimoControl(new Date(2016, 11, 15));
 		v2.setKilometraje(90000);
 		v2.setPeso(10000);
 		v2.setTara(3000);
-		v2.setTipo("Tercero");
+		v2.setTipo("Camioneta");
 		v2.setTrabajoEspecifico(true);
 		v2.setPlanDeMantenimiento(pm);
 		hbtDAO.guardar(v2);
+		
+		PrecioVehiculo pv=new PrecioVehiculo();
+		pv.setPrecio(2000);
+		pv.setTipoVehiculo("Semirremolque Con Barandas");
+		hbtDAO.guardar(pv);
+		PrecioVehiculo pv2=new PrecioVehiculo();
+		pv2.setPrecio(5000);
+		pv2.setTipoVehiculo("Avioneta");
+		hbtDAO.guardar(pv2);
 
 		datosInicialesParaEnvios();
 	}
@@ -1060,6 +1071,47 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	@Override
 	public List<VehiculoAMantenerDTO> getVehiculosAMantener() throws RemoteException {
 		return hbtDAO.getVehiculosAMantener();
+	}
+
+	@Override
+	public List<PrecioVehiculoDTO> listarVTerceros() throws RemoteException {
+		// TODO Auto-generated method stub
+		return hbtDAO.listarVTerceros();
+	}
+
+	@Override
+	public void crearVTerceros(PrecioVehiculoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.guardar(EntityManager.PrecioVehiculoToEntity(v));
+	}
+
+	@Override
+	public void modificarVTerceros(PrecioVehiculoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.modificar(EntityManager.PrecioVehiculoToEntity(v));
+	}
+
+	@Override
+	public void eliminarVTerceros(PrecioVehiculoDTO v) throws RemoteException {
+		// TODO Auto-generated method stub
+		hbtDAO.borrar(EntityManager.PrecioVehiculoToEntity(v));
+	}
+
+	@Override
+	public void crearEnvioDirecto(PedidoDTO p) throws RemoteException {
+		// TODO Auto-generated method stub
+		entities.Envio e=new entities.Envio();
+		e.setCumpleCondicionesCarga(true);
+		e.setEstado("Pendiente");
+		e.setFechaSalida(p.getFechaCarga());
+		e.setFechaLlegada(p.getFechaMaxima());
+		entities.Pedido pe=new entities.Pedido();
+		pe.setIdPedido(p.getIdPedido());
+		e.setPedido(pe);
+		e.setPrioridad(1);
+		e.setSucursalDestino(pe.getSucursalOrigen());
+		e.setSucursalDestino(pe.getSucursalDestino());
+		hbtDAO.guardar(e);
 	}
 
 }
