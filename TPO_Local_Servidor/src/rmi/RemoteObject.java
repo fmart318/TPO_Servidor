@@ -44,11 +44,8 @@ import entities.Factura;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
-
 import entities.PrecioVehiculo;
-
 import entities.Remito;
-
 import entities.Ruta;
 import entities.Sucursal;
 import entities.Trayecto;
@@ -1154,7 +1151,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		Remito r = new Remito();
 		r.setIdRemito(idRemito);
 		hbtDAO.borrar(r);
-
 	}
 
 }

@@ -42,11 +42,8 @@ import entities.Habilitado;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
-
 import entities.PrecioVehiculo;
-
 import entities.Remito;
-
 import entities.Ruta;
 import entities.Seguro;
 import entities.Sucursal;
@@ -880,6 +877,7 @@ public class HibernateDAO {
 		return tipo;
 	}
 	
+
 	public List<PrecioVehiculoDTO> listarVTerceros() {
 		List<PrecioVehiculoDTO> vehiculos = new ArrayList<PrecioVehiculoDTO>();
 		Session s = this.getSession();
