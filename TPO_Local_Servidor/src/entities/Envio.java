@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -45,31 +46,17 @@ public class Envio extends PersistentObject {
 	@Column(nullable = true)
 	private int prioridad;
 
-	@Column(columnDefinition = "varchar(40)", nullable = true)
-	private String sucursalOrigen;
-	
-	@Column(columnDefinition = "varchar(40)", nullable = true)
-	private String sucursalDestino;
+	@ManyToOne
+	@JoinColumn(name = "idSucursalOrigen", referencedColumnName = "idSucursal")
+	private Sucursal sucursalOrigen;
 
-	public String getSucursalDestino() {
-		return sucursalDestino;
-	}
-
-	public void setSucursalDestino(String sucursalDestino) {
-		this.sucursalDestino = sucursalDestino;
-	}
-
-	public String getSucursalOrigen() {
-		return sucursalOrigen;
-	}
-
-	public void setSucursalOrigen(String sucursalOrigen) {
-		this.sucursalOrigen = sucursalOrigen;
-	}
+	@ManyToOne
+	@JoinColumn(name = "idSucursalDestino", referencedColumnName = "idSucursal")
+	Sucursal sucursalDestino;
 
 	public Envio(int idEnvio, Date fechaSalida, Date fechaLlegada,
 			boolean cumpleCondicionesCarga, String estado, Pedido pedido,
-			int prioridad) {
+			int prioridad, Sucursal sucursalOrigen, Sucursal sucursalDestino) {
 		super();
 		this.idEnvio = idEnvio;
 		this.fechaSalida = fechaSalida;
@@ -78,6 +65,8 @@ public class Envio extends PersistentObject {
 		this.estado = estado;
 		this.pedido = pedido;
 		this.prioridad = prioridad;
+		this.sucursalOrigen = sucursalOrigen;
+		this.sucursalDestino = sucursalDestino;
 	}
 
 	public Envio() {
@@ -139,13 +128,26 @@ public class Envio extends PersistentObject {
 	public void setPrioridad(int prioridad) {
 		this.prioridad = prioridad;
 	}
+	
+	public Sucursal getSucursalOrigen() {
+		return sucursalOrigen;
+	}
+
+	public void setSucursalOrigen(Sucursal sucursalOrigen) {
+		this.sucursalOrigen = sucursalOrigen;
+	}
+
+	public Sucursal getSucursalDestino() {
+		return sucursalDestino;
+	}
+
+	public void setSucursalDestino(Sucursal sucursalDestino) {
+		this.sucursalDestino = sucursalDestino;
+	}
 
 	public EnvioDTO toDTO() {
-
 		EnvioDTO envioDTO = new EnvioDTO(idEnvio, fechaSalida, fechaLlegada,
-				cumpleCondicionesCarga, estado, pedido.toDTO(), prioridad);
-		envioDTO.setSucursalOrigen(sucursalOrigen);
-		envioDTO.setSucursalDestino(sucursalDestino);
+				cumpleCondicionesCarga, estado, pedido.toDTO(), prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO());
 		return envioDTO;
 	}
 }

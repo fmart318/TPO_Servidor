@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import dto.PedidoDTO;
 import dto.SucursalDTO;
 import dto.ViajeDTO;
 
@@ -36,21 +37,21 @@ public class Sucursal extends PersistentObject {
 	@JoinColumn(name = "idDireccion")
 	private Direccion ubicacion;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "sucursalDestino")
-	private List<Viaje> viajes;
+	@OneToMany
+	@JoinColumn(name = "idPedido")
+	private List<Pedido> pedidos;
 
 	public Sucursal() {
 
 	}
 
 	public Sucursal(int idSucursal, String nombre, Direccion ubicacion,
-			List<Viaje> viajes) {
+			List<Pedido> pedidos) {
 		super();
 		this.idSucursal = idSucursal;
 		this.nombre = nombre;
 		this.ubicacion = ubicacion;
-		this.viajes = viajes;
+		this.pedidos = pedidos;
 	}
 
 	public int getIdSucursal() {
@@ -77,20 +78,22 @@ public class Sucursal extends PersistentObject {
 		this.ubicacion = ubicacion;
 	}
 
-	public List<Viaje> getViajes() {
-		return viajes;
+	public List<Pedido> getPedidos() {
+		return pedidos;
 	}
 
-	public void setViajes(List<Viaje> viajes) {
-		this.viajes = viajes;
+	public void setPedidos(List<Pedido> pedidos) {
+		this.pedidos = pedidos;
 	}
+
 
 	public SucursalDTO toDTO() {
-		List<ViajeDTO> viajesDTO = new ArrayList<ViajeDTO>();
-		for (Viaje viaje : viajes)
-			viajesDTO.add(viaje.toDTO());
+		List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
+		for (Pedido pedido : pedidos) {
+			pedidoDtos.add(pedido.toDTO());
+		}
 		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre,
-				getUbicacion().toDTO(), viajesDTO);
+				getUbicacion().toDTO(), pedidoDtos);
 		return sucursalDTO;
 	}
 

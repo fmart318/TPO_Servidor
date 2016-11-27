@@ -119,17 +119,16 @@ public class Viaje extends PersistentObject {
 
 	public ViajeDTO toDTO() {
 		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
-		for (Envio envio : envios)
+		for (Envio envio : envios) {
 			enviosDTO.add(new EnvioDTO(envio.getIdEnvio(), envio
 					.getFechaSalida(), envio.getFechaLlegada(), envio
 					.isCumpleCondicionesCarga(), envio.getEstado(), envio
-					.getPedido().toDTO(), envio.getPrioridad()));
-
+					.getPedido().toDTO(), envio.getPrioridad() , envio.getSucursalOrigen().toDTO(), envio.getSucursalDestino().toDTO()));
+		}
 		return new ViajeDTO(idViaje, enviosDTO, fechaLlegada,
 				sucursalOrigen.toDTONoRecursivo(),
 				sucursalDestino.toDTONoRecursivo(), finalizado,
 				vehiculo.toDTO());
-
 	}
 
 	public int getIdViaje() {

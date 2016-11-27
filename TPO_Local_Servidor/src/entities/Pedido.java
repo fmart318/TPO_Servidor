@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -57,11 +58,11 @@ public class Pedido extends PersistentObject {
 	@Column(nullable = true)
 	private float precio;
 
-	@Column(columnDefinition = "varchar(40)", nullable = true)
-	private String sucursalDestino;
+	@Column(nullable = true)
+	private int sucursalOrigenId;
 
-	@Column(columnDefinition = "varchar(40)", nullable = true)
-	private String sucursalOrigen;
+	@Column(nullable = true)
+	private int sucursalDestinoId;
 
 	@Column(columnDefinition = "bit", nullable = true)
 	private boolean solicitaTransporteDirecto;
@@ -73,12 +74,10 @@ public class Pedido extends PersistentObject {
 	@JoinColumn(name = "idCliente")
 	private Cliente cliente;
 
-	public Pedido(int idPedido, Direccion direccionCarga,
-			Direccion direccionDestino, Date fechaCarga, int horaInicio,
-			int horaFin, Date fechaMaxima, List<Carga> cargas, float precio,
-			String sucursalDestino, String sucursalOrigen,
-			boolean solicitaTransporteDirecto,
-			boolean solicitaAvionetaParticular, Cliente cliente) {
+	public Pedido(int idPedido, Direccion direccionCarga, Direccion direccionDestino, Date fechaCarga, int horaInicio,
+			int horaFin, Date fechaMaxima, List<Carga> cargas, float precio, int sucursalDestinoId,
+			int sucursalOrigenId, boolean solicitaTransporteDirecto, boolean solicitaAvionetaParticular,
+			Cliente cliente) {
 		super();
 		this.idPedido = idPedido;
 		this.direccionCarga = direccionCarga;
@@ -89,8 +88,8 @@ public class Pedido extends PersistentObject {
 		this.fechaMaxima = fechaMaxima;
 		this.cargas = cargas;
 		this.precio = precio;
-		this.sucursalDestino = sucursalDestino;
-		this.sucursalOrigen = sucursalOrigen;
+		this.sucursalDestinoId = sucursalDestinoId;
+		this.sucursalOrigenId = sucursalOrigenId;
 		this.solicitaTransporteDirecto = solicitaTransporteDirecto;
 		this.solicitaAvionetaParticular = solicitaAvionetaParticular;
 		this.cliente = cliente;
@@ -171,22 +170,6 @@ public class Pedido extends PersistentObject {
 		this.precio = precio;
 	}
 
-	public String getSucursalDestino() {
-		return sucursalDestino;
-	}
-
-	public void setSucursalDestino(String sucursalDestino) {
-		this.sucursalDestino = sucursalDestino;
-	}
-
-	public String getSucursalOrigen() {
-		return sucursalOrigen;
-	}
-
-	public void setSucursalOrigen(String sucursalDestino) {
-		this.sucursalOrigen = sucursalDestino;
-	}
-
 	public boolean isSolicitaTransporteDirecto() {
 		return solicitaTransporteDirecto;
 	}
@@ -211,16 +194,30 @@ public class Pedido extends PersistentObject {
 		this.cliente = cliente;
 	}
 
+	public int getSucursalOrigenId() {
+		return sucursalOrigenId;
+	}
+
+	public void setSucursalOrigenId(int sucursalOrigenId) {
+		this.sucursalOrigenId = sucursalOrigenId;
+	}
+
+	public int getSucursalDestinoId() {
+		return sucursalDestinoId;
+	}
+
+	public void setSucursalDestinoId(int sucursalDestinoId) {
+		this.sucursalDestinoId = sucursalDestinoId;
+	}
+	
 	public PedidoDTO toDTO() {
 		List<CargaDTO> cargasDTO = new ArrayList<CargaDTO>();
-		for (Carga carga : cargas)
+		for (Carga carga : cargas) {
 			cargasDTO.add(carga.toDTO());
-		PedidoDTO pedidoDTO = new PedidoDTO(idPedido, direccionCarga.toDTO(),
-				direccionDestino.toDTO(), fechaCarga, horaInicio, horaFin,
-				fechaMaxima, cargasDTO, precio, sucursalDestino,
-				sucursalOrigen, solicitaTransporteDirecto,
-				solicitaAvionetaParticular, cliente.toDTO());
-		pedidoDTO.setSucursalOrigen(sucursalOrigen);
+		}
+		PedidoDTO pedidoDTO = new PedidoDTO(idPedido, direccionCarga.toDTO(), direccionDestino.toDTO(), fechaCarga,
+				horaInicio, horaFin, fechaMaxima, cargasDTO, precio, sucursalDestinoId, sucursalOrigenId,
+				solicitaTransporteDirecto, solicitaAvionetaParticular, cliente.toDTO());
 		return pedidoDTO;
 	}
 }

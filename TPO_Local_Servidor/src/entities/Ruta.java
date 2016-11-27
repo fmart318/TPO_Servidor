@@ -1,7 +1,5 @@
 package entities;
 
-import hbt.PersistentObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import dto.RutaDTO;
-import dto.SucursalDTO;
 import dto.TrayectoDTO;
+import hbt.PersistentObject;
 
 @Entity
 @Table(name = "Rutas")
@@ -27,9 +25,14 @@ public class Ruta extends PersistentObject {
 	@GeneratedValue
 	@Column(name = "idRuta", columnDefinition = "int", nullable = false)
 	private int idRuta;
+	
 	@OneToMany
 	@JoinColumn(name = "idRuta")
 	private List<Trayecto> trayectos;
+	
+	@OneToMany
+	@JoinColumn(name = "idRuta")
+	private List<Sucursal> sucursales;
 
 	@Column(name = "precio", columnDefinition = "float", nullable = true)
 	private float precio;
@@ -40,21 +43,21 @@ public class Ruta extends PersistentObject {
 
 	@ManyToOne
 	@JoinColumn(name = "idSucursalDestino", referencedColumnName = "idSucursal")
-	Sucursal sucursalDestino;
+	private Sucursal sucursalDestino;
 
 	public Ruta() {
 		super();
 	}
 
-	public Ruta(int idRuta, List<Trayecto> trayectos, float precio,
+	public Ruta(int idRuta, List<Trayecto> trayectos, float precio, List<Sucursal> sucursales,
 			Sucursal sucursalOrigen, Sucursal sucursalDestino) {
 		super();
 		this.idRuta = idRuta;
 		this.trayectos = trayectos;
 		this.precio = precio;
+		this.sucursales = sucursales;
 		this.sucursalDestino = sucursalDestino;
 		this.sucursalOrigen = sucursalOrigen;
-
 	}
 
 	public Ruta(int idRuta, List<Trayecto> trayectos, float precio) {
@@ -62,7 +65,14 @@ public class Ruta extends PersistentObject {
 		this.idRuta = idRuta;
 		this.trayectos = trayectos;
 		this.precio = precio;
+	}
+	
+	public List<Sucursal> getSucursales() {
+		return sucursales;
+	}
 
+	public void setSucursales(List<Sucursal> sucursales) {
+		this.sucursales = sucursales;
 	}
 
 	public float getPrecio() {

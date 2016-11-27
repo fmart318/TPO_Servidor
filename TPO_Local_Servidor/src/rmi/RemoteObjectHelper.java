@@ -85,10 +85,10 @@ public class RemoteObjectHelper {
 		return new Date(fechaActual.getTime() + minutosRuta);
 	}
 	
-	public static SucursalDTO obtenerSucursal(String nombre) {
+	public static SucursalDTO obtenerSucursal(int sucursalId) {
 		List<SucursalDTO> sucursales = hbtDAO.obtenerSucursales();
 		for (SucursalDTO sucursal : sucursales) {
-			if (sucursal.getNombre().equals(nombre)) {
+			if (sucursal.getIdSucursal() == sucursalId) {
 				return sucursal;
 			}
 		}
@@ -118,10 +118,10 @@ public class RemoteObjectHelper {
 		
 		for (ArrayList<EnvioDTO> respuesta : respuestasPosibles) {
 			EnvioDTO envioDto = respuesta.get(0);
-			SucursalDTO sucursalDestino = obtenerSucursal(envioDto.getSucursalDestino());
+			SucursalDTO sucursalDestino = envioDto.getSucursalDestino();
 			boolean todosCompartenElMismoDestino = true;
 			for (EnvioDTO envio : respuesta) {
-				SucursalDTO sucursalDestinoActual = obtenerSucursal(envio.getSucursalDestino());
+				SucursalDTO sucursalDestinoActual = envioDto.getSucursalDestino();
 				if (sucursalDestinoActual.getIdSucursal() != sucursalDestino.getIdSucursal()) {
 					todosCompartenElMismoDestino = false;
 					break;

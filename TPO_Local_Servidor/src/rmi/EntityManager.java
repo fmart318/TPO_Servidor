@@ -75,9 +75,7 @@ public class EntityManager {
 	public static Envio EnvioToEntity(EnvioDTO envioDTO) {
 		Envio envio = new Envio(envioDTO.getIdEnvio(), envioDTO.getFechaSalida(), envioDTO.getFechaLlegada(),
 				envioDTO.isCumpleCondicionesCarga(), envioDTO.getEstado(), PedidoToEntity(envioDTO.getPedido()),
-				envioDTO.getPrioridad());
-		envio.setSucursalOrigen(envioDTO.getSucursalOrigen());
-		envio.setSucursalDestino(envioDTO.getSucursalDestino());
+				envioDTO.getPrioridad(), SucursalToEntity(envioDTO.getSucursalOrigen()), SucursalToEntity(envioDTO.getSucursalDestino()));
 		return envio;
 	}
 
@@ -106,10 +104,9 @@ public class EntityManager {
 		Pedido pedido = new Pedido(pedidoDTO.getIdPedido(), DireccionToEntity(pedidoDTO.getDireccionCarga()),
 				DireccionToEntity(pedidoDTO.getDireccionDestino()), pedidoDTO.getFechaCarga(),
 				pedidoDTO.getHoraInicio(), pedidoDTO.getHoraFin(), pedidoDTO.getFechaMaxima(), cargas,
-				pedidoDTO.getPrecio(), pedidoDTO.getSucursalDestino(), pedidoDTO.getSucursalOrigen(),
+				pedidoDTO.getPrecio(), pedidoDTO.getSucursalDestinoId(), pedidoDTO.getSucursalOrigenId(),
 				pedidoDTO.isSolicitaTransporteDirecto(), pedidoDTO.isSolicitaAvionetaParticular(),
 				ClienteToEntity(pedidoDTO.getCliente()));
-		pedido.setSucursalOrigen(pedidoDTO.getSucursalOrigen());
 		return pedido;
 	}
 
