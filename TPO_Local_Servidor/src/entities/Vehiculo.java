@@ -65,6 +65,9 @@ public class Vehiculo extends PersistentObject {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "idPlanDeMantenimiento")
 	private PlanDeMantenimiento planDeMantenimiento;
+	
+	@Column(name = "sucursalIdActual", columnDefinition = "int", nullable = true)
+	private int sucursalIdActual;
 
 	public Vehiculo() {
 		super();
@@ -73,7 +76,7 @@ public class Vehiculo extends PersistentObject {
 	public Vehiculo(int idVehiculo, String tipo, float volumen, float peso,
 			float ancho, float alto, float profundidad, float tara,
 			int kilometraje, String estado, Boolean enGarantia,
-			Boolean trabajoEspecifico, Date fechaUltimoControl,
+			Boolean trabajoEspecifico, Date fechaUltimoControl, int sucursalIdActual,
 			PlanDeMantenimiento planDeMantenimiento) {
 		super();
 		this.idVehiculo = idVehiculo;
@@ -89,6 +92,7 @@ public class Vehiculo extends PersistentObject {
 		this.enGarantia = enGarantia;
 		this.trabajoEspecifico = trabajoEspecifico;
 		this.fechaUltimoControl = fechaUltimoControl;
+		this.sucursalIdActual = sucursalIdActual;
 		this.planDeMantenimiento = planDeMantenimiento;
 	}
 
@@ -199,7 +203,7 @@ public class Vehiculo extends PersistentObject {
 	public VehiculoDTO toDTO() {
 		return new VehiculoDTO(idVehiculo, tipo, volumen, peso, ancho, alto,
 				profundidad, tara, kilometraje, estado, enGarantia,
-				trabajoEspecifico, fechaUltimoControl,
+				trabajoEspecifico, fechaUltimoControl, sucursalIdActual,
 				planDeMantenimiento.toDTO());
 	}
 
@@ -213,5 +217,21 @@ public class Vehiculo extends PersistentObject {
 
 	public void setPlanDeMantenimiento(PlanDeMantenimiento planDeMantenimiento) {
 		this.planDeMantenimiento = planDeMantenimiento;
+	}
+	
+	public int getSucursalIdActual() {
+		return sucursalIdActual;
+	}
+
+	public void setSucursalIdActual(int sucursalIdActual) {
+		this.sucursalIdActual = sucursalIdActual;
+	}
+
+	public Boolean getTrabajoEspecifico() {
+		return trabajoEspecifico;
+	}
+
+	public Boolean getEnGarantia() {
+		return enGarantia;
 	}
 }

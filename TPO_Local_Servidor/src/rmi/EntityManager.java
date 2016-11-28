@@ -22,7 +22,6 @@ import dto.SucursalDTO;
 import dto.TransporteDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoDTO;
-import dto.ViajeDTO;
 import entities.Carga;
 import entities.Cliente;
 import entities.Direccion;
@@ -42,7 +41,6 @@ import entities.Sucursal;
 import entities.Transporte;
 import entities.Trayecto;
 import entities.Vehiculo;
-import entities.Viaje;
 
 public class EntityManager {
 
@@ -73,9 +71,14 @@ public class EntityManager {
 	}
 
 	public static Envio EnvioToEntity(EnvioDTO envioDTO) {
+		List<Pedido> pedidos = new ArrayList<Pedido>();
+		for (PedidoDTO pedido : envioDTO.getPedidos()) {
+			pedidos.add(PedidoToEntity(pedido));
+		}
 		Envio envio = new Envio(envioDTO.getIdEnvio(), envioDTO.getFechaSalida(), envioDTO.getFechaLlegada(),
-				envioDTO.isCumpleCondicionesCarga(), envioDTO.getEstado(), PedidoToEntity(envioDTO.getPedido()),
-				envioDTO.getPrioridad(), SucursalToEntity(envioDTO.getSucursalOrigen()), SucursalToEntity(envioDTO.getSucursalDestino()));
+				envioDTO.isCumpleCondicionesCarga(), envioDTO.getEstado(), pedidos, envioDTO.getPrioridad(),
+				SucursalToEntity(envioDTO.getSucursalOrigen()), SucursalToEntity(envioDTO.getSucursalDestino()),
+				envioDTO.getVehiculoId());
 		return envio;
 	}
 
@@ -104,9 +107,9 @@ public class EntityManager {
 		Pedido pedido = new Pedido(pedidoDTO.getIdPedido(), DireccionToEntity(pedidoDTO.getDireccionCarga()),
 				DireccionToEntity(pedidoDTO.getDireccionDestino()), pedidoDTO.getFechaCarga(),
 				pedidoDTO.getHoraInicio(), pedidoDTO.getHoraFin(), pedidoDTO.getFechaMaxima(), cargas,
-				pedidoDTO.getPrecio(), pedidoDTO.getSucursalDestinoId(), pedidoDTO.getSucursalOrigenId(),
-				pedidoDTO.isSolicitaTransporteDirecto(), pedidoDTO.isSolicitaAvionetaParticular(),
-				ClienteToEntity(pedidoDTO.getCliente()));
+				pedidoDTO.getPrecio(), pedidoDTO.getSucursalOrigenId(), pedidoDTO.getSucursalDestinoId(),
+				pedidoDTO.getSucursalActualId(), pedidoDTO.isSolicitaTransporteDirecto(),
+				pedidoDTO.isSolicitaAvionetaParticular(), ClienteToEntity(pedidoDTO.getCliente()), pedidoDTO.getEstado());
 		return pedido;
 	}
 
@@ -163,17 +166,7 @@ public class EntityManager {
 				vehiculoDTO.getPeso(), vehiculoDTO.getAncho(), vehiculoDTO.getAlto(), vehiculoDTO.getProfundidad(),
 				vehiculoDTO.getTara(), vehiculoDTO.getKilometraje(), vehiculoDTO.getEstado(),
 				vehiculoDTO.isEnGarantia(), vehiculoDTO.isTrabajoEspecifico(), vehiculoDTO.getFechaUltimoControl(),
-				PlanDeMantenimientoToEntity(vehiculoDTO.getPlanDeMantenimiento()));
-	}
-
-	public static Viaje ViajeToEntity(ViajeDTO viajeDTO) {
-		List<Envio> envios = new ArrayList<Envio>();
-		for (EnvioDTO envioDTO : viajeDTO.getEnvios()) {
-			envios.add(EnvioToEntity(envioDTO));
-		}
-		return new Viaje(viajeDTO.getIdViaje(), envios, viajeDTO.getFechaLlegada(),
-				SucursalToEntity(viajeDTO.getSucursalOrigen()), SucursalToEntity(viajeDTO.getSucursalDestino()),
-				viajeDTO.isFinalizado(), VehiculoToEntity(viajeDTO.getVehiculo()));
+				vehiculoDTO.getSucursalIdActual(), PlanDeMantenimientoToEntity(vehiculoDTO.getPlanDeMantenimiento()));
 	}
 
 }

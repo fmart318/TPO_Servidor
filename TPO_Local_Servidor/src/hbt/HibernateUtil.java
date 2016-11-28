@@ -35,7 +35,6 @@ public class HibernateUtil {
 			config.addAnnotatedClass(Transporte.class);
 			config.addAnnotatedClass(Trayecto.class);
 			config.addAnnotatedClass(Vehiculo.class);
-			config.addAnnotatedClass(Viaje.class);
 			sessionFactory = config.buildSessionFactory();
 		}
 		

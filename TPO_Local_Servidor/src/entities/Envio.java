@@ -1,20 +1,21 @@
 package entities;
 
-import hbt.PersistentObject;
-
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import dto.EnvioDTO;
+import dto.PedidoDTO;
+import hbt.PersistentObject;
 
 @Entity
 @Table(name = "Envios")
@@ -39,12 +40,15 @@ public class Envio extends PersistentObject {
 	@Column(columnDefinition = "varchar(50)", nullable = true)
 	private String estado;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "idPedido")
-	private Pedido pedido;
+	@OneToMany
+	@JoinColumn(name = "idEnvio", nullable = true, updatable = true, insertable = true)
+	private List<Pedido> pedidos;
 
 	@Column(nullable = true)
 	private int prioridad;
+	
+	@Column(columnDefinition = "int", nullable = true)
+	private int idVehiculo;
 
 	@ManyToOne
 	@JoinColumn(name = "idSucursalOrigen", referencedColumnName = "idSucursal")
@@ -52,21 +56,22 @@ public class Envio extends PersistentObject {
 
 	@ManyToOne
 	@JoinColumn(name = "idSucursalDestino", referencedColumnName = "idSucursal")
-	Sucursal sucursalDestino;
+	private Sucursal sucursalDestino;
 
 	public Envio(int idEnvio, Date fechaSalida, Date fechaLlegada,
-			boolean cumpleCondicionesCarga, String estado, Pedido pedido,
-			int prioridad, Sucursal sucursalOrigen, Sucursal sucursalDestino) {
+			boolean cumpleCondicionesCarga, String estado, List<Pedido> pedidos,
+			int prioridad, Sucursal sucursalOrigen, Sucursal sucursalDestino, int idVehiculo) {
 		super();
 		this.idEnvio = idEnvio;
 		this.fechaSalida = fechaSalida;
 		this.fechaLlegada = fechaLlegada;
 		this.cumpleCondicionesCarga = cumpleCondicionesCarga;
 		this.estado = estado;
-		this.pedido = pedido;
+		this.pedidos = pedidos;
 		this.prioridad = prioridad;
 		this.sucursalOrigen = sucursalOrigen;
 		this.sucursalDestino = sucursalDestino;
+		this.idVehiculo = idVehiculo;
 	}
 
 	public Envio() {
@@ -113,14 +118,6 @@ public class Envio extends PersistentObject {
 		this.estado = estado;
 	}
 
-	public Pedido getPedido() {
-		return pedido;
-	}
-
-	public void setPedido(Pedido pedido) {
-		this.pedido = pedido;
-	}
-
 	public int getPrioridad() {
 		return prioridad;
 	}
@@ -144,10 +141,32 @@ public class Envio extends PersistentObject {
 	public void setSucursalDestino(Sucursal sucursalDestino) {
 		this.sucursalDestino = sucursalDestino;
 	}
+	
+	public List<Pedido> getPedidos() {
+		return pedidos;
+	}
 
+	public void setPedidos(List<Pedido> pedidos) {
+		this.pedidos = pedidos;
+	}
+
+	public int getIdVehiculo() {
+		return idVehiculo;
+	}
+
+	public void setIdVehiculo(int idVehiculo) {
+		this.idVehiculo = idVehiculo;
+	}
+	
 	public EnvioDTO toDTO() {
+		
+		List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
+		for (Pedido pedido : pedidos) {
+			pedidoDtos.add(pedido.toDTO());
+		}
+		
 		EnvioDTO envioDTO = new EnvioDTO(idEnvio, fechaSalida, fechaLlegada,
-				cumpleCondicionesCarga, estado, pedido.toDTO(), prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO());
+				cumpleCondicionesCarga, estado, pedidoDtos, prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO(), idVehiculo);
 		return envioDTO;
 	}
 }

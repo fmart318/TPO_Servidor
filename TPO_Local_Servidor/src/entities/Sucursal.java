@@ -1,11 +1,8 @@
 package entities;
 
-import hbt.PersistentObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,7 +14,7 @@ import javax.persistence.Table;
 
 import dto.PedidoDTO;
 import dto.SucursalDTO;
-import dto.ViajeDTO;
+import hbt.PersistentObject;
 
 @Entity
 @Table(name = "Sucursales")
@@ -38,15 +35,14 @@ public class Sucursal extends PersistentObject {
 	private Direccion ubicacion;
 
 	@OneToMany
-	@JoinColumn(name = "idPedido")
+	@JoinColumn(name = "idSucursal")
 	private List<Pedido> pedidos;
 
 	public Sucursal() {
 
 	}
 
-	public Sucursal(int idSucursal, String nombre, Direccion ubicacion,
-			List<Pedido> pedidos) {
+	public Sucursal(int idSucursal, String nombre, Direccion ubicacion, List<Pedido> pedidos) {
 		super();
 		this.idSucursal = idSucursal;
 		this.nombre = nombre;
@@ -86,20 +82,17 @@ public class Sucursal extends PersistentObject {
 		this.pedidos = pedidos;
 	}
 
-
 	public SucursalDTO toDTO() {
 		List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
 		for (Pedido pedido : pedidos) {
 			pedidoDtos.add(pedido.toDTO());
 		}
-		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre,
-				getUbicacion().toDTO(), pedidoDtos);
+		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre, getUbicacion().toDTO(), pedidoDtos);
 		return sucursalDTO;
 	}
 
 	public SucursalDTO toDTONoRecursivo() {
-		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre,
-				getUbicacion().toDTO(), null);
+		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre, getUbicacion().toDTO(), null);
 		return sucursalDTO;
 	}
 }

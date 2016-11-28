@@ -19,12 +19,9 @@ import dto.HabilitadoDTO;
 import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
-
 import dto.PrecioVehiculoDTO;
 import dto.ProductoDTO;
-
 import dto.RemitoDTO;
-
 import dto.RutaDTO;
 import dto.SeguroDTO;
 import dto.SucursalDTO;
@@ -32,7 +29,6 @@ import dto.TransporteDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoAMantenerDTO;
 import dto.VehiculoDTO;
-import dto.ViajeDTO;
 import entities.Carga;
 import entities.Cliente;
 import entities.Direccion;
@@ -51,7 +47,6 @@ import entities.Sucursal;
 import entities.Transporte;
 import entities.Trayecto;
 import entities.Vehiculo;
-import entities.Viaje;
 import hbt.HibernateUtil;
 import hbt.PersistentObject;
 
@@ -89,7 +84,7 @@ public class HibernateDAO {
 			t = (Transaction) s.beginTransaction();
 
 			s.save(entidad);
-			System.out.println("Object " + entidad.getClass().getName() +  " Saved");
+			System.out.println("Object " + entidad.getClass().getName() + " Saved");
 			t.commit();
 
 		} catch (Exception e) {
@@ -153,25 +148,6 @@ public class HibernateDAO {
 		}
 	}
 
-	/* Tested and Passed */
-	public List<ViajeDTO> obtenerViajesDeCliente(int idCliente) {
-		List<ViajeDTO> viajesDTO = new ArrayList<ViajeDTO>();
-		Session s = this.getSession();
-		try {
-			List<Viaje> viajes = s
-					.createQuery(
-							"From Viaje v Join Envio e where e.idViaje=v.idViaje And e.pedido.cliente.idCliente=:id ")
-					.setParameter("id", idCliente).list();
-			for (Viaje viaje : viajes) {
-				viajesDTO.add(viaje.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return viajesDTO;
-	}
-
 	public int seleccionarViaje(int idViaje) {
 		int dias = 0;
 		Session s = this.getSession();
@@ -216,6 +192,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
+
 	public List<HabilitadoDTO> listarHabilitados() {
 		List<HabilitadoDTO> cargas = new ArrayList<HabilitadoDTO>();
 		Session s = this.getSession();
@@ -230,6 +207,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
+
 	public List<ProductoDTO> listarProducto() {
 		List<ProductoDTO> cargas = new ArrayList<ProductoDTO>();
 		Session s = this.getSession();
@@ -244,12 +222,13 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
-	
+
 	public List<CargaDTO> listarCargasSinDespachar() {
 		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
 		try {
-			List<entities.Carga> cs = s.createQuery("FROM Carga as c where c.despachado=:desp").setParameter("desp", false).list();
+			List<entities.Carga> cs = s.createQuery("FROM Carga as c where c.despachado=:desp")
+					.setParameter("desp", false).list();
 			for (entities.Carga c : cs) {
 				cargas.add(c.toDTO());
 			}
@@ -259,6 +238,7 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
+
 	public List<DireccionDTO> obtenerDirecciones() {
 		List<DireccionDTO> direcciones = new ArrayList<DireccionDTO>();
 		Session s = this.getSession();
@@ -272,21 +252,6 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return direcciones;
-	}
-
-	public List<ViajeDTO> obtenerViajes() {
-		List<ViajeDTO> viajesDTO = new ArrayList<ViajeDTO>();
-		Session s = this.getSession();
-		try {
-			List<Viaje> viajes = s.createQuery("FROM Viaje").list();
-			for (Viaje viaje : viajes) {
-				viajesDTO.add(viaje.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return viajesDTO;
 	}
 
 	/* Tested and Passed */
@@ -397,42 +362,6 @@ public class HibernateDAO {
 		return sucursalDTO;
 	}
 
-	public ViajeDTO obtenerViajePorVehiculo(VehiculoDTO vehiculo) {
-		ViajeDTO viaje = new ViajeDTO();
-		int id = vehiculo.getIdVehiculo();
-		Session s = this.getSession();
-		try {
-			Viaje v = (Viaje) s.createQuery(" FROM Viaje v where v.vehiculo.id =:idVehiculo")
-					.setParameter("idVehiculo", id).uniqueResult();
-
-			viaje = v.toDTO();
-			this.closeSession();
-			return viaje;
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return null;
-	}
-
-	public void updateViaje(Viaje viaje) {
-
-		Transaction t = null;
-		Session s = sessionFactory.getCurrentSession();
-		try {
-
-			t = s.beginTransaction();
-
-			s.update(viaje);
-			t.commit();
-
-		} catch (Exception e) {
-			t.rollback();
-			System.out.println(e);
-			System.out.println("ErrorDAO: " + viaje.getClass().getName() + ".modificar");
-		}
-	}
-
 	public List<PedidoDTO> obtenerPedidosDeCliente(int idCliente) {
 		List<PedidoDTO> pedidosDTO = new ArrayList<PedidoDTO>();
 		Session s = this.getSession();
@@ -447,64 +376,6 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return pedidosDTO;
-	}
-
-	public List<ViajeDTO> obtenerViajesDePedidos(List<PedidoDTO> pedidosDTO) {
-		List<ViajeDTO> viajesDTO = new ArrayList<ViajeDTO>();
-		int x = 0;
-
-		List<Viaje> aux = new ArrayList<Viaje>();
-		Session s = this.getSession();
-		for (int i = 0; i < pedidosDTO.size(); i++) {
-			x = pedidosDTO.get(i).getIdPedido();
-			try {
-				aux = s.createQuery("Select e.viajes from Envio e where e.pedido.idPedido IN (:id) ")
-						.setParameter("id", x).list();
-
-				for (Viaje viaje : aux) {
-					viajesDTO.add(viaje.toDTO());
-				}
-			} catch (Exception e) {
-				System.out.println(e);
-			}
-
-		}
-
-		this.closeSession();
-		return viajesDTO;
-	}
-
-	public ViajeDTO obtenerViajeDeEnvio(int idEnvio) {
-		Session session = this.getSession();
-		ViajeDTO viajeDTO = null;
-		try {
-			
-			Viaje viaje = (Viaje) session.createQuery("FROM Viaje v JOIN v.envios.idEnvio=:idEnvio ").setParameter("idEnvio", idEnvio)
-					.uniqueResult();
-
-			viajeDTO = viaje.toDTO();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return viajeDTO;
-	}
-
-	public ViajeDTO obtenerViaje(int id) {
-		ViajeDTO viajeDTO = new ViajeDTO();
-		Session s = this.getSession();
-		try {
-			Viaje v = (Viaje) s.createQuery("FROM Viaje v where v.id = :viaje").setParameter("viaje", id)
-					.uniqueResult();
-
-			viajeDTO = v.toDTO();
-			this.closeSession();
-			return viajeDTO;
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return null;
 	}
 
 	public List<TransporteDTO> obtenerTransportesDeTerceros(CargaDTO c, TransporteDTO tr) {
@@ -642,25 +513,28 @@ public class HibernateDAO {
 		return cl;
 	}
 
-	public EnvioDTO obtenerEnvioDePedido(int idPedido) {
-		
-		EnvioDTO envioDto = null;
+	public EnvioDTO obtenerEnvioActualDePedido(int idPedido) {
+
 		Session session = this.getSession();
 		try {
-			
-			Envio envio = (Envio) session.createQuery(" from Envio e where e.pedido.idPedido=:id  ").setParameter("id", idPedido)
-					.uniqueResult();
-			if (envio != null) {
-				envioDto = envio.toDTO();
+
+			List<Envio> envios = (List<Envio>) session.createQuery("from Envio").list();
+			if (envios != null) {
+				for (Envio envio : envios) {
+					for (Pedido pedido : envio.getPedidos()) {
+						if (pedido.getIdPedido() == idPedido && !envio.getEstado().equals("listo")) {
+							return envio.toDTO();
+						}
+					}
+				}
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			System.out.println(ex);
 			this.closeSession();
 			return null;
 		}
 		this.closeSession();
-		return envioDto;
+		return null;
 	}
 
 	public List<CargaDTO> obtenerCargasDeUnPedido(PedidoDTO pedido) {
@@ -738,39 +612,16 @@ public class HibernateDAO {
 		return transportesDTO;
 	}
 
-	public List<EnvioDTO> obtenerEnvios(String nombre) {
-		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
-		Session s = this.getSession();
-		try {
-			List<Envio> envios = s.createQuery("FROM Envio").list();
-			List<Pedido> pedidos = s.createQuery("FROM Pedido").list();
-			System.out.println(nombre);
-			for (Envio e : envios) {
-				for (Pedido p : pedidos) {
-
-					if (p.getCliente().getNombre().equals(nombre) && e.getPedido().getIdPedido() == p.getIdPedido()) {
-						enviosDTO.add(e.toDTO());
-						System.out.println("IF");
-					}
-					System.out.println("FOR");
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return enviosDTO;
-	}
 	public List<EnvioDTO> listarEnvios() {
 		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
 		Session s = this.getSession();
 		try {
 			List<Envio> envios = s.createQuery("FROM Envio").list();
-			for (Envio e : envios) 
+			for (Envio e : envios)
 				enviosDTO.add(e.toDTO());
-			} catch (Exception e) {
-				System.out.println(e);
-			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 		this.closeSession();
 		return enviosDTO;
 	}
@@ -805,7 +656,7 @@ public class HibernateDAO {
 		return enviosDTO;
 	}
 
-	public CargaDTO buscarCargaPorId(int idCarga){
+	public CargaDTO buscarCargaPorId(int idCarga) {
 		CargaDTO cl = new CargaDTO();
 		Session s = this.getSession();
 		try {
@@ -818,13 +669,15 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cl;
-		
+
 	}
-	public VehiculoDTO buscarVehiculoPorId(int idVehiculo){
+
+	public VehiculoDTO buscarVehiculoPorId(int idVehiculo) {
 		VehiculoDTO cl = new VehiculoDTO();
 		Session s = this.getSession();
 		try {
-			Vehiculo v = (Vehiculo) s.createQuery("FROM Vehiculo c where c.id=:id").setParameter("id", idVehiculo).uniqueResult();
+			Vehiculo v = (Vehiculo) s.createQuery("FROM Vehiculo c where c.id=:id").setParameter("id", idVehiculo)
+					.uniqueResult();
 			cl = v.toDTO();
 		} catch (Exception e) {
 
@@ -833,13 +686,15 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cl;
-		
+
 	}
-	public SucursalDTO buscarSucursalPorID(int idSucursal){
+
+	public SucursalDTO buscarSucursalPorID(int idSucursal) {
 		SucursalDTO cl = new SucursalDTO();
 		Session s = this.getSession();
 		try {
-			Sucursal c = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id").setParameter("id", idSucursal).uniqueResult();
+			Sucursal c = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id").setParameter("id", idSucursal)
+					.uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
 
@@ -848,13 +703,15 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cl;
-		
+
 	}
-	public PedidoDTO buscarPedidoPorId(int idPedido){
+
+	public PedidoDTO buscarPedidoPorId(int idPedido) {
 		PedidoDTO cl = new PedidoDTO();
 		Session s = this.getSession();
 		try {
-			Pedido c = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido).uniqueResult();
+			Pedido c = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido)
+					.uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
 
@@ -863,9 +720,10 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cl;
-		
+
 	}
-	public EnvioDTO buscarEnvioPorId(int idEnvio){
+
+	public EnvioDTO buscarEnvioPorId(int idEnvio) {
 		EnvioDTO cl = new EnvioDTO();
 		Session s = this.getSession();
 		try {
@@ -878,13 +736,15 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cl;
-		
+
 	}
-	public PrecioVehiculoDTO buscarPrecioVehiculoDTO(int idPrecioVehiculo){
+
+	public PrecioVehiculoDTO buscarPrecioVehiculoDTO(int idPrecioVehiculo) {
 		PrecioVehiculoDTO cl = new PrecioVehiculoDTO();
 		Session s = this.getSession();
 		try {
-			PrecioVehiculo c = (PrecioVehiculo) s.createQuery("FROM PrecioVehiculo c where c.id=:id").setParameter("id", idPrecioVehiculo).uniqueResult();
+			PrecioVehiculo c = (PrecioVehiculo) s.createQuery("FROM PrecioVehiculo c where c.id=:id")
+					.setParameter("id", idPrecioVehiculo).uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
 
@@ -893,10 +753,10 @@ public class HibernateDAO {
 		}
 		this.closeSession();
 		return cl;
-		
+
 	}
-	
-	//Plan de Mantenimiento
+
+	// Plan de Mantenimiento
 	@SuppressWarnings("unchecked")
 	public List<PlanDeMantenimientoDTO> listarPlanesDeMantenimiento() {
 		List<PlanDeMantenimientoDTO> planesDto = new ArrayList<PlanDeMantenimientoDTO>();
@@ -906,12 +766,12 @@ public class HibernateDAO {
 			for (PlanDeMantenimiento plan : planes) {
 				planesDto.add(plan.toDTO());
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return planesDto;
 	}
-	
+
 	public void updatePlanDeMantenimiento(PersistentObject plan) {
 		Transaction t = null;
 		Session s = sessionFactory.getCurrentSession();
@@ -926,7 +786,7 @@ public class HibernateDAO {
 			System.out.println("ErrorDAO: " + plan.getClass().getName() + ".modificar");
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<VehiculoAMantenerDTO> getVehiculosAMantener() {
 		List<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
@@ -947,7 +807,7 @@ public class HibernateDAO {
 					mantener.add(aMantener);
 				}
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return mantener;
@@ -962,14 +822,13 @@ public class HibernateDAO {
 		} else {
 			planTime = time + 1;
 		}
-		if (vehiculo.getKilometraje() % 10000 == 0
-				|| vehiculo.getKilometraje() >= plan.getKmProxControl()
+		if (vehiculo.getKilometraje() % 10000 == 0 || vehiculo.getKilometraje() >= plan.getKmProxControl()
 				|| time >= planTime) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	private String getTipoTrabajo(Vehiculo vehiculo) {
 		String tipo;
 		if (vehiculo.isEnGarantia()) {
@@ -981,23 +840,22 @@ public class HibernateDAO {
 		}
 		return tipo;
 	}
-	
 
 	public List<PrecioVehiculoDTO> listarVTerceros() {
 		List<PrecioVehiculoDTO> vehiculos = new ArrayList<PrecioVehiculoDTO>();
 		Session s = this.getSession();
 		try {
 			List<PrecioVehiculo> vs = s.createQuery("FROM PrecioVehiculo").list();
-			for (PrecioVehiculo e : vs) 
+			for (PrecioVehiculo e : vs)
 				vehiculos.add(e.toDTO());
-			} catch (Exception e) {
-				System.out.println(e);
-			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 		this.closeSession();
 		return vehiculos;
 	}
 
-	//Facturas
+	// Facturas
 	public List<FacturaDTO> listarFacturas() {
 		List<FacturaDTO> facturasDTO = new ArrayList<FacturaDTO>();
 		Session s = this.getSession();
@@ -1006,13 +864,13 @@ public class HibernateDAO {
 			for (Factura factura : facturas) {
 				facturasDTO.add(factura.toDTO());
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return facturasDTO;
 	}
-	
-	//Remitos
+
+	// Remitos
 	public List<RemitoDTO> listarRemitos() {
 		List<RemitoDTO> remitosDTO = new ArrayList<RemitoDTO>();
 		Session s = this.getSession();
@@ -1021,10 +879,10 @@ public class HibernateDAO {
 			for (Remito remito : remitos) {
 				remitosDTO.add(remito.toDTO());
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return remitosDTO;
 	}
-	
+
 }
