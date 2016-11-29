@@ -224,7 +224,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		List<PedidoDTO> pedidos = obtenerPedidos();
 		pedidos = RemoteObjectHelper.ordenarPedidosPorPrioridad(pedidos);
-		// controlarPedidosUrgentes(pedidos);
+		controlarPedidosUrgentes(pedidos);
 
 		ArrayList<PedidoDTO> pedidosPendientes = new ArrayList<PedidoDTO>();
 		ArrayList<PedidoDTO> pedidosEsperandoSerBuscadas = new ArrayList<PedidoDTO>();
@@ -355,9 +355,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 				cal.setTime(mejorFechaLLegada);
 				cal.add(Calendar.DATE, -30);
 				Date mejorFechaLLegadaMenosUnDia = cal.getTime();
-
-				if (!pedido.getFechaMaxima().before(mejorFechaLLegadaMenosUnDia)) {
-					// enviarUrgente(pedido);
+				
+				if (!pedido.getFechaMaxima().before(mejorFechaLLegada)) {
+					contratarTercero(pedido);
+				} else if (!pedido.getFechaMaxima().before(mejorFechaLLegadaMenosUnDia)) {
+					enviarUrgente(pedido);
 				}
 			}
 		}
@@ -371,7 +373,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		}
 
 		List<VehiculoDTO> vehiculosDisponibles = RemoteObjectHelper
-				.obtenerVehiculosDisponiblesEnSucursal(pedido.getSucursalOrigenId());
+				.obtenerVehiculosDisponiblesEnSucursal(pedido.getSucursalActualId());
 
 		if (vehiculosDisponibles.size() > 0) {
 
@@ -389,11 +391,15 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 				}
 			}
 			if (!vehiculoParaPedidoUrgenteDisponible) {
-				// Contratar Terceros
+				contratarTercero(pedido);
 			}
 		} else {
-			// Contratar Terceros
+			contratarTercero(pedido);
 		}
+	}
+	
+	private void contratarTercero(PedidoDTO pedido) throws RemoteException {
+		
 	}
 
 	public void asignarPedidosPendientesATransporteLibre(ArrayList<PedidoDTO> pedidosPendientes)
@@ -1045,65 +1051,26 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public void crearEnvioDirecto(int idPedido, int idPrecioVehiculo) throws RemoteException {
-		// TODO Auto-generated method stub
-		// entities.Viaje v = new entities.Viaje();
-		PedidoDTO p = hbtDAO.buscarPedidoPorId(idPedido);
-		PrecioVehiculoDTO pv = hbtDAO.buscarPrecioVehiculoDTO(idPrecioVehiculo);
-		for (SucursalDTO suc : hbtDAO.obtenerSucursales()) {
-			if (suc.getIdSucursal() == p.getSucursalOrigenId()) {
-				// v.setSucursalOrigen(EntityManager.SucursalToEntity(suc));
-			}
-			if (suc.getIdSucursal() == p.getSucursalDestinoId()) {
-				// v.setSucursalDestino(EntityManager.SucursalToEntity(suc));
-			}
-		}
-		entities.Envio e = new entities.Envio();
-		e.setCumpleCondicionesCarga(true);
-		e.setEstado("Pendiente");
-		e.setFechaSalida(p.getFechaCarga());
-		e.setFechaLlegada(p.getFechaMaxima());
+
+		PedidoDTO pedido = hbtDAO.buscarPedidoPorId(idPedido);
+		PrecioVehiculoDTO precioVehiculo = hbtDAO.buscarPrecioVehiculoDTO(idPrecioVehiculo);
+
 		List<Pedido> pedidos = new ArrayList<Pedido>();
-		pedidos.add(EntityManager.PedidoToEntity(p));
-		e.setPedidos(pedidos);
-		e.setPrioridad(1);
-		e.setSucursalOrigen(
-				EntityManager.SucursalToEntity(RemoteObjectHelper.obtenerSucursal(p.getSucursalOrigenId())));
-		e.setSucursalDestino(
-				EntityManager.SucursalToEntity(RemoteObjectHelper.obtenerSucursal(p.getSucursalDestinoId())));
-		hbtDAO.guardar(e);
+		pedidos.add(EntityManager.PedidoToEntity(pedido));
 
-		EnvioDTO env = hbtDAO.getInstancia().buscarEnvioPorId(e.getIdEnvio());
-		ArrayList<Envio> envios = new ArrayList<Envio>();
-		envios.add(EntityManager.EnvioToEntity(env));
-		// v.setEnvios(envios);
-		// v.setFechaLlegada(p.getFechaMaxima());
-		// v.setFinalizado(false);
+		List<EnvioDTO> envios = obtenerEnvios();
+		Envio envio = new Envio(envios.size(), pedido.getFechaCarga(), null, true, "despachado", pedidos, 1,
+				EntityManager.SucursalToEntity(RemoteObjectHelper.obtenerSucursal(pedido.getSucursalOrigenId())),
+				EntityManager.SucursalToEntity(RemoteObjectHelper.obtenerSucursal(pedido.getSucursalDestinoId())), 1);
+		hbtDAO.guardar(envio);
 
-		Vehiculo vehiculo = new Vehiculo();
-		vehiculo.setAlto(2);
-		vehiculo.setAncho(10);
-		vehiculo.setProfundidad(2);
-		vehiculo.setVolumen(vehiculo.getAlto() * vehiculo.getAncho() * vehiculo.getProfundidad());
-		vehiculo.setEnGarantia(true);
-		vehiculo.setEstado("En Uso");
-		vehiculo.setFechaUltimoControl(new Date());
-		vehiculo.setKilometraje(10200);
-		vehiculo.setPeso(1500);
-		vehiculo.setTara(600);
-		vehiculo.setTipo(pv.getTipoVehiculo());
-		vehiculo.setTrabajoEspecifico(true);
-		PlanDeMantenimiento pm = new PlanDeMantenimiento();
-		pm.setDiasDemora(0);
-		pm.setDiasProxControl(0);
-		pm.setKmProxControl(0);
-		hbtDAO.guardar(pm);
-		vehiculo.setPlanDeMantenimiento(pm);
+		PlanDeMantenimiento planMantenimiento = new PlanDeMantenimiento(5, 0, 0, 0);
+		hbtDAO.guardar(planMantenimiento);
 
+		List<VehiculoDTO> vehiculos = obtenerVehiculos();
+		Vehiculo vehiculo = new Vehiculo(vehiculos.size(), precioVehiculo.getTipoVehiculo(), 40, 1500, 10, 2, 2, 600, 10200,
+				"En Uso", true, true, new Date(), pedido.getSucursalOrigenId(), planMantenimiento);
 		hbtDAO.guardar(vehiculo);
-		VehiculoDTO ve = new VehiculoDTO();
-		ve = hbtDAO.buscarVehiculoPorId(vehiculo.getIdVehiculo());
-		// v.setVehiculo(EntityManager.VehiculoToEntity(ve));
-		// hbtDAO.guardar(v);
 	}
 
 	@Override

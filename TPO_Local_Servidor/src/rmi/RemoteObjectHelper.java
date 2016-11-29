@@ -68,6 +68,10 @@ public class RemoteObjectHelper {
 		}
 		return mejorRuta;
 	}
+	
+	public static Date calcularMejorFechaLlegada(int sucursalOrigen, int sucursalDestino) {
+		return calcularMejorFechaLlegada(obtenerSucursal(sucursalOrigen) , obtenerSucursal(sucursalOrigen));
+	}
 
 	public static Date calcularMejorFechaLlegada(SucursalDTO sucursalOrigen, SucursalDTO sucursalDestino) {
 
