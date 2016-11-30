@@ -892,6 +892,12 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
 		p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
 		hbtDAO.guardar(p);
+		
+		FacturaDTO factura  = new FacturaDTO();
+		factura.setPedido(p.toDTO());
+		factura.setPrecio(p.getPrecio());
+		altaFactura(factura);
+		
 	}
 
 	// Vehiculo
