@@ -9,28 +9,20 @@ import java.util.Date;
 import java.util.List;
 
 import dao.HibernateDAO;
-import dto.MapaDeRutaDTO;
 import dto.PedidoDTO;
 import dto.RutaDTO;
 import dto.SucursalDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoDTO;
+import dto.VehiculoTerceroDTO;
 
 public class RemoteObjectHelper {
 
 	private static HibernateDAO hbtDAO;
-	public static MapaDeRutaDTO mapadeRuta;
 
 	public RemoteObjectHelper() throws RemoteException {
 		super();
 		hbtDAO = HibernateDAO.getInstancia();
-		cargarMapaDeRuta();
-	}
-
-	public static void cargarMapaDeRuta() {
-		List<RutaDTO> rutas = hbtDAO.obtenerRutas();
-		mapadeRuta = new MapaDeRutaDTO();
-		mapadeRuta.setRutas(rutas);
 	}
 
 	public static RutaDTO obtenerMejorRuta(SucursalDTO origen, SucursalDTO destino) {
@@ -39,8 +31,8 @@ public class RemoteObjectHelper {
 		float precioMin = -1;
 		int kmMin = -1;
 
-		cargarMapaDeRuta();
-		for (RutaDTO ruta : mapadeRuta.getRutas()) {
+		List<RutaDTO> rutas = hbtDAO.obtenerRutas();
+		for (RutaDTO ruta : rutas) {
 			if (ruta.getOrigen().getIdSucursal() == origen.getIdSucursal()
 					&& ruta.getDestino().getIdSucursal() == destino.getIdSucursal()) {
 
@@ -66,6 +58,11 @@ public class RemoteObjectHelper {
 				}
 			}
 		}
+		
+		if (mejorRuta == null) {
+			System.out.println("-----No hay ruta disponible para sucursales-----");
+		}
+		
 		return mejorRuta;
 	}
 	
@@ -76,15 +73,19 @@ public class RemoteObjectHelper {
 	public static Date calcularMejorFechaLlegada(SucursalDTO sucursalOrigen, SucursalDTO sucursalDestino) {
 
 		RutaDTO mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
-		float tiempo = 0;
+		
+		if (mejorRuta != null) {
+			
+			float tiempo = 0;
+			for (TrayectoDTO trayecto : mejorRuta.getTrayectos()) {
+				tiempo = trayecto.getTiempo() + tiempo;
+			}
 
-		for (TrayectoDTO trayecto : mejorRuta.getTrayectos()) {
-			tiempo = trayecto.getTiempo() + tiempo;
+			Date fechaActual = Calendar.getInstance().getTime();
+			long minutosRuta = (long) tiempo * 60000;
+			return new Date(fechaActual.getTime() + minutosRuta);
 		}
-
-		Date fechaActual = Calendar.getInstance().getTime();
-		long minutosRuta = (long) tiempo * 60000;
-		return new Date(fechaActual.getTime() + minutosRuta);
+		return null;
 	}
 
 	public static SucursalDTO obtenerSucursal(int sucursalId) {
@@ -94,6 +95,7 @@ public class RemoteObjectHelper {
 				return sucursal;
 			}
 		}
+		System.out.println("-----No esxiste sucursal en el sistema-----");
 		return null;
 	}
 
@@ -206,6 +208,17 @@ public class RemoteObjectHelper {
 			}
 		}
 		return vehiculosDisponibles;
+	}
+	
+	public static List<VehiculoTerceroDTO> obtenerVehiculosTercerosDisponibles() {
+		List<VehiculoTerceroDTO> vehiculosTercerosDisponibles = new ArrayList<VehiculoTerceroDTO>();
+		List<VehiculoTerceroDTO> vehiculosTerceros = hbtDAO.listarVTerceros();
+		for (VehiculoTerceroDTO vehiculo : vehiculosTerceros) {
+			if (vehiculo.getEstado().equals("Libre")) {
+				vehiculosTercerosDisponibles.add(vehiculo);
+			}
+		}
+		return vehiculosTercerosDisponibles;
 	}
 
 	public static List<PedidoDTO> ordenarPedidosPorPrioridad(List<PedidoDTO> pedidos) {

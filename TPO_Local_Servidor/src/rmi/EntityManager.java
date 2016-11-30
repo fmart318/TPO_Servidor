@@ -9,38 +9,30 @@ import dto.DireccionDTO;
 import dto.EmpresaDTO;
 import dto.EnvioDTO;
 import dto.FacturaDTO;
-import dto.HabilitadoDTO;
 import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
-import dto.PrecioVehiculoDTO;
-import dto.ProductoDTO;
-import dto.ProveedorDTO;
 import dto.RemitoDTO;
 import dto.RutaDTO;
 import dto.SucursalDTO;
-import dto.TransporteDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoDTO;
+import dto.VehiculoTerceroDTO;
 import entities.Carga;
 import entities.Cliente;
 import entities.Direccion;
 import entities.Empresa;
 import entities.Envio;
 import entities.Factura;
-import entities.Habilitado;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
-import entities.PrecioVehiculo;
-import entities.Producto;
-import entities.Proveedor;
 import entities.Remito;
 import entities.Ruta;
 import entities.Sucursal;
-import entities.Transporte;
 import entities.Trayecto;
 import entities.Vehiculo;
+import entities.VehiculoTercero;
 
 public class EntityManager {
 
@@ -61,13 +53,8 @@ public class EntityManager {
 	}
 
 	public static Empresa EmpresaToEntity(EmpresaDTO empresaDTO) {
-		List<Producto> productos = new ArrayList<Producto>();
-		for (ProductoDTO producto : empresaDTO.getProductos()) {
-			productos.add(ProductoToEntity(producto));
-		}
 		return new Empresa(empresaDTO.getIdCliente(), empresaDTO.getNombre(), empresaDTO.getCUIT(),
-				empresaDTO.getTipo(), empresaDTO.getDetallePoliticas(), productos,
-				empresaDTO.getSaldoCuentaCorriente());
+				empresaDTO.getTipo(), empresaDTO.getDetallePoliticas(), empresaDTO.getSaldoCuentaCorriente());
 	}
 
 	public static Envio EnvioToEntity(EnvioDTO envioDTO) {
@@ -86,17 +73,9 @@ public class EntityManager {
 		return new Factura(facturaDTO.getIdFactura(), PedidoToEntity(facturaDTO.getPedido()), facturaDTO.getPrecio());
 	}
 
-	public static Habilitado HabilitadoToEntity(HabilitadoDTO habilitadoDTO) {
-		return new Habilitado(habilitadoDTO.getNombre(), habilitadoDTO.getDniHabilitado());
-	}
-
 	public static Particular ParticularToEntity(ParticularDTO particularDTO) {
-		List<Habilitado> habilitados = new ArrayList<Habilitado>();
-		for (HabilitadoDTO habilitado : particularDTO.getHabilitados()) {
-			habilitados.add(HabilitadoToEntity(habilitado));
-		}
 		return new Particular(particularDTO.getIdCliente(), particularDTO.getNombre(), particularDTO.getDNI(),
-				particularDTO.getApellido(), habilitados);
+				particularDTO.getApellido());
 	}
 
 	public static Pedido PedidoToEntity(PedidoDTO pedidoDTO) {
@@ -109,7 +88,8 @@ public class EntityManager {
 				pedidoDTO.getHoraInicio(), pedidoDTO.getHoraFin(), pedidoDTO.getFechaMaxima(), cargas,
 				pedidoDTO.getPrecio(), pedidoDTO.getSucursalOrigenId(), pedidoDTO.getSucursalDestinoId(),
 				pedidoDTO.getSucursalActualId(), pedidoDTO.isSolicitaTransporteDirecto(),
-				pedidoDTO.isSolicitaAvionetaParticular(), ClienteToEntity(pedidoDTO.getCliente()), pedidoDTO.getEstado());
+				pedidoDTO.isSolicitaAvionetaParticular(), ClienteToEntity(pedidoDTO.getCliente()),
+				pedidoDTO.getEstado());
 		return pedido;
 	}
 
@@ -119,18 +99,14 @@ public class EntityManager {
 				planDeMantenimientoDTO.getKmProxControl());
 	}
 
-	public static PrecioVehiculo PrecioVehiculoToEntity(PrecioVehiculoDTO precioVehiculoDTO) {
-		return new PrecioVehiculo(precioVehiculoDTO.getIdPrecioVehiculo(), precioVehiculoDTO.getTipoVehiculo(),
-				precioVehiculoDTO.getPrecio());
-	}
-
-	public static Producto ProductoToEntity(ProductoDTO productoDTO) {
-		return new Producto(productoDTO.getIdProducto(), productoDTO.getNombre(), productoDTO.getTipo());
-	}
-
-	public static Proveedor ProveedorToEntity(ProveedorDTO proveedorDTO) {
-		return new Proveedor(proveedorDTO.getIdProveedor(), proveedorDTO.getCompania(),
-				proveedorDTO.getTipoMercaderia());
+	public static VehiculoTercero VehiculoTerceroToEntity(VehiculoTerceroDTO vehiculoTerceroDTO) {
+		List<Pedido> pedidos = new ArrayList<Pedido>();
+		for (PedidoDTO pedidoDto : vehiculoTerceroDTO.getPedidos()) {
+			pedidos.add(PedidoToEntity(pedidoDto));
+		}
+		return new VehiculoTercero(vehiculoTerceroDTO.getIdVehiculoTercero(), vehiculoTerceroDTO.getTipoVehiculo(),
+				vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(), vehiculoTerceroDTO.getFechaLlegada(),
+				pedidos);
 	}
 
 	public static Remito RemitoToEntity(RemitoDTO remitoDTO) {
@@ -148,11 +124,6 @@ public class EntityManager {
 	public static Sucursal SucursalToEntity(SucursalDTO sucursalDTO) {
 		return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
 				DireccionToEntity(sucursalDTO.getUbicacion()), null);
-	}
-
-	public static Transporte TransporteToEntity(TransporteDTO transporteDTO) {
-		return new Transporte(transporteDTO.getIdProveedor(), transporteDTO.getCompania(),
-				transporteDTO.getTipoMercaderia(), transporteDTO.getTipoTransporte());
 	}
 
 	public static Trayecto TrayectoToEntity(TrayectoDTO trayectoDTO) {

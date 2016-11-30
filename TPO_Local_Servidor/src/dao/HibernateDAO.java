@@ -15,38 +15,31 @@ import dto.DireccionDTO;
 import dto.EmpresaDTO;
 import dto.EnvioDTO;
 import dto.FacturaDTO;
-import dto.HabilitadoDTO;
 import dto.ParticularDTO;
 import dto.PedidoDTO;
 import dto.PlanDeMantenimientoDTO;
-import dto.PrecioVehiculoDTO;
-import dto.ProductoDTO;
 import dto.RemitoDTO;
 import dto.RutaDTO;
-import dto.SeguroDTO;
 import dto.SucursalDTO;
-import dto.TransporteDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoAMantenerDTO;
 import dto.VehiculoDTO;
+import dto.VehiculoTerceroDTO;
 import entities.Carga;
 import entities.Cliente;
 import entities.Direccion;
 import entities.Empresa;
 import entities.Envio;
 import entities.Factura;
-import entities.Habilitado;
 import entities.Particular;
 import entities.Pedido;
 import entities.PlanDeMantenimiento;
-import entities.PrecioVehiculo;
 import entities.Remito;
 import entities.Ruta;
-import entities.Seguro;
 import entities.Sucursal;
-import entities.Transporte;
 import entities.Trayecto;
 import entities.Vehiculo;
+import entities.VehiculoTercero;
 import hbt.HibernateUtil;
 import hbt.PersistentObject;
 
@@ -163,6 +156,7 @@ public class HibernateDAO {
 		return dias;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<SucursalDTO> obtenerSucursales() {
 		List<SucursalDTO> sucursalesDTO = new ArrayList<SucursalDTO>();
 		Session s = this.getSession();
@@ -178,6 +172,7 @@ public class HibernateDAO {
 		return sucursalesDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<CargaDTO> listarCargas() {
 		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
@@ -193,36 +188,7 @@ public class HibernateDAO {
 		return cargas;
 	}
 
-	public List<HabilitadoDTO> listarHabilitados() {
-		List<HabilitadoDTO> cargas = new ArrayList<HabilitadoDTO>();
-		Session s = this.getSession();
-		try {
-			List<entities.Habilitado> cs = s.createQuery("FROM Habilitado").list();
-			for (entities.Habilitado c : cs) {
-				cargas.add(c.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return cargas;
-	}
-
-	public List<ProductoDTO> listarProducto() {
-		List<ProductoDTO> cargas = new ArrayList<ProductoDTO>();
-		Session s = this.getSession();
-		try {
-			List<entities.Producto> cs = s.createQuery("FROM Producto").list();
-			for (entities.Producto c : cs) {
-				cargas.add(c.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return cargas;
-	}
-
+	@SuppressWarnings("unchecked")
 	public List<CargaDTO> listarCargasSinDespachar() {
 		List<CargaDTO> cargas = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
@@ -239,6 +205,7 @@ public class HibernateDAO {
 		return cargas;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<DireccionDTO> obtenerDirecciones() {
 		List<DireccionDTO> direcciones = new ArrayList<DireccionDTO>();
 		Session s = this.getSession();
@@ -269,23 +236,7 @@ public class HibernateDAO {
 		return particularDTO;
 	}
 
-	/* Tested and Passed */
-	public List<SeguroDTO> obtenerSegurosParaCarga(String tipoMercaderia) {
-		List<SeguroDTO> segurosDTO = new ArrayList<SeguroDTO>();
-		Session s = this.getSession();
-		try {
-			List<Seguro> seguros = s.createQuery("FROM Seguro s where s.tipoMercaderia=:tipoMercaderia")
-					.setParameter("tipoMercaderia", tipoMercaderia).list();
-			for (Seguro seguro : seguros) {
-				segurosDTO.add(seguro.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return segurosDTO;
-	}
-
+	@SuppressWarnings("unchecked")
 	public List<VehiculoDTO> obtenerVehiculos() {
 		List<VehiculoDTO> vehiculosDTO = new ArrayList<VehiculoDTO>();
 		Session s = this.getSession();
@@ -362,6 +313,7 @@ public class HibernateDAO {
 		return sucursalDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<PedidoDTO> obtenerPedidosDeCliente(int idCliente) {
 		List<PedidoDTO> pedidosDTO = new ArrayList<PedidoDTO>();
 		Session s = this.getSession();
@@ -378,30 +330,7 @@ public class HibernateDAO {
 		return pedidosDTO;
 	}
 
-	public List<TransporteDTO> obtenerTransportesDeTerceros(CargaDTO c, TransporteDTO tr) {
-		List<TransporteDTO> transportesDTO = new ArrayList<TransporteDTO>();
-		String mercaderia = c.getTipoMercaderia();
-		String trans = tr.getTipoTransporte();
-		// Transporte tiene un tipo MERcaderia, que no esta en el DC asi que no
-		// lo tengo en cuenta
-
-		Session s = this.getSession();
-		try {
-			List<Transporte> transportes = s
-					.createQuery(
-							"Select p.Transporte from Proveedor p  where p.tipoMercaderia=(:mer) and p.Transporte.tipoTransporte=(:trans) ")
-					.setParameter("mer", mercaderia).setParameter("trans", trans).list();
-			for (Transporte transporte : transportes) {
-				transportesDTO.add(transporte.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return transportesDTO;
-
-	}
-
+	@SuppressWarnings("unchecked")
 	public List<RutaDTO> obtenerRutas() {
 		List<RutaDTO> rutasDTO = new ArrayList<RutaDTO>();
 		Session s = this.getSession();
@@ -438,6 +367,7 @@ public class HibernateDAO {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<PedidoDTO> obtenerPedidos() {
 		List<PedidoDTO> pedidosDTO = new ArrayList<PedidoDTO>();
 		Session s = this.getSession();
@@ -453,6 +383,7 @@ public class HibernateDAO {
 		return pedidosDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<ClienteDTO> obtenerClientes() {
 		List<ClienteDTO> clientesDTO = new ArrayList<ClienteDTO>();
 		Session s = this.getSession();
@@ -468,6 +399,7 @@ public class HibernateDAO {
 		return clientesDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<EmpresaDTO> obtenerClientesEmpresa() {
 		List<EmpresaDTO> clientesDTO = new ArrayList<EmpresaDTO>();
 		Session s = this.getSession();
@@ -483,6 +415,7 @@ public class HibernateDAO {
 		return clientesDTO;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<ParticularDTO> obtenerClientesParticular() {
 		List<ParticularDTO> clientesDTO = new ArrayList<ParticularDTO>();
 		Session s = this.getSession();
@@ -513,6 +446,7 @@ public class HibernateDAO {
 		return cl;
 	}
 
+	@SuppressWarnings("unchecked")
 	public EnvioDTO obtenerEnvioActualDePedido(int idPedido) {
 
 		Session session = this.getSession();
@@ -537,6 +471,7 @@ public class HibernateDAO {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<CargaDTO> obtenerCargasDeUnPedido(PedidoDTO pedido) {
 		List<CargaDTO> cargasDTO = new ArrayList<CargaDTO>();
 		Session s = this.getSession();
@@ -567,21 +502,6 @@ public class HibernateDAO {
 		return pedidoDTO;
 	}
 
-	public List<HabilitadoDTO> obtenerHabilitados() {
-		List<HabilitadoDTO> habilitadosDTO = new ArrayList<HabilitadoDTO>();
-		Session s = this.getSession();
-		try {
-			List<Habilitado> habilitados = s.createQuery("FROM Habilitado").list();
-			for (Habilitado h : habilitados) {
-				habilitadosDTO.add(h.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return habilitadosDTO;
-	}
-
 	public String validarCredenciales(String username, String password) {
 		String string = "No Valido";
 		Session s = this.getSession();
@@ -597,35 +517,7 @@ public class HibernateDAO {
 		return string;
 	}
 
-	public List<TransporteDTO> obtenerTransportes() {
-		List<TransporteDTO> transportesDTO = new ArrayList<TransporteDTO>();
-		Session s = this.getSession();
-		try {
-			List<Transporte> transportes = s.createQuery("FROM Transporte").list();
-			for (Transporte t : transportes) {
-				transportesDTO.add(t.toDTO());
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return transportesDTO;
-	}
-
-	public List<EnvioDTO> listarEnvios() {
-		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
-		Session s = this.getSession();
-		try {
-			List<Envio> envios = s.createQuery("FROM Envio").list();
-			for (Envio e : envios)
-				enviosDTO.add(e.toDTO());
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return enviosDTO;
-	}
-
+	@SuppressWarnings("unchecked")
 	public List<TrayectoDTO> obtenerTrayectos() {
 		List<TrayectoDTO> trayectoDtos = new ArrayList<TrayectoDTO>();
 		Session s = this.getSession();
@@ -641,6 +533,7 @@ public class HibernateDAO {
 		return trayectoDtos;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<EnvioDTO> obtenerEnvios() {
 		List<EnvioDTO> enviosDTO = new ArrayList<EnvioDTO>();
 		Session session = this.getSession();
@@ -739,21 +632,18 @@ public class HibernateDAO {
 
 	}
 
-	public PrecioVehiculoDTO buscarPrecioVehiculoDTO(int idPrecioVehiculo) {
-		PrecioVehiculoDTO cl = new PrecioVehiculoDTO();
+	public VehiculoTerceroDTO buscarVehiculoTerceroDTO(int idVehiculoTercero) {
+		VehiculoTerceroDTO cl = new VehiculoTerceroDTO();
 		Session s = this.getSession();
 		try {
-			PrecioVehiculo c = (PrecioVehiculo) s.createQuery("FROM PrecioVehiculo c where c.id=:id")
-					.setParameter("id", idPrecioVehiculo).uniqueResult();
+			VehiculoTercero c = (VehiculoTercero) s.createQuery("FROM VehiculosTerceros c where c.id=:id")
+					.setParameter("id", idVehiculoTercero).uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
-
 			System.out.println(e);
-
 		}
 		this.closeSession();
 		return cl;
-
 	}
 
 	// Plan de Mantenimiento
@@ -842,12 +732,13 @@ public class HibernateDAO {
 		return tipo;
 	}
 
-	public List<PrecioVehiculoDTO> listarVTerceros() {
-		List<PrecioVehiculoDTO> vehiculos = new ArrayList<PrecioVehiculoDTO>();
+	@SuppressWarnings("unchecked")
+	public List<VehiculoTerceroDTO> listarVTerceros() {
+		List<VehiculoTerceroDTO> vehiculos = new ArrayList<VehiculoTerceroDTO>();
 		Session s = this.getSession();
 		try {
-			List<PrecioVehiculo> vs = s.createQuery("FROM PrecioVehiculo").list();
-			for (PrecioVehiculo e : vs)
+			List<VehiculoTercero> vs = s.createQuery("FROM VehiculosTerceros").list();
+			for (VehiculoTercero e : vs)
 				vehiculos.add(e.toDTO());
 		} catch (Exception e) {
 			System.out.println(e);
@@ -857,6 +748,7 @@ public class HibernateDAO {
 	}
 
 	// Facturas
+	@SuppressWarnings("unchecked")
 	public List<FacturaDTO> listarFacturas() {
 		List<FacturaDTO> facturasDTO = new ArrayList<FacturaDTO>();
 		Session s = this.getSession();
@@ -872,6 +764,7 @@ public class HibernateDAO {
 	}
 
 	// Remitos
+	@SuppressWarnings("unchecked")
 	public List<RemitoDTO> listarRemitos() {
 		List<RemitoDTO> remitosDTO = new ArrayList<RemitoDTO>();
 		Session s = this.getSession();

@@ -24,6 +24,7 @@ public class MainServer extends RmiStarter {
 
 	}
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws RemoteException {
 		new MainServer();
 		RemoteObject remoteObject = new RemoteObject();
