@@ -100,13 +100,20 @@ public class EntityManager {
 	}
 
 	public static VehiculoTercero VehiculoTerceroToEntity(VehiculoTerceroDTO vehiculoTerceroDTO) {
-		List<Pedido> pedidos = new ArrayList<Pedido>();
-		for (PedidoDTO pedidoDto : vehiculoTerceroDTO.getPedidos()) {
-			pedidos.add(PedidoToEntity(pedidoDto));
-		}
-		return new VehiculoTercero(vehiculoTerceroDTO.getIdVehiculoTercero(), vehiculoTerceroDTO.getTipoVehiculo(),
-				vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(), vehiculoTerceroDTO.getFechaLlegada(),
-				pedidos);
+		if (vehiculoTerceroDTO.getPedidos()!=null){
+			List<Pedido> pedidos = new ArrayList<Pedido>();
+			for (PedidoDTO pedidoDto : vehiculoTerceroDTO.getPedidos()) {
+				pedidos.add(PedidoToEntity(pedidoDto));
+			}
+			return new VehiculoTercero(vehiculoTerceroDTO.getIdVehiculoTercero(), vehiculoTerceroDTO.getTipoVehiculo(),
+					vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(), vehiculoTerceroDTO.getFechaLlegada(),
+					pedidos);
+		}else
+			return new VehiculoTercero(vehiculoTerceroDTO.getIdVehiculoTercero(), vehiculoTerceroDTO.getTipoVehiculo(),
+					vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(), vehiculoTerceroDTO.getFechaLlegada(),
+					null);
+			
+		
 	}
 
 	public static Remito RemitoToEntity(RemitoDTO remitoDTO) {

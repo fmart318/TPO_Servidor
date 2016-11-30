@@ -636,7 +636,7 @@ public class HibernateDAO {
 		VehiculoTerceroDTO cl = new VehiculoTerceroDTO();
 		Session s = this.getSession();
 		try {
-			VehiculoTercero c = (VehiculoTercero) s.createQuery("FROM VehiculosTerceros c where c.id=:id")
+			VehiculoTercero c = (VehiculoTercero) s.createQuery("FROM VehiculoTercero c where c.id=:id")
 					.setParameter("id", idVehiculoTercero).uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
@@ -737,7 +737,7 @@ public class HibernateDAO {
 		List<VehiculoTerceroDTO> vehiculos = new ArrayList<VehiculoTerceroDTO>();
 		Session s = this.getSession();
 		try {
-			List<VehiculoTercero> vs = s.createQuery("FROM VehiculosTerceros").list();
+			List<VehiculoTercero> vs = s.createQuery("FROM VehiculoTercero").list();
 			for (VehiculoTercero e : vs)
 				vehiculos.add(e.toDTO());
 		} catch (Exception e) {
