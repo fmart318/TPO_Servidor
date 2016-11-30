@@ -804,6 +804,7 @@ public class HibernateDAO {
 					aMantener.setPuntoAControlar(vehiculo.getPlanDeMantenimiento().getPuntoAControlar());
 					aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
 					aMantener.setEstado(vehiculo.getEstado());
+					aMantener.setVehiculo(vehiculo.toDTO());
 					mantener.add(aMantener);
 				}
 			}
