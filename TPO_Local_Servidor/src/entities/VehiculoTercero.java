@@ -54,6 +54,9 @@ public class VehiculoTercero extends PersistentObject {
 		this.idVehiculoTercero = idVehiculoTercero;
 		this.tipoVehiculo = tipoVehiculo;
 		this.precio = precio;
+		this.estado = estado;
+		this.fechaLlegada = fechaLlegada;
+		this.pedidos = pedidos;
 	}
 
 	public int getIdVehiculoTercero() {

@@ -141,21 +141,6 @@ public class HibernateDAO {
 		}
 	}
 
-	public int seleccionarViaje(int idViaje) {
-		int dias = 0;
-		Session s = this.getSession();
-		try {
-			Date fechaLlegada = (Date) s.createQuery("Select v.fechaLlegada from Viaje v where v.=:id ")
-					.setParameter("id", idViaje).uniqueResult();
-			Calendar cal = Calendar.getInstance();
-			dias = (int) (fechaLlegada.getTime() - cal.getTime().getTime()) / 86400000;
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return dias;
-	}
-
 	@SuppressWarnings("unchecked")
 	public List<SucursalDTO> obtenerSucursales() {
 		List<SucursalDTO> sucursalesDTO = new ArrayList<SucursalDTO>();
@@ -632,11 +617,32 @@ public class HibernateDAO {
 
 	}
 
+	@SuppressWarnings("unchecked")
+	public VehiculoTerceroDTO obtenerVehiculoTerceroConPedido(int idPedido) {
+		Session s = this.getSession();
+		try {
+			List<VehiculoTercero> vehiculosTerceros = (List<VehiculoTercero>) s.createQuery("FROM VehiculoTercero").list();
+			
+			for (VehiculoTercero vehiculo : vehiculosTerceros) {
+				for (Pedido pedido : vehiculo.getPedidos()) {
+					if (pedido.getIdPedido() == idPedido) {
+						return vehiculo.toDTO();
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return null;
+	}
+	
 	public VehiculoTerceroDTO buscarVehiculoTerceroDTO(int idVehiculoTercero) {
 		VehiculoTerceroDTO cl = new VehiculoTerceroDTO();
 		Session s = this.getSession();
 		try {
-			VehiculoTercero c = (VehiculoTercero) s.createQuery("FROM VehiculosTerceros c where c.id=:id")
+			VehiculoTercero c = (VehiculoTercero) s.createQuery("FROM VehiculoTercero c where c.id=:id")
 					.setParameter("id", idVehiculoTercero).uniqueResult();
 			cl = c.toDTO();
 		} catch (Exception e) {
@@ -737,7 +743,7 @@ public class HibernateDAO {
 		List<VehiculoTerceroDTO> vehiculos = new ArrayList<VehiculoTerceroDTO>();
 		Session s = this.getSession();
 		try {
-			List<VehiculoTercero> vs = s.createQuery("FROM VehiculosTerceros").list();
+			List<VehiculoTercero> vs = s.createQuery("FROM VehiculoTercero").list();
 			for (VehiculoTercero e : vs)
 				vehiculos.add(e.toDTO());
 		} catch (Exception e) {
