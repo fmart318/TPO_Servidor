@@ -233,7 +233,19 @@ public class HibernateDAO {
 		this.closeSession();
 		return oDTO;
 	}
-
+	public SucursalDTO obtenerSucursalPorId(int idSucursal) {
+		SucursalDTO oDTO = new SucursalDTO();
+		Session s = this.getSession();
+		try {
+			Sucursal o = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id")
+					.setParameter("id", idSucursal).uniqueResult();
+			oDTO = o.toDTO();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return oDTO;
+	}
 	/* Tested and Passed */
 	public ParticularDTO obtenerClienteParticular(int DNI) {
 		ParticularDTO particularDTO = new ParticularDTO();
@@ -675,6 +687,19 @@ public class HibernateDAO {
 		return planesDto;
 	}
 
+	public PlanDeMantenimientoDTO obtenerPlanDeMantenimientoPorId(int idPlanDeMantenimiento) {
+		PlanDeMantenimientoDTO oDTO = new PlanDeMantenimientoDTO();
+		Session s = this.getSession();
+		try {
+			PlanDeMantenimiento o = (PlanDeMantenimiento) s.createQuery("FROM PlanDeMantenimiento c where c.id=:id")
+					.setParameter("id", idPlanDeMantenimiento).uniqueResult();
+			oDTO = o.toDTO();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return oDTO;
+	}
 	public void updatePlanDeMantenimiento(PersistentObject plan) {
 		Transaction t = null;
 		Session s = sessionFactory.getCurrentSession();

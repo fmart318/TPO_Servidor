@@ -159,14 +159,18 @@ public class Envio extends PersistentObject {
 	}
 	
 	public EnvioDTO toDTO() {
-		
-		List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
-		for (Pedido pedido : pedidos) {
-			pedidoDtos.add(pedido.toDTO());
+		if(pedidos!=null){
+			List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
+			for (Pedido pedido : pedidos) {
+				pedidoDtos.add(pedido.toDTO());
+			}
+			
+			return new EnvioDTO(idEnvio, fechaSalida, fechaLlegada,
+					cumpleCondicionesCarga, estado, pedidoDtos, prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO(), idVehiculo);
 		}
+		else
+			return new EnvioDTO(idEnvio, fechaSalida, fechaLlegada,
+					cumpleCondicionesCarga, estado, null, prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO(), idVehiculo);
 		
-		EnvioDTO envioDTO = new EnvioDTO(idEnvio, fechaSalida, fechaLlegada,
-				cumpleCondicionesCarga, estado, pedidoDtos, prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO(), idVehiculo);
-		return envioDTO;
 	}
 }

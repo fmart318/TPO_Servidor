@@ -1,6 +1,7 @@
 package rmi;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import dto.CargaDTO;
@@ -100,20 +101,19 @@ public class EntityManager {
 	}
 
 	public static VehiculoTercero VehiculoTerceroToEntity(VehiculoTerceroDTO vehiculoTerceroDTO) {
-		if (vehiculoTerceroDTO.getPedidos()!=null){
+		if (vehiculoTerceroDTO.getPedidos() != null) {
 			List<Pedido> pedidos = new ArrayList<Pedido>();
 			for (PedidoDTO pedidoDto : vehiculoTerceroDTO.getPedidos()) {
 				pedidos.add(PedidoToEntity(pedidoDto));
 			}
 			return new VehiculoTercero(vehiculoTerceroDTO.getIdVehiculoTercero(), vehiculoTerceroDTO.getTipoVehiculo(),
-					vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(), vehiculoTerceroDTO.getFechaLlegada(),
-					pedidos);
-		}else
+					vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(),
+					vehiculoTerceroDTO.getFechaLlegada(), pedidos);
+		} else
 			return new VehiculoTercero(vehiculoTerceroDTO.getIdVehiculoTercero(), vehiculoTerceroDTO.getTipoVehiculo(),
-					vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(), vehiculoTerceroDTO.getFechaLlegada(),
-					null);
-			
-		
+					vehiculoTerceroDTO.getPrecio(), vehiculoTerceroDTO.getEstado(),
+					vehiculoTerceroDTO.getFechaLlegada(), null);
+
 	}
 
 	public static Remito RemitoToEntity(RemitoDTO remitoDTO) {
@@ -122,50 +122,86 @@ public class EntityManager {
 
 	public static Ruta RutaToEntity(RutaDTO rutaDTO) {
 		List<Trayecto> trayectos = new ArrayList<Trayecto>();
-		for (TrayectoDTO trayecto : rutaDTO.getTrayectos()) {
-			trayectos.add(TrayectoToEntity(trayecto));
-		}
-		return new Ruta(rutaDTO.getIdRuta(), trayectos, rutaDTO.getPrecio());
+		List<Sucursal> sucursales = new ArrayList<Sucursal>();
+		Sucursal so, sd;
+		if (rutaDTO.getTrayectos() != null) {
+			for (TrayectoDTO trayecto : rutaDTO.getTrayectos()) {
+				trayectos.add(TrayectoToEntity(trayecto));
+			}
+		} else
+			trayectos = null;
+
+		if (rutaDTO.getSucursales() != null) {
+			for (SucursalDTO sucursal : rutaDTO.getSucursales()) {
+				sucursales.add(SucursalToEntity(sucursal));
+			}
+		} else
+			sucursales = null;
+
+		if (rutaDTO.getSucursalOrigen() != null)
+			sd = SucursalToEntity(rutaDTO.getSucursalOrigen());
+		else
+			sd = null;
+		if (rutaDTO.getSucursalDestino() != null)
+			so = SucursalToEntity(rutaDTO.getSucursalDestino());
+		else
+			so = null;
+		return new Ruta(rutaDTO.getIdRuta(), trayectos, sucursales, rutaDTO.getPrecio(), so, sd);
 	}
 
 	public static Sucursal SucursalToEntity(SucursalDTO sucursalDTO) {
-		if(sucursalDTO.getPedidos()!=null&&sucursalDTO.getUbicacion()!=null){
+		if (sucursalDTO.getPedidos() != null && sucursalDTO.getUbicacion() != null) {
 			List<Pedido> pedidos = new ArrayList<Pedido>();
 			for (PedidoDTO pedido : sucursalDTO.getPedidos()) {
 				pedidos.add(PedidoToEntity(pedido));
 			}
 			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
-					DireccionToEntity(sucursalDTO.getUbicacion()),pedidos);
-		}
-		else if(sucursalDTO.getPedidos()!=null&&sucursalDTO.getUbicacion()==null){
+					DireccionToEntity(sucursalDTO.getUbicacion()), pedidos);
+		} else if (sucursalDTO.getPedidos() != null && sucursalDTO.getUbicacion() == null) {
 			List<Pedido> pedidos = new ArrayList<Pedido>();
 			for (PedidoDTO pedido : sucursalDTO.getPedidos()) {
 				pedidos.add(PedidoToEntity(pedido));
 			}
-			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
-					null, pedidos);
-		}
-		else if(sucursalDTO.getPedidos()==null&&sucursalDTO.getUbicacion()!=null)
+			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(), null, pedidos);
+		} else if (sucursalDTO.getPedidos() == null && sucursalDTO.getUbicacion() != null)
 			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
 					DireccionToEntity(sucursalDTO.getUbicacion()), null);
 		else
-			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
-					null, null);
-			
+			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(), null, null);
+
 	}
 
 	public static Trayecto TrayectoToEntity(TrayectoDTO trayectoDTO) {
-		return new Trayecto(trayectoDTO.getIdTrayecto(), SucursalToEntity(trayectoDTO.getSucursalOrigen()),
-				SucursalToEntity(trayectoDTO.getSucursalDestino()), trayectoDTO.getTiempo(), trayectoDTO.getKm(),
+		Sucursal so, sd;
+		if (trayectoDTO.getSucursalOrigen() != null)
+			so = SucursalToEntity(trayectoDTO.getSucursalOrigen());
+		else
+			so = null;
+		if (trayectoDTO.getSucursalDestino() != null)
+			sd = SucursalToEntity(trayectoDTO.getSucursalDestino());
+		else
+			sd = null;
+		return new Trayecto(trayectoDTO.getIdTrayecto(), so, sd, trayectoDTO.getTiempo(), trayectoDTO.getKm(),
 				trayectoDTO.getPrecio());
 	}
 
 	public static Vehiculo VehiculoToEntity(VehiculoDTO vehiculoDTO) {
-		return new Vehiculo(vehiculoDTO.getIdVehiculo(), vehiculoDTO.getTipo(), vehiculoDTO.getVolumen(),
-				vehiculoDTO.getPeso(), vehiculoDTO.getAncho(), vehiculoDTO.getAlto(), vehiculoDTO.getProfundidad(),
-				vehiculoDTO.getTara(), vehiculoDTO.getKilometraje(), vehiculoDTO.getEstado(),
-				vehiculoDTO.isEnGarantia(), vehiculoDTO.isTrabajoEspecifico(), vehiculoDTO.getFechaUltimoControl(),
-				vehiculoDTO.getSucursalIdActual(), PlanDeMantenimientoToEntity(vehiculoDTO.getPlanDeMantenimiento()));
+		PlanDeMantenimiento p;
+		if (vehiculoDTO.getPlanDeMantenimiento() != null)
+			
+			return new Vehiculo(vehiculoDTO.getIdVehiculo(), vehiculoDTO.getTipo(), vehiculoDTO.getVolumen(),
+					vehiculoDTO.getPeso(), vehiculoDTO.getAncho(), vehiculoDTO.getAlto(), vehiculoDTO.getProfundidad(),
+					vehiculoDTO.getTara(), vehiculoDTO.getKilometraje(), vehiculoDTO.getEstado(),
+					vehiculoDTO.isTrabajoEspecifico(), vehiculoDTO.isEnGarantia(), vehiculoDTO.getFechaUltimoControl(),
+					PlanDeMantenimientoToEntity(vehiculoDTO.getPlanDeMantenimiento()),vehiculoDTO.getSucursalIdActual());
+		else
+			return new Vehiculo(vehiculoDTO.getIdVehiculo(), vehiculoDTO.getTipo(), vehiculoDTO.getVolumen(),
+					vehiculoDTO.getPeso(), vehiculoDTO.getAncho(), vehiculoDTO.getAlto(), vehiculoDTO.getProfundidad(),
+					vehiculoDTO.getTara(), vehiculoDTO.getKilometraje(), vehiculoDTO.getEstado(),
+					vehiculoDTO.isEnGarantia(), vehiculoDTO.isTrabajoEspecifico(), vehiculoDTO.getFechaUltimoControl(),
+					null,vehiculoDTO.getSucursalIdActual());
+			
+		
 	}
 
 }

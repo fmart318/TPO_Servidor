@@ -1,7 +1,5 @@
 package entities;
 
-import hbt.PersistentObject;
-
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -14,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import dto.VehiculoDTO;
+import hbt.PersistentObject;
 
 @Entity
 @Table(name = "Vehiculos")
@@ -54,10 +53,10 @@ public class Vehiculo extends PersistentObject {
 	private String estado;
 
 	@Column(name = "trabajoEspecifico", columnDefinition = "bit", nullable = true)
-	private Boolean trabajoEspecifico;
+	private boolean trabajoEspecifico;
 
 	@Column(name = "especificacion", columnDefinition = "bit", nullable = true)
-	private Boolean enGarantia;
+	private boolean enGarantia;
 
 	@Column(name = "fechaUltimaControl", columnDefinition = "datetime", nullable = true)
 	private Date fechaUltimoControl;
@@ -65,19 +64,18 @@ public class Vehiculo extends PersistentObject {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "idPlanDeMantenimiento")
 	private PlanDeMantenimiento planDeMantenimiento;
-	
+
 	@Column(name = "sucursalIdActual", columnDefinition = "int", nullable = true)
 	private int sucursalIdActual;
 
 	public Vehiculo() {
 		super();
 	}
+	
 
-	public Vehiculo(int idVehiculo, String tipo, float volumen, float peso,
-			float ancho, float alto, float profundidad, float tara,
-			int kilometraje, String estado, Boolean enGarantia,
-			Boolean trabajoEspecifico, Date fechaUltimoControl, int sucursalIdActual,
-			PlanDeMantenimiento planDeMantenimiento) {
+	public Vehiculo(int idVehiculo, String tipo, float volumen, float peso, float ancho, float alto, float profundidad,
+			float tara, int kilometraje, String estado, boolean trabajoEspecifico, boolean enGarantia,
+			Date fechaUltimoControl, PlanDeMantenimiento planDeMantenimiento, int sucursalIdActual) {
 		super();
 		this.idVehiculo = idVehiculo;
 		this.tipo = tipo;
@@ -89,12 +87,13 @@ public class Vehiculo extends PersistentObject {
 		this.tara = tara;
 		this.kilometraje = kilometraje;
 		this.estado = estado;
-		this.enGarantia = enGarantia;
 		this.trabajoEspecifico = trabajoEspecifico;
+		this.enGarantia = enGarantia;
 		this.fechaUltimoControl = fechaUltimoControl;
-		this.sucursalIdActual = sucursalIdActual;
 		this.planDeMantenimiento = planDeMantenimiento;
+		this.sucursalIdActual = sucursalIdActual;
 	}
+
 
 	public int getIdVehiculo() {
 		return idVehiculo;
@@ -176,12 +175,20 @@ public class Vehiculo extends PersistentObject {
 		this.estado = estado;
 	}
 
-	public Boolean isTrabajoEspecifico() {
+	public boolean isTrabajoEspecifico() {
 		return trabajoEspecifico;
 	}
 
-	public void setTrabajoEspecifico(Boolean trabajoEspecifico) {
+	public void setTrabajoEspecifico(boolean trabajoEspecifico) {
 		this.trabajoEspecifico = trabajoEspecifico;
+	}
+
+	public boolean isEnGarantia() {
+		return enGarantia;
+	}
+
+	public void setEnGarantia(boolean enGarantia) {
+		this.enGarantia = enGarantia;
 	}
 
 	public Date getFechaUltimoControl() {
@@ -196,29 +203,10 @@ public class Vehiculo extends PersistentObject {
 		return planDeMantenimiento;
 	}
 
-	public void setPlanesDeMantenimiento(PlanDeMantenimiento planDeMantenimiento) {
-		this.planDeMantenimiento = planDeMantenimiento;
-	}
-
-	public VehiculoDTO toDTO() {
-		return new VehiculoDTO(idVehiculo, tipo, volumen, peso, ancho, alto,
-				profundidad, tara, kilometraje, estado, enGarantia,
-				trabajoEspecifico, fechaUltimoControl, sucursalIdActual,
-				planDeMantenimiento.toDTO());
-	}
-
-	public Boolean isEnGarantia() {
-		return enGarantia;
-	}
-
-	public void setEnGarantia(Boolean enGarantia) {
-		this.enGarantia = enGarantia;
-	}
-
 	public void setPlanDeMantenimiento(PlanDeMantenimiento planDeMantenimiento) {
 		this.planDeMantenimiento = planDeMantenimiento;
 	}
-	
+
 	public int getSucursalIdActual() {
 		return sucursalIdActual;
 	}
@@ -227,11 +215,12 @@ public class Vehiculo extends PersistentObject {
 		this.sucursalIdActual = sucursalIdActual;
 	}
 
-	public Boolean getTrabajoEspecifico() {
-		return trabajoEspecifico;
-	}
-
-	public Boolean getEnGarantia() {
-		return enGarantia;
+	public VehiculoDTO toDTO() {
+		if (planDeMantenimiento != null)
+			return new VehiculoDTO(idVehiculo, tipo, volumen, peso, ancho, alto, profundidad, tara, kilometraje, estado,
+					enGarantia, trabajoEspecifico, fechaUltimoControl, sucursalIdActual, planDeMantenimiento.toDTO());
+		else
+			return new VehiculoDTO(idVehiculo, tipo, volumen, peso, ancho, alto, profundidad, tara, kilometraje, estado,
+					enGarantia, trabajoEspecifico, fechaUltimoControl, sucursalIdActual, null);
 	}
 }
