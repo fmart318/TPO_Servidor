@@ -220,6 +220,19 @@ public class HibernateDAO {
 		this.closeSession();
 		return direcciones;
 	}
+	public DireccionDTO obtenerDireccionPorId(int idDireccion) {
+		DireccionDTO oDTO = new DireccionDTO();
+		Session s = this.getSession();
+		try {
+			Direccion o = (Direccion) s.createQuery("FROM Direccion c where c.id=:id")
+					.setParameter("id", idDireccion).uniqueResult();
+			oDTO = o.toDTO();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return oDTO;
+	}
 
 	/* Tested and Passed */
 	public ParticularDTO obtenerClienteParticular(int DNI) {

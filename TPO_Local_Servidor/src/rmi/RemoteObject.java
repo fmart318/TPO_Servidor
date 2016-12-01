@@ -1009,6 +1009,12 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(remito);
 	}
 
+	@Override
+	public DireccionDTO obtenerDireccionPorId(int idDireccion) throws RemoteException {
+		// TODO Auto-generated method stub
+		return hbtDAO.obtenerDireccionPorId(idDireccion);
+	}
+
 
 
 

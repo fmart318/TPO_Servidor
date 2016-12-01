@@ -129,8 +129,29 @@ public class EntityManager {
 	}
 
 	public static Sucursal SucursalToEntity(SucursalDTO sucursalDTO) {
-		return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
-				DireccionToEntity(sucursalDTO.getUbicacion()), null);
+		if(sucursalDTO.getPedidos()!=null&&sucursalDTO.getUbicacion()!=null){
+			List<Pedido> pedidos = new ArrayList<Pedido>();
+			for (PedidoDTO pedido : sucursalDTO.getPedidos()) {
+				pedidos.add(PedidoToEntity(pedido));
+			}
+			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
+					DireccionToEntity(sucursalDTO.getUbicacion()),pedidos);
+		}
+		else if(sucursalDTO.getPedidos()!=null&&sucursalDTO.getUbicacion()==null){
+			List<Pedido> pedidos = new ArrayList<Pedido>();
+			for (PedidoDTO pedido : sucursalDTO.getPedidos()) {
+				pedidos.add(PedidoToEntity(pedido));
+			}
+			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
+					null, pedidos);
+		}
+		else if(sucursalDTO.getPedidos()==null&&sucursalDTO.getUbicacion()!=null)
+			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
+					DireccionToEntity(sucursalDTO.getUbicacion()), null);
+		else
+			return new Sucursal(sucursalDTO.getIdSucursal(), sucursalDTO.getNombre(),
+					null, null);
+			
 	}
 
 	public static Trayecto TrayectoToEntity(TrayectoDTO trayectoDTO) {
