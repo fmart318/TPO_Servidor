@@ -150,10 +150,12 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			// Si el envio esta parado
 			else if (envioDto.getEstado().equals("parado")) {
 				if (!controlarPedidoLLegoADestinoFinal(envioDto, pedido)) {
-					System.out.println("-----Verificando si se puede enviar el pedido-----");
+					System.out.println("-----Verificando si se puede generar un envio-----");
 					pedidosPendientes.add(pedido);
-					asignarPedidosPendientesATransporteLibre(RemoteObjectHelper
-							.obtenerPedidosConMismoSucursalActual(pedidosPendientes, pedido.getSucursalActualId()));
+					if (!controlarPedidoUrgenteNecesario(pedido)) {
+						asignarPedidosPendientesATransporteLibre(RemoteObjectHelper
+								.obtenerPedidosConMismoSucursalActual(pedidosPendientes, pedido.getSucursalActualId()));
+					}
 				}
 			}
 		}
@@ -184,18 +186,27 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	private void controlarLLegadaDeTercero(VehiculoTerceroDTO vehiculoTerceroDto, PedidoDTO pedido)
 			throws RemoteException {
 
+		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
+		
 		// Se asume que el tercero siempre llega en el horario predeterminado
-		if (vehiculoTerceroDto.getFechaLlegada().after(new Date())) {
+		if (vehiculoTerceroDto.getFechaLlegada().before(fechaActual)) {
 			System.out.println("-----Pedido LLego a su destino final-----");
-
-			pedido.setSucursalActualId(pedido.getSucursalDestinoId());
-			hbtDAO.modificar(EntityManager.PedidoToEntity(pedido));
-
+			
 			vehiculoTerceroDto.setEstado("Libre");
 			vehiculoTerceroDto.setPedidos(new ArrayList<PedidoDTO>());
 			vehiculoTerceroDto.setFechaLlegada(null);
-
 			hbtDAO.modificar(EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDto));
+			
+			SucursalDTO sucursalDestino = RemoteObjectHelper.obtenerSucursal(pedido.getSucursalDestinoId());
+			
+			pedido.setSucursalActualId(sucursalDestino.getIdSucursal());
+			hbtDAO.modificar(EntityManager.PedidoToEntity(pedido));
+
+			List<PedidoDTO> pedidos = sucursalDestino.getPedidos();
+			pedidos.add(pedido);
+			sucursalDestino.setPedidos(pedidos);
+			hbtDAO.modificar(EntityManager.SucursalToEntity(sucursalDestino));
+
 		} else {
 			System.out.println("-----Pedido Sigue en camino-----");
 		}
@@ -274,7 +285,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		if (mejorFechaLLegada != null) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(mejorFechaLLegada);
-			cal.add(Calendar.DATE, -30);
+			cal.add(Calendar.DATE, -1);
 			Date mejorFechaLLegadaMenosUnDia = cal.getTime();
 
 			if (pedido.getFechaMaxima().before(mejorFechaLLegada)) {
@@ -425,6 +436,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
 		Timestamp fecahActualMasUnMinuto = new Timestamp(fechaActual.getTime() + (10 * 6000));
+		Timestamp fecahActualMasTresMinutos = new Timestamp(fechaActual.getTime() + (10 * 6000 * 3));
 		Timestamp fecahActualMas2Dias = new Timestamp(fechaActual.getTime() + (10 * 6000 * 1440 * 2));
 
 		// Pedido A - Volumen = 5 - Sucursal = 1
@@ -468,7 +480,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		cargasC.add(cargaC);
 		hbtDAO.guardar(cargaC);
 
-		Pedido pedidoC = new Pedido(5, direccionA, direccionC, fechaActual, 12, 13, fecahActualMas2Dias, cargasC, 1500,
+		Pedido pedidoC = new Pedido(5, direccionA, direccionC, fechaActual, 12, 13, fecahActualMasTresMinutos, cargasC, 1500,
 				sucursal1.getIdSucursal(), sucursal3.getIdSucursal(), sucursal1.getIdSucursal(), false, false, cliente,
 				"pendiente");
 		hbtDAO.guardar(pedidoC);
