@@ -528,10 +528,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.guardar(planDeMantenimiento);
 
 		Vehiculo vehiculoA = new Vehiculo(3, "Propio", 8, 3500, 2, 2, 3, 1500, 10200, "Libre", false, true, null,
-				sucursal1.getIdSucursal(), planDeMantenimiento);
+				planDeMantenimiento, sucursal1.getIdSucursal());
 		hbtDAO.guardar(vehiculoA);
+
 		Vehiculo vehiculoB = new Vehiculo(4, "Propio", 8, 3500, 2, 2, 3, 1500, 10200, "Libre", false, false, null,
-				sucursal1.getIdSucursal(), planDeMantenimiento);
+				planDeMantenimiento, sucursal1.getIdSucursal());
 		hbtDAO.guardar(vehiculoB);
 
 		VehiculoTercero vehiculoTerceroA = new VehiculoTercero(1, "Semirremolque Con Barandas", 2000, "Libre", null,
@@ -644,6 +645,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		hbtDAO.modificar(sucursal);
 	}
+	
+	@Override
+	public SucursalDTO obtenerSucursalPorId(int idSucursal) throws RemoteException {
+		return hbtDAO.obtenerSucursalPorId(idSucursal);
+	}
 
 	// Trayecto
 
@@ -654,18 +660,13 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public void altaTrayecto(TrayectoDTO trayectDto) throws RemoteException {
-		Trayecto trayecto = new Trayecto();
-		trayecto = EntityManager.TrayectoToEntity(trayectDto);
-		hbtDAO.guardar(trayecto);
+
+		hbtDAO.guardar(EntityManager.TrayectoToEntity(trayectDto));
 	}
 
 	@Override
 	public void updateTrayecto(TrayectoDTO trayectDto) throws RemoteException {
-		Trayecto trayecto = new Trayecto(trayectDto.getIdTrayecto(),
-				EntityManager.SucursalToEntity(trayectDto.getSucursalOrigen()),
-				EntityManager.SucursalToEntity(trayectDto.getSucursalDestino()), trayectDto.getTiempo(),
-				trayectDto.getKm(), trayectDto.getPrecio());
-		hbtDAO.modificar(trayecto);
+		hbtDAO.modificar(EntityManager.TrayectoToEntity(trayectDto));
 	}
 
 	@Override
@@ -691,17 +692,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public void updateRuta(RutaDTO rutaDto) throws RemoteException {
-		Ruta ruta = new Ruta();
-		ruta.setIdRuta(rutaDto.getIdRuta());
-		ruta.setPrecio(rutaDto.getPrecio());
 
-		List<Trayecto> trayectos = new ArrayList<Trayecto>();
-		for (TrayectoDTO trayecto : rutaDto.getTrayectos()) {
-			trayectos.add(EntityManager.TrayectoToEntity(trayecto));
-		}
-		ruta.setTrayectos(trayectos);
-
-		hbtDAO.modificar(ruta);
+		hbtDAO.modificar(EntityManager.RutaToEntity(rutaDto));
 	}
 
 	@Override
@@ -895,6 +887,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public void eliminarDireccion(DireccionDTO d) throws RemoteException {
 		hbtDAO.borrar(EntityManager.DireccionToEntity(d));
 	}
+	
+	@Override
+	public DireccionDTO obtenerDireccionPorId(int idDireccion) throws RemoteException {
+		return hbtDAO.obtenerDireccionPorId(idDireccion);
+	}
 
 	// Plan de Mantenimiento
 
@@ -922,6 +919,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	@Override
 	public List<VehiculoAMantenerDTO> getVehiculosAMantener() throws RemoteException {
 		return hbtDAO.getVehiculosAMantener();
+	}
+	
+	@Override
+	public PlanDeMantenimientoDTO obtenerPlanDeMantenimientoPorId(int idPlanDeMantenimiento) throws RemoteException {
+		return hbtDAO.obtenerPlanDeMantenimientoPorId(idPlanDeMantenimiento);
 	}
 
 	// Vehiculo Tercero

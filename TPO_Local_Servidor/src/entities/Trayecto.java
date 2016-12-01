@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import dto.SucursalDTO;
 import dto.TrayectoDTO;
 
 @Entity
@@ -104,7 +105,16 @@ public class Trayecto extends PersistentObject {
 	}
 
 	public TrayectoDTO toDTO() {
-		return new TrayectoDTO(idTrayecto, getSucursalOrigen().toDTO(),
-				getSucursalDestino().toDTO(), tiempo, km, precio);
+		SucursalDTO so,sd;
+		if(sucursalOrigen!=null)
+			so=getSucursalOrigen().toDTO();
+		else
+			so=null;
+		if(sucursalDestino!=null)
+			sd=getSucursalDestino().toDTO();
+		else
+			sd=null;
+		return new TrayectoDTO(idTrayecto, so,
+				sd, tiempo, km, precio);
 	}
 }

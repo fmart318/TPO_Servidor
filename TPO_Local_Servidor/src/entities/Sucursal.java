@@ -83,12 +83,27 @@ public class Sucursal extends PersistentObject {
 	}
 
 	public SucursalDTO toDTO() {
-		List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
-		for (Pedido pedido : pedidos) {
-			pedidoDtos.add(pedido.toDTO());
+		if(pedidos!=null&&ubicacion!=null){
+			List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
+			for (Pedido pedido : pedidos) {
+				pedidoDtos.add(pedido.toDTO());
+			}
+			SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre, getUbicacion().toDTO(), pedidoDtos);
+			return sucursalDTO;
+		}else if(pedidos!=null&&ubicacion==null){
+			List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
+			for (Pedido pedido : pedidos) {
+				pedidoDtos.add(pedido.toDTO());
+			}
+			SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre, null, pedidoDtos);
+			return sucursalDTO;
+		}else if(pedidos==null&&ubicacion!=null){
+			return new SucursalDTO(idSucursal, nombre, getUbicacion().toDTO(), null);
 		}
-		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre, getUbicacion().toDTO(), pedidoDtos);
-		return sucursalDTO;
+		else if(pedidos==null&&ubicacion==null){
+			return new SucursalDTO(idSucursal, nombre, null, null);
+		}
+		else return new SucursalDTO(idSucursal, nombre, null, null);
 	}
 
 	public SucursalDTO toDTONoRecursivo() {

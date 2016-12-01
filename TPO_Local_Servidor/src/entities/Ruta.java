@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import dto.RutaDTO;
+import dto.SucursalDTO;
 import dto.TrayectoDTO;
 import hbt.PersistentObject;
 
@@ -48,6 +49,39 @@ public class Ruta extends PersistentObject {
 	public Ruta() {
 		super();
 	}
+	
+
+	public Ruta(int idRuta, List<Trayecto> trayectos, List<Sucursal> sucursales, float precio, Sucursal sucursalOrigen,
+			Sucursal sucursalDestino) {
+		super();
+		this.idRuta = idRuta;
+		this.trayectos = trayectos;
+		this.sucursales = sucursales;
+		this.precio = precio;
+		this.sucursalOrigen = sucursalOrigen;
+		this.sucursalDestino = sucursalDestino;
+	}
+
+
+	public Sucursal getSucursalOrigen() {
+		return sucursalOrigen;
+	}
+
+
+	public void setSucursalOrigen(Sucursal sucursalOrigen) {
+		this.sucursalOrigen = sucursalOrigen;
+	}
+
+
+	public Sucursal getSucursalDestino() {
+		return sucursalDestino;
+	}
+
+
+	public void setSucursalDestino(Sucursal sucursalDestino) {
+		this.sucursalDestino = sucursalDestino;
+	}
+
 
 	public Ruta(int idRuta, List<Trayecto> trayectos, float precio, List<Sucursal> sucursales,
 			Sucursal sucursalOrigen, Sucursal sucursalDestino) {
@@ -101,10 +135,33 @@ public class Ruta extends PersistentObject {
 
 	public RutaDTO toDTO() {
 		List<TrayectoDTO> trayectosDTO = new ArrayList<TrayectoDTO>();
-		for (Trayecto trayecto : trayectos)
-			trayectosDTO.add(trayecto.toDTO());
-		return new RutaDTO(idRuta, trayectosDTO, precio,
-				sucursalOrigen.toDTO(), sucursalDestino.toDTO());
+		if(trayectos!=null){
+			for (Trayecto trayecto : trayectos)
+				trayectosDTO.add(trayecto.toDTO());
+		}
+		else{
+			trayectosDTO=null;
+		}
+		List<SucursalDTO> sucursalsDTO = new ArrayList<SucursalDTO>();
+		if(sucursales!=null){
+			
+			for (Sucursal sucursal : sucursales)
+				sucursalsDTO.add(sucursal.toDTO());
+		}else
+			sucursalsDTO=null;
+		SucursalDTO so;
+		if(sucursalOrigen!=null){
+			so=sucursalOrigen.toDTO();
+		}else
+			so=null;
+		SucursalDTO sd;
+		if(sucursalDestino!=null)
+			sd=sucursalDestino.toDTO();
+		else
+			sd=null;
+
+		return new RutaDTO(idRuta, trayectosDTO,sucursalsDTO, precio,
+				so, sd);
 	}
 
 	public int calcularKm() {

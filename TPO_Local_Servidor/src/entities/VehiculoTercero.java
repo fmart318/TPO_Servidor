@@ -48,8 +48,9 @@ public class VehiculoTercero extends PersistentObject {
 		super();
 	}
 
-	public VehiculoTercero(int idVehiculoTercero, String tipoVehiculo,
-			float precio, String estado, Date fechaLlegada, List<Pedido> pedidos) {
+
+	public VehiculoTercero(int idVehiculoTercero, String tipoVehiculo, float precio, String estado, Date fechaLlegada,
+			List<Pedido> pedidos) {
 		super();
 		this.idVehiculoTercero = idVehiculoTercero;
 		this.tipoVehiculo = tipoVehiculo;
@@ -58,6 +59,7 @@ public class VehiculoTercero extends PersistentObject {
 		this.fechaLlegada = fechaLlegada;
 		this.pedidos = pedidos;
 	}
+
 
 	public int getIdVehiculoTercero() {
 		return idVehiculoTercero;
@@ -108,11 +110,16 @@ public class VehiculoTercero extends PersistentObject {
 	}
 	
 	public VehiculoTerceroDTO toDTO() {
-		List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
-		for (Pedido pedido : this.pedidos) {
-			pedidoDtos.add(pedido.toDTO());
+		if(pedidos!=null){
+			List<PedidoDTO> pedidoDtos = new ArrayList<PedidoDTO>();
+			for (Pedido pedido : this.pedidos) {
+				pedidoDtos.add(pedido.toDTO());
+			}
+			return new VehiculoTerceroDTO(idVehiculoTercero, tipoVehiculo, precio, estado, fechaLlegada, pedidoDtos);
 		}
-		return new VehiculoTerceroDTO(idVehiculoTercero, tipoVehiculo, precio, estado, fechaLlegada, pedidoDtos);
+		else
+			return new VehiculoTerceroDTO(idVehiculoTercero, tipoVehiculo, precio, estado, fechaLlegada, null);
+		
 	}
 
 }
