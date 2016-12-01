@@ -71,7 +71,6 @@ public class Vehiculo extends PersistentObject {
 	public Vehiculo() {
 		super();
 	}
-	
 
 	public Vehiculo(int idVehiculo, String tipo, float volumen, float peso, float ancho, float alto, float profundidad,
 			float tara, int kilometraje, String estado, boolean trabajoEspecifico, boolean enGarantia,
