@@ -15,6 +15,10 @@ import dto.SucursalDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoDTO;
 import dto.VehiculoTerceroDTO;
+import entities.Ruta;
+import entities.Sucursal;
+import entities.Vehiculo;
+import entities.VehiculoTercero;
 
 public class RemoteObjectHelper {
 
@@ -128,7 +132,11 @@ public class RemoteObjectHelper {
 			SucursalDTO sucursalActual = obtenerSucursal(pedidoDto.getSucursalActualId());
 			SucursalDTO sucursalDestino = obtenerSucursal(pedidoDto.getSucursalDestinoId());
 			RutaDTO mejorRuta = obtenerMejorRuta(sucursalActual, sucursalDestino);
-			int proximoDestinoId = mejorRuta.getNextSucursal(sucursalActual).getIdSucursal();
+			
+			Sucursal sucursalActualEntity = EntityManager.SucursalToEntity(sucursalActual);
+			Ruta mejorRutaEntity = EntityManager.RutaToEntity(mejorRuta);
+			
+			int proximoDestinoId = mejorRutaEntity.getNextSucursal(sucursalActualEntity).getIdSucursal();
 
 			boolean todosCompartenElMismoDestino = true;
 
@@ -137,7 +145,11 @@ public class RemoteObjectHelper {
 				SucursalDTO sucursalPedidoActual = obtenerSucursal(pedido.getSucursalActualId());
 				SucursalDTO sucursalPedidoDestino = obtenerSucursal(pedido.getSucursalDestinoId());
 				RutaDTO mejorRutaActual = obtenerMejorRuta(sucursalPedidoActual, sucursalPedidoDestino);
-				int proximoDestinoActualId = mejorRutaActual.getNextSucursal(sucursalPedidoActual).getIdSucursal();
+				
+				Sucursal sucursalPedidoActualEntity = EntityManager.SucursalToEntity(sucursalActual);
+				Ruta mejorRutaActualEntity = EntityManager.RutaToEntity(mejorRutaActual);
+				
+				int proximoDestinoActualId = mejorRutaActualEntity.getNextSucursal(sucursalPedidoActualEntity).getIdSucursal();
 
 				if (proximoDestinoActualId != proximoDestinoId) {
 					todosCompartenElMismoDestino = false;
@@ -203,7 +215,8 @@ public class RemoteObjectHelper {
 		List<VehiculoDTO> vehiculosDisponibles = new ArrayList<VehiculoDTO>();
 		List<VehiculoDTO> vehiculos = hbtDAO.obtenerVehiculos();
 		for (VehiculoDTO vehiculo : vehiculos) {
-			if (vehiculo.getEstado().equals("Libre") && vehiculo.getSucursalIdActual() == sucursalId) {
+			Vehiculo vehiculoEntity = EntityManager.VehiculoToEntity(vehiculo);
+			if (vehiculoEntity.isLibre() && vehiculoEntity.isInSucursal(sucursalId)) {
 				vehiculosDisponibles.add(vehiculo);
 			}
 		}
@@ -214,7 +227,8 @@ public class RemoteObjectHelper {
 		List<VehiculoTerceroDTO> vehiculosTercerosDisponibles = new ArrayList<VehiculoTerceroDTO>();
 		List<VehiculoTerceroDTO> vehiculosTerceros = hbtDAO.listarVTerceros();
 		for (VehiculoTerceroDTO vehiculo : vehiculosTerceros) {
-			if (vehiculo.getEstado().equals("Libre")) {
+			VehiculoTercero vehiculoTerceroEntity = EntityManager.VehiculoTerceroToEntity(vehiculo);
+			if (vehiculoTerceroEntity.isLibre()) {
 				vehiculosTercerosDisponibles.add(vehiculo);
 			}
 		}

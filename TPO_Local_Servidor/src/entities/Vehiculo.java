@@ -222,4 +222,32 @@ public class Vehiculo extends PersistentObject {
 			return new VehiculoDTO(idVehiculo, tipo, volumen, peso, ancho, alto, profundidad, tara, kilometraje, estado,
 					enGarantia, trabajoEspecifico, fechaUltimoControl, sucursalIdActual, null);
 	}
+	
+	
+	
+	public boolean isInSucursal(int sucursalId) {
+		return this.getSucursalIdActual() == sucursalId;
+	}
+	
+	public void setEnUso() {
+		this.setEstado("En Uso");
+		this.setSucursalIdActual(-1);
+	}
+	
+	public void setEstadoLibre() {
+		this.setEstado("Libre");
+	}
+	
+	public boolean isEnUso() {
+		return this.getEstado().equals("En Uso");
+	}
+	
+	public boolean isLibre() {
+		return this.getEstado().equals("Libre");
+	}
+	
+	public float getMinimoVolumenAceptado() {
+		return (this.getVolumen() * 70) / 100;
+	}
+	
 }

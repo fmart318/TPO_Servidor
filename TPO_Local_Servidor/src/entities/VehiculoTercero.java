@@ -122,4 +122,27 @@ public class VehiculoTercero extends PersistentObject {
 		
 	}
 
+	public void setEnUso() {
+		this.setEstado("En Uso");
+
+	}
+	
+	public void setEstadoLibre() {
+		this.setEstado("Libre");
+	}
+	
+	public boolean isEnUso() {
+		return this.getEstado().equals("En Uso");
+	}
+	
+	public boolean isLibre() {
+		return this.getEstado().equals("Libre");
+	}
+	
+	public void liberarVehiculoTercero() {
+		this.setEstado("Libre");
+		this.setPedidos(new ArrayList<Pedido>());
+		this.setFechaLlegada(null);
+	}
+	
 }

@@ -242,4 +242,20 @@ public class Pedido extends PersistentObject {
 				solicitaTransporteDirecto, solicitaAvionetaParticular, cliente.toDTO() , estado);
 		return pedidoDTO;
 	}
+	
+	public float getVolumenTotalDeCargas() {
+		float cargaTotalPedido = 0;
+		for (Carga carga : this.cargas) {
+			cargaTotalPedido = carga.getVolumen() + cargaTotalPedido;
+		}
+		return cargaTotalPedido;
+	}
+	
+	public void setEstadoFinalizado() {
+		this.setEstado("finalizado");
+	}
+	
+	public boolean llegoDestinoFinal() {
+		return this.getSucursalActualId() == this.getSucursalDestinoId();
+	}
 }

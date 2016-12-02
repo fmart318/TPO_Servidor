@@ -179,5 +179,26 @@ public class Ruta extends PersistentObject {
 	public Sucursal getDestino() {
 		return sucursalDestino;
 	}
+	
+	public Sucursal getNextSucursal(Sucursal sucursal) {
+		for (Trayecto trayecto : trayectos) {
+			if (trayecto.getSucursalOrigen().getIdSucursal() ==  sucursal.getIdSucursal()) {
+				return trayecto.getSucursalDestino();
+			}
+		}
+		return null;
+	}
+	
+	public float getTiempoRuta() {
+		float tiempoRuta = 0;
+		for (Trayecto trayecto : this.getTrayectos()) {
+			tiempoRuta = trayecto.getTiempo() + tiempoRuta;
+		}
+		return tiempoRuta;
+	}
+	
+	public long getTiempoPrimerTrayecto() {
+		return (long) this.getTrayectos().get(0).getTiempo() * 60000;
+	}
 
 }
