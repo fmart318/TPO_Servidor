@@ -31,7 +31,6 @@ import dto.VehiculoTerceroDTO;
 import entities.Carga;
 import entities.Direccion;
 import entities.Empresa;
-import entities.Envio;
 import entities.Factura;
 import entities.Particular;
 import entities.Pedido;
@@ -120,11 +119,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			VehiculoTerceroDTO vehiculoTerceroDTO = hbtDAO.obtenerVehiculoTerceroConPedido(pedido.getIdPedido());
 			EnvioDTO envioDto = hbtDAO.obtenerEnvioActualDePedido(pedido.getIdPedido());
 
-			Pedido pedidoEntity = EntityManager.PedidoToEntity(pedido);
-			Envio envioEntity = EntityManager.EnvioToEntity(envioDto);
-			
 			// Si el pedido ya llego a su destino
-			if (pedidoEntity.llegoDestinoFinal()) {
+			if (pedido.getSucursalActualId() == pedido.getSucursalDestinoId()) {
 				System.out.println("-----Pedido LLego a su destino final-----");
 				pedidosEsperandoSerBuscadas.add(pedido);
 			}
@@ -146,13 +142,13 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			}
 
 			// Si el envio esta despachado
-			else if (envioEntity.isDespachado()) {
+			else if (envioDto.getEstado().equals("despachado")) {
 				System.out.println("-----Controlando Llegada de Envio-----");
 				controlarLLegadaDeEnvio(envioDto);
 			}
 
 			// Si el envio esta parado
-			else if (envioEntity.isParado()) {
+			else if (envioDto.getEstado().equals("parado")) {
 				if (!controlarPedidoLLegoADestinoFinal(envioDto, pedido)) {
 					System.out.println("-----Verificando si se puede generar un envio-----");
 					pedidosPendientes.add(pedido);
@@ -168,17 +164,16 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	private boolean controlarPedidoLLegoADestinoFinal(EnvioDTO envioDto, PedidoDTO pedido) throws RemoteException {
-		
+
 		if (envioDto.getSucursalDestino().getIdSucursal() == pedido.getSucursalDestinoId()) {
 			System.out.println("-----Pedido llego a Destino Final-----");
-			Envio envioEntity = EntityManager.EnvioToEntity(envioDto);
-			envioEntity.setEstadoListo();
-			hbtDAO.modificar(envioEntity);
+
+			envioDto.setEstado("listo");
+			hbtDAO.modificar(EntityManager.EnvioToEntity(envioDto));
 
 			for (PedidoDTO pedidosDeEnvios : envioDto.getPedidos()) {
-				Pedido pedidoEntity = EntityManager.PedidoToEntity(pedidosDeEnvios);
-				pedidoEntity.setEstadoFinalizado();
-				hbtDAO.modificar(pedidoEntity);
+				pedidosDeEnvios.setEstado("finalizado");
+				hbtDAO.modificar(EntityManager.PedidoToEntity(pedidosDeEnvios));
 			}
 			return true;
 
@@ -196,9 +191,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		// Se asume que el tercero siempre llega en el horario predeterminado
 		if (vehiculoTerceroDto.getFechaLlegada().before(fechaActual)) {
 			System.out.println("-----Pedido LLego a su destino final-----");
-			VehiculoTercero vehiculoTerceroEntity = EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDto);
-			vehiculoTerceroEntity.liberarVehiculoTercero();
-			hbtDAO.modificar(vehiculoTerceroEntity);
+			
+			vehiculoTerceroDto.setEstado("Libre");
+			vehiculoTerceroDto.setPedidos(new ArrayList<PedidoDTO>());
+			vehiculoTerceroDto.setFechaLlegada(null);
+			hbtDAO.modificar(EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDto));
 			
 			SucursalDTO sucursalDestino = RemoteObjectHelper.obtenerSucursal(pedido.getSucursalDestinoId());
 			
@@ -226,14 +223,12 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 			VehiculoDTO vehiculo = hbtDAO.obtenerVehiculo(envioDto.getVehiculoId());
 			vehiculo.setSucursalIdActual(sucursalDestino.getIdSucursal());
-			Vehiculo vehiculoentity = EntityManager.VehiculoToEntity(vehiculo);
-			vehiculoentity.setEstadoLibre();
-			hbtDAO.modificar(vehiculoentity);
-			
+			vehiculo.setEstado("Libre");
+			hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculo));
+
+			envioDto.setEstado("parado");
 			envioDto.setFechaLlegada(fechaActual);
-			Envio envioEntity = EntityManager.EnvioToEntity(envioDto);
-			envioEntity.setEstadoParado();
-			hbtDAO.modificar(envioEntity);
+			hbtDAO.modificar(EntityManager.EnvioToEntity(envioDto));
 
 			for (PedidoDTO pedido : envioDto.getPedidos()) {
 				pedido.setSucursalActualId(envioDto.getSucursalDestino().getIdSucursal());
@@ -257,22 +252,23 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		SucursalDTO sucursalDestino = RemoteObjectHelper.obtenerSucursal(pedidos.get(0).getSucursalDestinoId());
 		RutaDTO rutaVehiculo = RemoteObjectHelper.obtenerMejorRuta(sucursalActual, sucursalDestino);
 
-		Vehiculo vehiculoEntity = EntityManager.VehiculoToEntity(vehiculoDto);
-		Ruta rutaEntity = EntityManager.RutaToEntity(rutaVehiculo);
-		if (rutaEntity != null) {
-			vehiculoEntity.setEnUso();
-			
-			hbtDAO.modificar(vehiculoEntity);
+		if (rutaVehiculo != null) {
+			vehiculoDto.setEstado("En viaje");
+			vehiculoDto.setSucursalIdActual(-1);
+			hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculoDto));
 
-			long minutosFechaLlegadaEnvio = rutaEntity.getTiempoPrimerTrayecto();
+			float tiempoRuta = 0;
+			for (TrayectoDTO trayecto : rutaVehiculo.getTrayectos()) {
+				tiempoRuta = trayecto.getTiempo() + tiempoRuta;
+			}
+
+			long minutosFechaLlegadaEnvio = (long) rutaVehiculo.getTrayectos().get(0).getTiempo() * 60000;
 			Timestamp fechaInicialEnvio = new Timestamp(System.currentTimeMillis());
 			Timestamp fechaLlegadaEnvio = new Timestamp(System.currentTimeMillis() + minutosFechaLlegadaEnvio);
-			
-			Sucursal sucursalActualEntity = EntityManager.SucursalToEntity(sucursalActual);
 
 			List<EnvioDTO> envios = obtenerEnvios();
 			EnvioDTO envioDto = new EnvioDTO(envios.size() + 1, fechaInicialEnvio, fechaLlegadaEnvio, true,
-					"despachado", pedidos, 1, sucursalActual, rutaEntity.getNextSucursal(sucursalActualEntity).toDTO(),
+					"despachado", pedidos, 1, sucursalActual, rutaVehiculo.getNextSucursal(sucursalActual),
 					vehiculoDto.getIdVehiculo());
 			hbtDAO.guardar(EntityManager.EnvioToEntity(envioDto));
 
@@ -306,13 +302,16 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		System.out.println("-----Pedido requiere un envio urgente-----");
 
-		Pedido pedidoEntity = EntityManager.PedidoToEntity(pedido);
-		float cargaTotalPedido = pedidoEntity.getVolumenTotalDeCargas();
+		float cargaTotalPedido = 0;
+		for (CargaDTO carga : pedido.getCargas()) {
+			cargaTotalPedido = carga.getVolumen() + cargaTotalPedido;
+		}
 
 		List<VehiculoDTO> vehiculosDisponibles = RemoteObjectHelper
 				.obtenerVehiculosDisponiblesEnSucursal(pedido.getSucursalActualId());
 
 		if (vehiculosDisponibles.size() > 0) {
+
 			boolean vehiculoParaPedidoUrgenteDisponible = false;
 			for (VehiculoDTO vehiculoDto : vehiculosDisponibles) {
 				if (cargaTotalPedido < vehiculoDto.getVolumen()) {
@@ -338,22 +337,26 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	private boolean contratarTercero(PedidoDTO pedido) throws RemoteException {
 
 		System.out.println("-----Contratando un Tercero-----");
-		
+
+		float cargaTotalPedido = 0;
+		for (CargaDTO carga : pedido.getCargas()) {
+			cargaTotalPedido = carga.getVolumen() + cargaTotalPedido;
+		}
+
 		List<VehiculoTerceroDTO> vehiculosTercerosDisponibles = RemoteObjectHelper
 				.obtenerVehiculosTercerosDisponibles();
 
 		if (vehiculosTercerosDisponibles.size() > 0) {
 			VehiculoTerceroDTO vehiculoTerceroDTO = vehiculosTercerosDisponibles.get(0);
-			
+			vehiculoTerceroDTO.setEstado("En Uso");
+			vehiculoTerceroDTO.setFechaLlegada(pedido.getFechaMaxima());
+
 			List<PedidoDTO> pedidoList = new ArrayList<PedidoDTO>();
 			pedidoList.add(pedido);
 			vehiculoTerceroDTO.setPedidos(pedidoList);
-			
-			VehiculoTercero vehiculoTerceroEntity = EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDTO);
-			vehiculoTerceroEntity.setEnUso();
-			vehiculoTerceroEntity.setFechaLlegada(pedido.getFechaMaxima());
 
-			hbtDAO.modificar(vehiculoTerceroEntity);
+			hbtDAO.modificar(EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDTO));
+
 			return true;
 		} else {
 			System.out.println("-----No hay Tercero Disponible-----");
@@ -371,10 +374,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 			boolean seGeneroEnvio = false;
 			for (VehiculoDTO vehiculoDisponible : vehiculosDisponibles) {
-				Vehiculo vehiculoDisponibleEntity = EntityManager.VehiculoToEntity(vehiculoDisponible);
 				ArrayList<PedidoDTO> pedidosPendientesConvenientes = RemoteObjectHelper
 						.obtenerCombinacionPedidosPendientesMasConveniente(pedidosPendientes,
-								vehiculoDisponibleEntity.getMinimoVolumenAceptado(), vehiculoDisponibleEntity.getVolumen());
+								(vehiculoDisponible.getVolumen() * 70) / 100, vehiculoDisponible.getVolumen());
 
 				if (pedidosPendientesConvenientes.size() > 0) {
 					seGeneroEnvio = true;

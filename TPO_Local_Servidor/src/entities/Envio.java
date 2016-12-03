@@ -173,28 +173,4 @@ public class Envio extends PersistentObject {
 					cumpleCondicionesCarga, estado, null, prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO(), idVehiculo);
 		
 	}
-	
-	public void setEstadoListo() {
-		this.setEstado("listo");
-	}
-	
-	public void setEstadoParado() {
-		this.setEstado("parado");
-	}
-	
-	public void setEstadoDespachado() {
-		this.setEstado("despachado");
-	}
-	
-	public boolean isListo() {
-		return this.getEstado().equals("listo");
-	}
-	
-	public boolean isDespachado() {
-		return this.getEstado().equals("despachado");
-	}
-	
-	public boolean isParado() {
-		return this.getEstado().equals("parado");
-	}
 }
