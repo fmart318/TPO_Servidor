@@ -8,6 +8,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Session;
+import org.hibernate.mapping.Array;
+import org.w3c.dom.ls.LSInput;
+
 import Strategy.PoliticaEspecificidad;
 import Strategy.PoliticaGarantia;
 import Strategy.PoliticaGeneral;
@@ -31,6 +35,7 @@ import dto.VehiculoTerceroDTO;
 import entities.Carga;
 import entities.Direccion;
 import entities.Empresa;
+import entities.Envio;
 import entities.Factura;
 import entities.Particular;
 import entities.Pedido;
@@ -116,8 +121,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 			System.out.println("-----Controlando Pedido " + pedido.getIdPedido() + "-----");
 
-			VehiculoTerceroDTO vehiculoTerceroDTO = hbtDAO.obtenerVehiculoTerceroConPedido(pedido.getIdPedido());
-			EnvioDTO envioDto = hbtDAO.obtenerEnvioActualDePedido(pedido.getIdPedido());
+			VehiculoTerceroDTO vehiculoTerceroDTO = hbtDAO.obtenerVehiculoTerceroConPedido(pedido.getIdPedido()).toDTO();
+			EnvioDTO envioDto = hbtDAO.obtenerEnvioActualDePedido(pedido.getIdPedido()).toDTO();
 
 			// Si el pedido ya llego a su destino
 			if (pedido.getSucursalActualId() == pedido.getSucursalDestinoId()) {
@@ -197,7 +202,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			vehiculoTerceroDto.setFechaLlegada(null);
 			hbtDAO.modificar(EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDto));
 			
-			SucursalDTO sucursalDestino = RemoteObjectHelper.obtenerSucursal(pedido.getSucursalDestinoId());
+			SucursalDTO sucursalDestino = obtenerSucursalPorId(pedido.getSucursalDestinoId());
 			
 			pedido.setSucursalActualId(sucursalDestino.getIdSucursal());
 			hbtDAO.modificar(EntityManager.PedidoToEntity(pedido));
@@ -221,7 +226,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 			SucursalDTO sucursalDestino = envioDto.getSucursalDestino();
 
-			VehiculoDTO vehiculo = hbtDAO.obtenerVehiculo(envioDto.getVehiculoId());
+			VehiculoDTO vehiculo = hbtDAO.obtenerVehiculo(envioDto.getVehiculoId()).toDTO();
 			vehiculo.setSucursalIdActual(sucursalDestino.getIdSucursal());
 			vehiculo.setEstado("Libre");
 			hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculo));
@@ -248,8 +253,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	private void generarEnvio(VehiculoDTO vehiculoDto, List<PedidoDTO> pedidos) throws RemoteException {
 
-		SucursalDTO sucursalActual = RemoteObjectHelper.obtenerSucursal(pedidos.get(0).getSucursalActualId());
-		SucursalDTO sucursalDestino = RemoteObjectHelper.obtenerSucursal(pedidos.get(0).getSucursalDestinoId());
+		SucursalDTO sucursalActual = obtenerSucursalPorId(pedidos.get(0).getSucursalActualId());
+		SucursalDTO sucursalDestino = obtenerSucursalPorId(pedidos.get(0).getSucursalDestinoId());
 		RutaDTO rutaVehiculo = RemoteObjectHelper.obtenerMejorRuta(sucursalActual, sucursalDestino);
 
 		if (rutaVehiculo != null) {
@@ -278,8 +283,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	public boolean controlarPedidoUrgenteNecesario(PedidoDTO pedido) throws RemoteException {
 
-		SucursalDTO sucursalActual = RemoteObjectHelper.obtenerSucursal(pedido.getSucursalActualId());
-		SucursalDTO sucursalDestino = RemoteObjectHelper.obtenerSucursal(pedido.getSucursalDestinoId());
+		SucursalDTO sucursalActual =obtenerSucursalPorId(pedido.getSucursalActualId());
+		SucursalDTO sucursalDestino = obtenerSucursalPorId(pedido.getSucursalDestinoId());
 		Date mejorFechaLLegada = RemoteObjectHelper.calcularMejorFechaLlegada(sucursalActual, sucursalDestino);
 
 		if (mejorFechaLLegada != null) {
@@ -395,7 +400,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public void crearEnvioDirecto(int idPedido) throws RemoteException {
-		PedidoDTO pedidoDto = hbtDAO.buscarPedidoPorId(idPedido);
+		PedidoDTO pedidoDto = hbtDAO.buscarPedidoPorId(idPedido).toDTO();
 		controlarEnvioUrgente(pedidoDto);
 	}
 
@@ -546,9 +551,16 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Cliente Empresa
-
+	/**
+	 * Devuelve una lista de dto empresas
+	 */
 	public List<EmpresaDTO> obtenerClientesEmpresa() {
-		return hbtDAO.obtenerClientesEmpresa();
+		List<Empresa> empresas = hbtDAO.obtenerClientesEmpresa();
+		List<EmpresaDTO> empresasDto = new ArrayList<EmpresaDTO>();
+		for (Empresa empresa : empresas) {
+			empresasDto.add(empresa.toDTO());
+		}
+		return empresasDto;
 	}
 
 	@Override
@@ -581,9 +593,16 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Cliente Particular
-
+	/**
+	 * Devuelve una lista de dto particulares
+	 */
 	public List<ParticularDTO> obtenerClientesParticular() {
-		return hbtDAO.obtenerClientesParticular();
+		List<Particular> particulares = hbtDAO.obtenerClientesParticular();
+		List<ParticularDTO> particularesDto = new ArrayList<ParticularDTO>();
+		for (Particular particular : particulares) {
+			particularesDto.add(particular.toDTO());
+		}
+		return particularesDto;
 	}
 
 	@Override
@@ -611,11 +630,21 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Sucursal
-
+	/**
+	 * Devuelve una lista de dto sucursales
+	 */
 	public List<SucursalDTO> obtenerSucursales() throws RemoteException {
-		return hbtDAO.obtenerSucursales();
+		List<Sucursal> sucursalesEntitiy = hbtDAO.obtenerSucursales();
+		List<SucursalDTO> sucursalesDto = new ArrayList<SucursalDTO>();
+		for (Sucursal sucursal : sucursalesEntitiy) {
+			sucursalesDto.add(sucursal.toDTO());
+		}
+		return sucursalesDto;
 	}
 
+	/**
+	 * Crea una nueva sucursal
+	 */
 	@Override
 	public void altaSucursal(SucursalDTO sucursalDto) throws RemoteException {
 		Sucursal sucursal = new Sucursal();
@@ -623,6 +652,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.guardar(sucursal);
 	}
 
+	/**
+	 * Elimina una sucursal
+	 */
 	@Override
 	public void deleteSucursal(int idSucursal) throws RemoteException {
 		Sucursal sucursal = new Sucursal();
@@ -630,6 +662,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(sucursal);
 	}
 
+	/**
+	 * Actualiza una sucursal existente
+	 */
 	@Override
 	public void updateSucursal(SucursalDTO sucursalDto) throws RemoteException {
 		Sucursal sucursal = new Sucursal();
@@ -646,16 +681,34 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.modificar(sucursal);
 	}
 	
+	/**
+	 * Busca una sucursal en particular por el id
+	 */
 	@Override
 	public SucursalDTO obtenerSucursalPorId(int idSucursal) throws RemoteException {
-		return hbtDAO.obtenerSucursalPorId(idSucursal);
+		List<Sucursal> sucursales = hbtDAO.obtenerSucursales();
+		for (Sucursal sucursal : sucursales) {
+			if (sucursal.getIdSucursal() == idSucursal) {
+				return sucursal.toDTO();
+			}
+		}
+		System.out.println("-----No esxiste sucursal en el sistema-----");
+		return null;
 	}
 
 	// Trayecto
 
+	/**
+	 * Devuelve una lista de dto trayectos
+	 */
 	@Override
 	public List<TrayectoDTO> obtenerTrayectos() throws RemoteException {
-		return hbtDAO.obtenerTrayectos();
+		List<Trayecto> trayectos = hbtDAO.obtenerTrayectos();
+		List<TrayectoDTO> trayectosDto = new ArrayList<TrayectoDTO>();
+		for (Trayecto trayecto : trayectos) {
+			trayectosDto.add(trayecto.toDTO());
+		}
+		return trayectosDto;
 	}
 
 	@Override
@@ -677,10 +730,17 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Ruta
-
+	/**
+	 * Devuelve una lista de dto rutas
+	 */
 	@Override
 	public List<RutaDTO> obtenerRutas() throws RemoteException {
-		return hbtDAO.obtenerRutas();
+		List<Ruta> rutas = hbtDAO.obtenerRutas();
+		List<RutaDTO> rutasDto = new ArrayList<RutaDTO>();
+		for (Ruta ruta : rutas) {
+			rutasDto.add(ruta.toDTO());
+		}
+		return rutasDto;
 	}
 
 	@Override
@@ -734,7 +794,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		p.setCargas(cargas);
 
-		List<EmpresaDTO> empresas = hbtDAO.obtenerClientesEmpresa();
+		List<EmpresaDTO> empresas = obtenerClientesEmpresa();
 		for (EmpresaDTO e : empresas) {
 			if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
 				Empresa empresa = new Empresa();
@@ -743,7 +803,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			}
 		}
 
-		List<ParticularDTO> particulares = hbtDAO.obtenerClientesParticular();
+		List<ParticularDTO> particulares = obtenerClientesParticular();
 		for (ParticularDTO pa : particulares) {
 			if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
 				Particular particular = new Particular();
@@ -780,20 +840,39 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	}
 
+	/**
+	 * Devuelve una lista de dto pedidos
+	 */
 	public List<PedidoDTO> obtenerPedidos() {
-		return hbtDAO.obtenerPedidos();
+		List<Pedido> pedidos = hbtDAO.obtenerPedidos();
+		List<PedidoDTO> pedidosDto = new ArrayList<PedidoDTO>();
+		for (Pedido pedido : pedidos) {
+			pedidosDto.add(pedido.toDTO());
+		}
+		return pedidosDto;
 	}
 
 	// Envio
-
+	/**
+	 * Devuelve una lista de dto envios
+	 */
 	public List<EnvioDTO> obtenerEnvios() throws RemoteException {
-		return hbtDAO.obtenerEnvios();
+		List<Envio> envios = hbtDAO.obtenerEnvios();
+		List<EnvioDTO> enviosDto = new ArrayList<EnvioDTO>();
+		for (Envio envio : envios) {
+			enviosDto.add(envio.toDTO());
+		}
+		return enviosDto;
 	}
 
 	// Vehiculo
-
 	public List<VehiculoDTO> obtenerVehiculos() {
-		return hbtDAO.obtenerVehiculos();
+		List<VehiculoDTO> vehiculosDto = new ArrayList<VehiculoDTO>();
+		List<Vehiculo> vehiculosEntity = hbtDAO.obtenerVehiculos();
+		for (Vehiculo vehiculo : vehiculosEntity) {
+			vehiculosDto.add(vehiculo.toDTO());
+		}
+		return vehiculosDto;
 	}
 
 	@Override
@@ -812,10 +891,18 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Carga
-
+	
+	/**
+	 * Devuelve una lista de dto cargas
+	 */
 	@Override
 	public List<CargaDTO> listarCargas() throws RemoteException {
-		return hbtDAO.listarCargas();
+		List<CargaDTO> cargasDto = new ArrayList<CargaDTO>();
+		List<Carga> cargasEntity = hbtDAO.listarCargas();
+		for (Carga carga : cargasEntity) {
+			cargasDto.add(carga.toDTO());
+		}
+		return cargasDto;
 	}
 
 	@Override
@@ -865,19 +952,35 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public CargaDTO buscarCargaPorId(int idCarga) throws RemoteException {
-		return hbtDAO.buscarCargaPorId(idCarga);
+		return hbtDAO.buscarCargaPorId(idCarga).toDTO();
 	}
 
+	/**
+	 * Devuelve una lista de dto cargas que no fueron despachadas
+	 */
 	@Override
 	public List<CargaDTO> listarCargasSinDespachar() throws RemoteException {
-		return hbtDAO.listarCargasSinDespachar();
+		List<Carga> cargasEntity = hbtDAO.listarCargasSinDespachar();
+		List<CargaDTO> cargasDto = new ArrayList<CargaDTO>();
+		for (Carga carga : cargasEntity) {
+			cargasDto.add(carga.toDTO());
+		}
+		return cargasDto;
 	}
 
 	// Direccion
 
+	/**
+	 * Devuelve una lista de dto direcciones
+	 */
 	@Override
 	public List<DireccionDTO> listarDirecciones() throws RemoteException {
-		return hbtDAO.obtenerDirecciones();
+		List<Direccion> direccionesEntity = hbtDAO.obtenerDirecciones();
+		List<DireccionDTO> direccionesDto = new ArrayList<DireccionDTO>();
+		for (Direccion direccion : direccionesEntity) {
+			direccionesDto.add(direccion.toDTO());
+		}
+		return direccionesDto;
 	}
 
 	@Override
@@ -895,16 +998,25 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(EntityManager.DireccionToEntity(d));
 	}
 	
+	/**
+	 * Devuelve un dto direccion buscado por el id
+	 */
 	@Override
 	public DireccionDTO obtenerDireccionPorId(int idDireccion) throws RemoteException {
-		return hbtDAO.obtenerDireccionPorId(idDireccion);
+		Direccion direccion = hbtDAO.obtenerDireccionPorId(idDireccion);
+		return direccion.toDTO();
 	}
 
 	// Plan de Mantenimiento
 
 	@Override
 	public List<PlanDeMantenimientoDTO> listarPlanesDeMantenimiento() throws RemoteException {
-		return hbtDAO.listarPlanesDeMantenimiento();
+		List<PlanDeMantenimiento> planes = hbtDAO.listarPlanesDeMantenimiento();
+		List<PlanDeMantenimientoDTO> planesDto = new ArrayList<PlanDeMantenimientoDTO>();
+		for (PlanDeMantenimiento plan : planes) {
+			planesDto.add(plan.toDTO());
+		}
+		return planesDto;
 	}
 
 	public void altaPlanMantenimiento(PlanDeMantenimientoDTO planDeMantenimientoDTO) {
@@ -924,20 +1036,52 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	@Override
-	public List<VehiculoAMantenerDTO> getVehiculosAMantener() throws RemoteException {
-		return hbtDAO.getVehiculosAMantener();
+	public PlanDeMantenimientoDTO obtenerPlanDeMantenimientoPorId(int idPlanDeMantenimiento) throws RemoteException {
+		return hbtDAO.obtenerPlanDeMantenimientoPorId(idPlanDeMantenimiento).toDTO();
+	}
+
+	/**
+	 * Devuelve una lista de Vehiculos a mantener
+	 */
+	@SuppressWarnings("unchecked")
+	public List<VehiculoAMantenerDTO> getVehiculosAMantener() {
+		List<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
+		List<VehiculoAMantenerDTO> mantener = new ArrayList<VehiculoAMantenerDTO>();
+		VehiculoAMantenerDTO aMantener;
+		try {
+			vehiculos = hbtDAO.obtenerVehiculos();
+			for (Vehiculo vehiculo : vehiculos) {
+				if (vehiculo.hayQueMantener()) {
+					aMantener = new VehiculoAMantenerDTO();
+					aMantener.setIdVehiculo(vehiculo.getIdVehiculo());
+					aMantener.setHayQueMantener("Si");
+					aMantener.setTipoDeTrabajo(vehiculo.getTipoTrabajo());
+					aMantener.setPuntoAControlar(vehiculo.getPlanDeMantenimiento().getPuntoAControlar());
+					aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
+					aMantener.setEstado(vehiculo.getEstado());
+					aMantener.setVehiculo(vehiculo.toDTO());
+					mantener.add(aMantener);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mantener;
 	}
 	
-	@Override
-	public PlanDeMantenimientoDTO obtenerPlanDeMantenimientoPorId(int idPlanDeMantenimiento) throws RemoteException {
-		return hbtDAO.obtenerPlanDeMantenimientoPorId(idPlanDeMantenimiento);
-	}
-
 	// Vehiculo Tercero
 
+	/**
+	 * Devuelve una lista de dto vehiculos de tercero
+	 */
 	@Override
 	public List<VehiculoTerceroDTO> listarVTerceros() throws RemoteException {
-		return hbtDAO.listarVTerceros();
+		List<VehiculoTercero> vehiculos = hbtDAO.listarVTerceros();
+		List<VehiculoTerceroDTO> vehiculosDto = new ArrayList<VehiculoTerceroDTO>();
+		for (VehiculoTercero vehiculo : vehiculos) {
+			vehiculosDto.add(vehiculo.toDTO());
+		}
+		return vehiculosDto;
 	}
 
 	@Override
@@ -957,14 +1101,22 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 	@Override
 	public VehiculoTerceroDTO buscarVehiculoTerceroDTO(int idVehiculoTerceroDTO) throws RemoteException {
-		return hbtDAO.buscarVehiculoTerceroDTO(idVehiculoTerceroDTO);
+		return hbtDAO.buscarVehiculoTerceroDTO(idVehiculoTerceroDTO).toDTO();
 	}
 
 	// Facturas
 
+	/**
+	 * Devuvle una lista de dto facturas
+	 */
 	@Override
 	public List<FacturaDTO> listarFacturas() throws RemoteException {
-		return hbtDAO.listarFacturas();
+		List<Factura> facturas = hbtDAO.listarFacturas();
+		List<FacturaDTO> facturasDto = new ArrayList<FacturaDTO>();
+		for (Factura factura : facturas) {
+			facturasDto.add(factura.toDTO());
+		}
+		return facturasDto;
 	}
 
 	public void altaFactura(FacturaDTO facturaDTO) {
@@ -979,10 +1131,17 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Remitos
-
+	/**
+	 * Devuelve una lista de dto remitos
+	 */
 	@Override
 	public List<RemitoDTO> listarRemitos() throws RemoteException {
-		return hbtDAO.listarRemitos();
+		List<Remito> remitos = hbtDAO.listarRemitos();
+		List<RemitoDTO> remitosDto = new ArrayList<RemitoDTO>();
+		for (Remito remito : remitos) {
+			remitosDto.add(remito.toDTO());
+		}
+		return remitosDto;
 	}
 
 	public void altaRemito(RemitoDTO remitoDTO) {
@@ -995,5 +1154,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		remito.setIdRemito(idRemito);
 		hbtDAO.borrar(remito);
 	}
+	
+	
 
 }
