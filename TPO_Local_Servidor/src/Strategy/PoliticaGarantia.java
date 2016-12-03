@@ -1,12 +1,12 @@
 package Strategy;
 
-import dto.VehiculoDTO;
+import entities.Vehiculo;
 
 public class PoliticaGarantia implements PoliticaMantenimiento{
 
-	public void mandarAMantenimiento(VehiculoDTO vehiculoDTO) {
-		// TODO Auto-generated method stub
-		vehiculoDTO.setEstado("En mantenimiento por garantia.");
+	@Override
+	public void mandarAMantenimiento(Vehiculo vehiculo) {
+		vehiculo.setEstadoMantenimientoGarantia();
 	}
 
 	

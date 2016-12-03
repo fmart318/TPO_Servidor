@@ -1,5 +1,6 @@
 package entities;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -180,5 +181,21 @@ public class Envio extends PersistentObject {
 	
 	public int getSucursalDestinoId() {
 		return this.getSucursalDestino().getIdSucursal();
+	}
+	
+	public boolean isDespachado() {
+		return this.getEstado().equals("despachado");
+	}
+	
+	public boolean isParado() {
+		return this.getEstado().equals("parado");
+	}
+	
+	public void setParado() {
+		this.setEstado("parado");
+	}
+	
+	public boolean llegoADestino(Timestamp fechaActual) {
+		return fechaActual.after(this.getFechaLlegada());
 	}
 }

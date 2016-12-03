@@ -251,12 +251,28 @@ public class Pedido extends PersistentObject {
 		return cargaTotalPedido;
 	}
 	
+	public float setVolumenCargaTotal() {
+		float total = 0;
+		for (Carga carga : this.getCargas()) {
+			total = total + carga.getVolumen();
+		}
+		return total;
+	}
+	
 	public void setEstadoFinalizado() {
 		this.setEstado("finalizado");
 	}
 	
+	public void setEstadoPendiente() {
+		this.setEstado("pendiente");
+	}
+	
 	public boolean llegoDestinoFinal() {
 		return this.getSucursalActualId() == this.getSucursalDestinoId();
+	}
+	
+	public boolean hayQueMandarUrgente(Date mejorFechaLlegada) {
+		return this.getFechaMaxima().before(mejorFechaLlegada);
 	}
 	
 }

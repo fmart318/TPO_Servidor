@@ -1,11 +1,12 @@
 package Strategy;
 
 import dto.VehiculoDTO;
+import entities.Vehiculo;
 
-public class PoliticaGeneral implements PoliticaMantenimiento{
+public class PoliticaGeneral implements PoliticaMantenimiento {
 
-	public void mandarAMantenimiento(VehiculoDTO vehiculoDTO) {
-		vehiculoDTO.setEstado("En mantenimiento general.");
-		
+	@Override
+	public void mandarAMantenimiento(Vehiculo vehiculo) {
+		vehiculo.setEstadoMantenimientoGeneral();
 	}
 }

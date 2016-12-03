@@ -2,6 +2,7 @@ package entities;
 
 import hbt.PersistentObject;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -124,7 +125,6 @@ public class VehiculoTercero extends PersistentObject {
 
 	public void setEnUso() {
 		this.setEstado("En Uso");
-
 	}
 	
 	public void setEstadoLibre() {
@@ -145,4 +145,7 @@ public class VehiculoTercero extends PersistentObject {
 		this.setFechaLlegada(null);
 	}
 	
+	public boolean llego(Timestamp fechaActual) {
+		return this.getFechaLlegada().before(fechaActual);
+	}
 }

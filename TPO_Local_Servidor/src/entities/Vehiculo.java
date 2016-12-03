@@ -224,8 +224,6 @@ public class Vehiculo extends PersistentObject {
 					enGarantia, trabajoEspecifico, fechaUltimoControl, sucursalIdActual, null);
 	}
 	
-	
-	
 	public boolean isInSucursal(int sucursalId) {
 		return this.getSucursalIdActual() == sucursalId;
 	}
@@ -247,8 +245,16 @@ public class Vehiculo extends PersistentObject {
 		return this.getEstado().equals("Libre");
 	}
 	
+	public boolean isEnDeposito() {
+		return this.getEstado().equals("En Deposito");
+	}
+	
 	public float getMinimoVolumenAceptado() {
 		return (this.getVolumen() * 70) / 100;
+	}
+	
+	public boolean necesitaMantenimiento() {
+		return this.getKilometraje() >= this.getPlanDeMantenimiento().getKmProxControl();
 	}
 	
 	public boolean hayQueMantener() {
@@ -279,4 +285,27 @@ public class Vehiculo extends PersistentObject {
 		return tipo;
 	}
 	
+	public boolean alcanzaLugar(float volumen) {
+		return this.getVolumen() > volumen;
+	}
+	
+	public void setDiasProximoControl(int diasProxControl) {
+		this.getPlanDeMantenimiento().setDiasProxControl(diasProxControl);
+	}
+	
+	public void setKmProximoControl(int kmProximoControl) {
+		this.getPlanDeMantenimiento().setKmProxControl(kmProximoControl);
+	}
+	
+	public void setEstadoMantenimientoEspecifico() {
+		this.setEstado("En mantenimiento por trabajo especifico.");
+	}
+	
+	public void setEstadoMantenimientoGarantia() {
+		this.setEstado("En mantenimiento por garantia.");
+	}
+	
+	public void setEstadoMantenimientoGeneral() {
+		this.setEstado("En mantenimiento general.");
+	}
 }
