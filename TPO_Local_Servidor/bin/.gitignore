@@ -1,2 +1,8 @@
+/Strategy/
+/allow_all.policy
+/cratetable-login.sql
+/dao/
 /entities/
+/hbt/
+/hibernate.properties
 /rmi/

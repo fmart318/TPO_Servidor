@@ -1,9 +1,5 @@
 package rmi;
-import java.rmi.RemoteException;
-import java.util.List;
-
 import dao.HibernateDAO;
-import dto.*;
  
  
 
@@ -23,18 +19,5 @@ public class Controlador {
 	private Controlador()
 	{
 		super();
-	}
-	
-	public void controlarPlanMantenimiento() throws RemoteException {
-		List<VehiculoDTO> vehiculosDTO= hbtDAO.obtenerVehiculos();
-		RemoteObject rmO=new RemoteObject();
-		for(VehiculoDTO v: vehiculosDTO)
-		{
-			if(v.getEstado().equals("En Deposito"))
-			{
-				rmO.controlarVehiculo(v);
-			}
-		}
-		
 	}
 }

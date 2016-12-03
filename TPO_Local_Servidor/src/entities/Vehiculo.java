@@ -1,5 +1,6 @@
 package entities;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -248,6 +249,34 @@ public class Vehiculo extends PersistentObject {
 	
 	public float getMinimoVolumenAceptado() {
 		return (this.getVolumen() * 70) / 100;
+	}
+	
+	public boolean hayQueMantener() {
+		PlanDeMantenimiento plan = this.getPlanDeMantenimiento();
+		long time = Calendar.getInstance().getTimeInMillis();
+		long planTime;
+		if (this.getFechaUltimoControl() != null) {
+			planTime = plan.getDiasProxControl() + this.getFechaUltimoControl().getTime();
+		} else {
+			planTime = time + 1;
+		}
+		if (this.getKilometraje() % 10000 == 0 || this.getKilometraje() >= plan.getKmProxControl()
+				|| time >= planTime) {
+			return true;
+		}
+		return false;
+	}
+	
+	public String getTipoTrabajo() {
+		String tipo;
+		if (this.isEnGarantia()) {
+			tipo = "En Garantia: Llevar a la agencia oficial";
+		} else if (this.isTrabajoEspecifico()) {
+			tipo = "Trabajo Especifico: Llevar a taller";
+		} else {
+			tipo = "Trabajo General: Llevar a lubricentro";
+		}
+		return tipo;
 	}
 	
 }

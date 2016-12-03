@@ -15,6 +15,9 @@ import dto.SucursalDTO;
 import dto.TrayectoDTO;
 import dto.VehiculoDTO;
 import dto.VehiculoTerceroDTO;
+import entities.Ruta;
+import entities.Vehiculo;
+import entities.VehiculoTercero;
 
 public class RemoteObjectHelper {
 
@@ -31,7 +34,12 @@ public class RemoteObjectHelper {
 		float precioMin = -1;
 		int kmMin = -1;
 
-		List<RutaDTO> rutas = hbtDAO.obtenerRutas();
+		List<Ruta> rutasEntity = hbtDAO.obtenerRutas();
+		List<RutaDTO> rutas = new ArrayList<RutaDTO>();
+		for (Ruta ruta : rutasEntity) {
+			rutas.add(ruta.toDTO());
+		}
+		
 		for (RutaDTO ruta : rutas) {
 			if (ruta.getOrigen().getIdSucursal() == origen.getIdSucursal()
 					&& ruta.getDestino().getIdSucursal() == destino.getIdSucursal()) {
@@ -67,7 +75,8 @@ public class RemoteObjectHelper {
 	}
 	
 	public static Date calcularMejorFechaLlegada(int sucursalOrigen, int sucursalDestino) {
-		return calcularMejorFechaLlegada(obtenerSucursal(sucursalOrigen) , obtenerSucursal(sucursalOrigen));
+		return calcularMejorFechaLlegada(hbtDAO.buscarSucursalPorID(sucursalOrigen).toDTO(),
+				hbtDAO.buscarSucursalPorID(sucursalOrigen).toDTO());
 	}
 
 	public static Date calcularMejorFechaLlegada(SucursalDTO sucursalOrigen, SucursalDTO sucursalDestino) {
@@ -85,17 +94,6 @@ public class RemoteObjectHelper {
 			long minutosRuta = (long) tiempo * 60000;
 			return new Date(fechaActual.getTime() + minutosRuta);
 		}
-		return null;
-	}
-
-	public static SucursalDTO obtenerSucursal(int sucursalId) {
-		List<SucursalDTO> sucursales = hbtDAO.obtenerSucursales();
-		for (SucursalDTO sucursal : sucursales) {
-			if (sucursal.getIdSucursal() == sucursalId) {
-				return sucursal;
-			}
-		}
-		System.out.println("-----No esxiste sucursal en el sistema-----");
 		return null;
 	}
 
@@ -125,8 +123,8 @@ public class RemoteObjectHelper {
 		for (ArrayList<PedidoDTO> respuesta : respuestasPosibles) {
 
 			PedidoDTO pedidoDto = respuesta.get(0);
-			SucursalDTO sucursalActual = obtenerSucursal(pedidoDto.getSucursalActualId());
-			SucursalDTO sucursalDestino = obtenerSucursal(pedidoDto.getSucursalDestinoId());
+			SucursalDTO sucursalActual = hbtDAO.buscarSucursalPorID(pedidoDto.getSucursalActualId()).toDTO();
+			SucursalDTO sucursalDestino = hbtDAO.buscarSucursalPorID(pedidoDto.getSucursalDestinoId()).toDTO();
 			RutaDTO mejorRuta = obtenerMejorRuta(sucursalActual, sucursalDestino);
 			int proximoDestinoId = mejorRuta.getNextSucursal(sucursalActual).getIdSucursal();
 
@@ -134,8 +132,8 @@ public class RemoteObjectHelper {
 
 			for (PedidoDTO pedido : respuesta) {
 
-				SucursalDTO sucursalPedidoActual = obtenerSucursal(pedido.getSucursalActualId());
-				SucursalDTO sucursalPedidoDestino = obtenerSucursal(pedido.getSucursalDestinoId());
+				SucursalDTO sucursalPedidoActual = hbtDAO.buscarSucursalPorID(pedido.getSucursalActualId()).toDTO();
+				SucursalDTO sucursalPedidoDestino = hbtDAO.buscarSucursalPorID(pedido.getSucursalDestinoId()).toDTO();
 				RutaDTO mejorRutaActual = obtenerMejorRuta(sucursalPedidoActual, sucursalPedidoDestino);
 				int proximoDestinoActualId = mejorRutaActual.getNextSucursal(sucursalPedidoActual).getIdSucursal();
 
@@ -199,12 +197,15 @@ public class RemoteObjectHelper {
 		}
 	}
 
+	/**
+	 * Devuelve una lista de dto vehiculos que se encuentran disponibles en una sucursal dada
+	 */
 	public static List<VehiculoDTO> obtenerVehiculosDisponiblesEnSucursal(int sucursalId) {
 		List<VehiculoDTO> vehiculosDisponibles = new ArrayList<VehiculoDTO>();
-		List<VehiculoDTO> vehiculos = hbtDAO.obtenerVehiculos();
-		for (VehiculoDTO vehiculo : vehiculos) {
-			if (vehiculo.getEstado().equals("Libre") && vehiculo.getSucursalIdActual() == sucursalId) {
-				vehiculosDisponibles.add(vehiculo);
+		List<Vehiculo> vehiculos = hbtDAO.obtenerVehiculos();
+		for (Vehiculo vehiculo : vehiculos) {
+			if (vehiculo.isLibre() && vehiculo.isInSucursal(sucursalId)) {
+				vehiculosDisponibles.add(vehiculo.toDTO());
 			}
 		}
 		return vehiculosDisponibles;
@@ -212,10 +213,11 @@ public class RemoteObjectHelper {
 	
 	public static List<VehiculoTerceroDTO> obtenerVehiculosTercerosDisponibles() {
 		List<VehiculoTerceroDTO> vehiculosTercerosDisponibles = new ArrayList<VehiculoTerceroDTO>();
-		List<VehiculoTerceroDTO> vehiculosTerceros = hbtDAO.listarVTerceros();
-		for (VehiculoTerceroDTO vehiculo : vehiculosTerceros) {
-			if (vehiculo.getEstado().equals("Libre")) {
-				vehiculosTercerosDisponibles.add(vehiculo);
+		List<VehiculoTercero> vehiculos = hbtDAO.listarVTerceros();
+		
+		for (VehiculoTercero vehiculo : vehiculos) {
+			if (vehiculo.isLibre()) {
+				vehiculosTercerosDisponibles.add(vehiculo.toDTO());
 			}
 		}
 		return vehiculosTercerosDisponibles;
