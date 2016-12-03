@@ -115,13 +115,14 @@ public class HibernateDAO {
 			s.merge(entidad);
 			t.commit();
 
-			// Definir una exception nuestra.
 		} catch (Exception e) {
 			t.rollback();
 			System.out.println(e);
 			System.out.println("ErrorDAO: " + entidad.getClass().getName() + ".mergear");
 		}
 	}
+	
+	/**-------------------------------------------------------------------------------------------**/
 
 	//Sucursales
 	/**
@@ -172,9 +173,24 @@ public class HibernateDAO {
 		this.closeSession();
 		return cargas;
 	}
+	
+	/**
+	 * Devuelve una entity carga buscada por id
+	 */
+	public Carga buscarCargaPorId(int idCarga) {
+		Carga carga = new Carga();
+		Session s = this.getSession();
+		try {
+			carga = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return carga;
+	}
 
 	/**
-	 * Devuelve una lista de entities cargas que no fuerons despachadas
+	 * Devuelve una lista de entities cargas que no fueron despachadas
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Carga> listarCargasSinDespachar() {
@@ -257,231 +273,21 @@ public class HibernateDAO {
 		return vehiculo;
 	}
 
+	//Vehiculo de tercero
 	/**
-	 * Devuelve una lista de entities rutas
+	 * Devuelve una lista de entities vehiculos de tercero
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Ruta> obtenerRutas() {
-		List<Ruta> rutas = new ArrayList<Ruta>();
+	public List<VehiculoTercero> listarVTerceros() {
+		List<VehiculoTercero> vehiculos = new ArrayList<VehiculoTercero>();
 		Session s = this.getSession();
 		try {
-			rutas = s.createQuery("FROM Ruta").list();
+			vehiculos = s.createQuery("FROM VehiculoTercero").list();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return rutas;
-	}
-
-	/**
-	 * Devuelve una lista de entities pedidos
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Pedido> obtenerPedidos() {
-		List<Pedido> pedidos = new ArrayList<Pedido>();
-		Session s = this.getSession();
-		try {
-			pedidos = s.createQuery("FROM Pedido").list();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return pedidos;
-	}
-
-	/**
-	 * Devuelve una lista de entities clientes
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Cliente> obtenerClientes() {
-		List<Cliente> clientes = new ArrayList<Cliente>();
-		Session s = this.getSession();
-		try {
-			clientes = s.createQuery("FROM Cliente").list();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return clientes;
-	}
-
-	/**
-	 * Devuelve una lista de entities clientes empresa
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Empresa> obtenerClientesEmpresa() {
-		List<Empresa> clientes = new ArrayList<Empresa>();
-		Session s = this.getSession();
-		try {
-			clientes = s.createQuery("FROM Empresa").list();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return clientes;
-	}
-
-	/**
-	 * Devuelve una list de entities clientes particulares
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Particular> obtenerClientesParticular() {
-		List<Particular> clientes = new ArrayList<Particular>();
-		Session s = this.getSession();
-		try {
-			clientes = s.createQuery("FROM Particular").list();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return clientes;
-	}
-
-	/**
-	 * Devuelve un entity envio el cual es el envio actual de una pedido dado 
-	 */
-	@SuppressWarnings("unchecked")
-	public Envio obtenerEnvioActualDePedido(int idPedido) {
-		Session session = this.getSession();
-		Envio envioEntity = null;
-		try {
-
-			List<Envio> envios = (List<Envio>) session.createQuery("from Envio").list();
-			if (envios != null) {
-				for (Envio envio : envios) {
-					for (Pedido pedido : envio.getPedidos()) {
-						if (pedido.getIdPedido() == idPedido && !envio.getEstado().equals("listo")) {
-							envioEntity = envio;
-						}
-					}
-				}
-			}
-		} catch (Exception ex) {
-			System.out.println(ex);
-		}
-		this.closeSession();
-		return envioEntity;
-	}
-
-	/**
-	 * Valida Credenciales
-	 */
-	public String validarCredenciales(String username, String password) {
-		String string = "No Valido";
-		Session s = this.getSession();
-		try {
-			string = (String) s
-					.createQuery("Select c.type FROM Credential c WHERE c.username=:username and c.password=:password")
-					.setParameter("username", username).setParameter("password", password).uniqueResult();
-
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return string;
-	}
-
-	/**
-	 * Devuelve una lista de entities trayectos
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Trayecto> obtenerTrayectos() {
-		List<Trayecto> trayectos = new ArrayList<Trayecto>();
-		Session s = this.getSession();
-		try {
-			trayectos = s.createQuery("FROM Trayecto").list();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return trayectos;
-	}
-
-	/**
-	 * Devuelve una lista de entities envios
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Envio> obtenerEnvios() {
-		List<Envio> envios = new ArrayList<Envio>();
-		Session session = this.getSession();
-		try {
-			envios = session.createQuery("FROM Envio").list();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return envios;
-	}
-
-	/**
-	 * Devuelve una entity carga buscada por id
-	 */
-	public Carga buscarCargaPorId(int idCarga) {
-		Carga carga = new Carga();
-		Session s = this.getSession();
-		try {
-			carga = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return carga;
-	}
-
-	/**
-	 * Devuelve una entity sucursal buscada por id
-	 */
-	public Sucursal buscarSucursalPorID(int idSucursal) {
-		Sucursal sucursal = new Sucursal();
-		Session s = this.getSession();
-		try {
-			sucursal = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id").setParameter("id", idSucursal)
-					.uniqueResult();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return sucursal;
-	}
-
-	/**
-	 * Devuelve un entity pedido buscado por id
-	 */
-	public Pedido buscarPedidoPorId(int idPedido) {
-		Pedido pedido = new Pedido();
-		Session s = this.getSession();
-		try {
-			pedido = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido)
-					.uniqueResult();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return pedido;
-	}
-
-	/**
-	 * Devuelve una entity vehiculo de tercero que pertenece a un pedido
-	 */
-	@SuppressWarnings("unchecked")
-	public VehiculoTercero obtenerVehiculoTerceroConPedido(int idPedido) {
-		List<VehiculoTercero> vehiculosTercero = new ArrayList<VehiculoTercero>();
-		VehiculoTercero vehiculoTercero = null;
-		Session s = this.getSession();
-		try {
-			vehiculosTercero = (List<VehiculoTercero>) s.createQuery("FROM VehiculoTercero").list();
-			for (VehiculoTercero vehiculo : vehiculosTercero) {
-				for (Pedido pedido : vehiculo.getPedidos()) {
-					if (pedido.getIdPedido() == idPedido) {
-						vehiculoTercero = vehiculo;
-					}
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		this.closeSession();
-		return vehiculoTercero;
+		return vehiculos;
 	}
 	
 	/**
@@ -532,22 +338,141 @@ public class HibernateDAO {
 		return plan;
 	}
 	
+	//Rutas
 	/**
-	 * Devuelve una lista de entities vehiculos de tercero
+	 * Devuelve una lista de entities rutas
 	 */
 	@SuppressWarnings("unchecked")
-	public List<VehiculoTercero> listarVTerceros() {
-		List<VehiculoTercero> vehiculos = new ArrayList<VehiculoTercero>();
+	public List<Ruta> obtenerRutas() {
+		List<Ruta> rutas = new ArrayList<Ruta>();
 		Session s = this.getSession();
 		try {
-			vehiculos = s.createQuery("FROM VehiculoTercero").list();
+			rutas = s.createQuery("FROM Ruta").list();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return vehiculos;
+		return rutas;
+	}
+	
+	//Trayectos
+	/**
+	 * Devuelve una lista de entities trayectos
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Trayecto> obtenerTrayectos() {
+		List<Trayecto> trayectos = new ArrayList<Trayecto>();
+		Session s = this.getSession();
+		try {
+			trayectos = s.createQuery("FROM Trayecto").list();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return trayectos;
 	}
 
+	//Pedidos
+	/**
+	 * Devuelve una lista de entities pedidos
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Pedido> obtenerPedidos() {
+		List<Pedido> pedidos = new ArrayList<Pedido>();
+		Session s = this.getSession();
+		try {
+			pedidos = s.createQuery("FROM Pedido").list();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return pedidos;
+	}
+	
+	/**
+	 * Devuelve un entity pedido buscado por id
+	 */
+	public Pedido buscarPedidoPorId(int idPedido) {
+		Pedido pedido = new Pedido();
+		Session s = this.getSession();
+		try {
+			pedido = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido)
+					.uniqueResult();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return pedido;
+	}
+
+	//Clientes
+	/**
+	 * Devuelve una lista de entities clientes
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Cliente> obtenerClientes() {
+		List<Cliente> clientes = new ArrayList<Cliente>();
+		Session s = this.getSession();
+		try {
+			clientes = s.createQuery("FROM Cliente").list();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return clientes;
+	}
+
+	//Cliente Empresa
+	/**
+	 * Devuelve una lista de entities clientes empresa
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Empresa> obtenerClientesEmpresa() {
+		List<Empresa> clientes = new ArrayList<Empresa>();
+		Session s = this.getSession();
+		try {
+			clientes = s.createQuery("FROM Empresa").list();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return clientes;
+	}
+
+	//Cliente Particular
+	/**
+	 * Devuelve una list de entities clientes particulares
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Particular> obtenerClientesParticular() {
+		List<Particular> clientes = new ArrayList<Particular>();
+		Session s = this.getSession();
+		try {
+			clientes = s.createQuery("FROM Particular").list();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return clientes;
+	}
+
+	//Envios
+	/**
+	 * Devuelve una lista de entities envios
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Envio> obtenerEnvios() {
+		List<Envio> envios = new ArrayList<Envio>();
+		Session session = this.getSession();
+		try {
+			envios = session.createQuery("FROM Envio").list();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return envios;
+	}
+	
 	// Facturas
 	/**
 	 * Devuelve una lista de entities facturas
@@ -580,4 +505,21 @@ public class HibernateDAO {
 		return remitos;
 	}
 
+	/**
+	 * Valida Credenciales
+	 */
+	public String validarCredenciales(String username, String password) {
+		String string = "No Valido";
+		Session s = this.getSession();
+		try {
+			string = (String) s
+					.createQuery("Select c.type FROM Credential c WHERE c.username=:username and c.password=:password")
+					.setParameter("username", username).setParameter("password", password).uniqueResult();
+
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		this.closeSession();
+		return string;
+	}
 }

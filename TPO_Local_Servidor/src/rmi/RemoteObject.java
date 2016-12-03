@@ -8,10 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Session;
-import org.hibernate.mapping.Array;
-import org.w3c.dom.ls.LSInput;
-
 import Strategy.PoliticaEspecificidad;
 import Strategy.PoliticaGarantia;
 import Strategy.PoliticaGeneral;
@@ -121,8 +117,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 			System.out.println("-----Controlando Pedido " + pedido.getIdPedido() + "-----");
 
-			VehiculoTerceroDTO vehiculoTerceroDTO = hbtDAO.obtenerVehiculoTerceroConPedido(pedido.getIdPedido()).toDTO();
-			EnvioDTO envioDto = hbtDAO.obtenerEnvioActualDePedido(pedido.getIdPedido()).toDTO();
+			VehiculoTerceroDTO vehiculoTerceroDTO = obtenerVehiculoTerceroConPedido(pedido.getIdPedido()).toDTO();
+			EnvioDTO envioDto = obtenerEnvioActualDePedido(pedido.getIdPedido()).toDTO();
 
 			// Si el pedido ya llego a su destino
 			if (pedido.getSucursalActualId() == pedido.getSucursalDestinoId()) {
@@ -1155,6 +1151,39 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(remito);
 	}
 	
+	/**
+	 * Devuelve una entity vehiculo de tercero que pertenece a un pedido
+	 */
+	public VehiculoTercero obtenerVehiculoTerceroConPedido(int idPedido) {
+		List<VehiculoTercero> vehiculosTercero = new ArrayList<VehiculoTercero>();
+		VehiculoTercero vehiculoTercero = null;
+		vehiculosTercero = hbtDAO.listarVTerceros();
+		for (VehiculoTercero vehiculo : vehiculosTercero) {
+			for (Pedido pedido : vehiculo.getPedidos()) {
+				if (pedido.getIdPedido() == idPedido) {
+					vehiculoTercero = vehiculo;
+				}
+			}
+		}
+		return vehiculoTercero;
+	}
 	
+	/**
+	 * Devuelve un entity envio el cual es el envio actual de una pedido dado 
+	 */
+	public Envio obtenerEnvioActualDePedido(int idPedido) {
+		Envio envioEntity = null;
+		List<Envio> envios = hbtDAO.obtenerEnvios();
+		if (envios != null) {
+			for (Envio envio : envios) {
+				for (Pedido pedido : envio.getPedidos()) {
+					if (pedido.getIdPedido() == idPedido && !envio.getEstado().equals("listo")) {
+						envioEntity = envio;
+					}
+				}
+			}
+		}
+		return envioEntity;
+	}
 
 }

@@ -75,8 +75,8 @@ public class RemoteObjectHelper {
 	}
 	
 	public static Date calcularMejorFechaLlegada(int sucursalOrigen, int sucursalDestino) {
-		return calcularMejorFechaLlegada(hbtDAO.buscarSucursalPorID(sucursalOrigen).toDTO(),
-				hbtDAO.buscarSucursalPorID(sucursalOrigen).toDTO());
+		return calcularMejorFechaLlegada(hbtDAO.obtenerSucursalPorId(sucursalOrigen).toDTO(),
+				hbtDAO.obtenerSucursalPorId(sucursalOrigen).toDTO());
 	}
 
 	public static Date calcularMejorFechaLlegada(SucursalDTO sucursalOrigen, SucursalDTO sucursalDestino) {
@@ -123,8 +123,8 @@ public class RemoteObjectHelper {
 		for (ArrayList<PedidoDTO> respuesta : respuestasPosibles) {
 
 			PedidoDTO pedidoDto = respuesta.get(0);
-			SucursalDTO sucursalActual = hbtDAO.buscarSucursalPorID(pedidoDto.getSucursalActualId()).toDTO();
-			SucursalDTO sucursalDestino = hbtDAO.buscarSucursalPorID(pedidoDto.getSucursalDestinoId()).toDTO();
+			SucursalDTO sucursalActual = hbtDAO.obtenerSucursalPorId(pedidoDto.getSucursalActualId()).toDTO();
+			SucursalDTO sucursalDestino = hbtDAO.obtenerSucursalPorId(pedidoDto.getSucursalDestinoId()).toDTO();
 			RutaDTO mejorRuta = obtenerMejorRuta(sucursalActual, sucursalDestino);
 			int proximoDestinoId = mejorRuta.getNextSucursal(sucursalActual).getIdSucursal();
 
@@ -132,8 +132,8 @@ public class RemoteObjectHelper {
 
 			for (PedidoDTO pedido : respuesta) {
 
-				SucursalDTO sucursalPedidoActual = hbtDAO.buscarSucursalPorID(pedido.getSucursalActualId()).toDTO();
-				SucursalDTO sucursalPedidoDestino = hbtDAO.buscarSucursalPorID(pedido.getSucursalDestinoId()).toDTO();
+				SucursalDTO sucursalPedidoActual = hbtDAO.obtenerSucursalPorId(pedido.getSucursalActualId()).toDTO();
+				SucursalDTO sucursalPedidoDestino = hbtDAO.obtenerSucursalPorId(pedido.getSucursalDestinoId()).toDTO();
 				RutaDTO mejorRutaActual = obtenerMejorRuta(sucursalPedidoActual, sucursalPedidoDestino);
 				int proximoDestinoActualId = mejorRutaActual.getNextSucursal(sucursalPedidoActual).getIdSucursal();
 
