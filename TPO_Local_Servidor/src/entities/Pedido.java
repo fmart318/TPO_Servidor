@@ -258,4 +258,5 @@ public class Pedido extends PersistentObject {
 	public boolean llegoDestinoFinal() {
 		return this.getSucursalActualId() == this.getSucursalDestinoId();
 	}
+	
 }

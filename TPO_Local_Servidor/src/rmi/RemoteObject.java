@@ -59,54 +59,80 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Funciones del Negocio
-
-	public boolean controlarVehiculo(VehiculoDTO vehiculoDTO) {
-
-		Calendar c = Calendar.getInstance();
-		c.setTime(vehiculoDTO.getFechaUltimoControl());
-		c.add(Calendar.DATE, vehiculoDTO.getPlanDeMantenimiento().getDiasProxControl());
-		Date fecha = c.getTime();
-
-		boolean Boolean = false;
-		if (vehiculoDTO.getEstado().equals("En Deposito")) {
-			System.out.println(vehiculoDTO.getKilometraje() + vehiculoDTO.getPlanDeMantenimiento().getKmProxControl());
-			if (vehiculoDTO.getKilometraje() >= vehiculoDTO.getPlanDeMantenimiento().getKmProxControl()) {
-				Boolean = true;
-				if (vehiculoDTO.isEnGarantia()) {
-					politicaMantenimiento = new PoliticaGarantia();
-					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
-				} else if (vehiculoDTO.isTrabajoEspecifico()) {
-					politicaMantenimiento = new PoliticaEspecificidad();
-					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
-				} else {
-					politicaMantenimiento = new PoliticaGeneral();
-					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
-				}
-				vehiculoDTO.getPlanDeMantenimiento().setKmProxControl(vehiculoDTO.getKilometraje() + 200);
-				vehiculoDTO.getPlanDeMantenimiento().setDiasProxControl(60);
-				hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculoDTO));
-			} else if (fecha.before(new Date())) {
-				Boolean = true;
-				if (vehiculoDTO.isEnGarantia()) {
-					politicaMantenimiento = new PoliticaGarantia();
-					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
-				} else if (vehiculoDTO.isTrabajoEspecifico()) {
-					politicaMantenimiento = new PoliticaEspecificidad();
-					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
-				} else {
-					politicaMantenimiento = new PoliticaGeneral();
-					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
-				}
-				vehiculoDTO.getPlanDeMantenimiento().setKmProxControl(vehiculoDTO.getKilometraje() + 200);
-				vehiculoDTO.getPlanDeMantenimiento().setDiasProxControl(60);
-				hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculoDTO));
-			}
+	
+	//Pedidos
+	/**
+	 * Devuelve una lista de entities pedidos
+	 */
+	private List<Pedido> obtenerPedidosEntity() {
+		return hbtDAO.obtenerPedidos();
+	}
+	
+	/**
+	 * Devuelve una lista de dto pedidos
+	 */
+	public List<PedidoDTO> obtenerPedidos() {
+		List<Pedido> pedidos = obtenerPedidosEntity();
+		List<PedidoDTO> pedidosDto = new ArrayList<PedidoDTO>();
+		for (Pedido pedido : pedidos) {
+			pedidosDto.add(pedido.toDTO());
 		}
-		return Boolean;
+		return pedidosDto;
 	}
 
-	public void controlarEstadoDeEnvios() throws RemoteException {
+	/**
+	 * Controla que el pedido haya llegado a la sucursal de destino
+	 */
+	private boolean controlarPedidoLLegoADestinoFinal(EnvioDTO envioDto, PedidoDTO pedidoDto) throws RemoteException {
+		Envio envio = EntityManager.EnvioToEntity(envioDto);
+		Pedido pedido = EntityManager.PedidoToEntity(pedidoDto);
+		
+		if (envio.getSucursalDestinoId() == pedido.getSucursalDestinoId()) {
+			System.out.println("-----Pedido llego a Destino Final-----");
 
+			envio.setListo();
+			hbtDAO.modificar(envio);
+
+			for (Pedido pedidoDeEnvio : envio.getPedidos()) {
+				pedido.setEstadoFinalizado();
+				hbtDAO.modificar(pedidoDeEnvio);
+			}
+			return true;
+
+		} else {
+			System.out.println("-----Pedido llego a Destino Intermediario-----");
+			return false;
+		}
+	}
+	
+	/**
+	 * Chequea si el pedido debe ser enviado como urgente 
+	 */
+	public boolean controlarPedidoUrgenteNecesario(PedidoDTO pedidoDto) throws RemoteException {
+		Pedido pedido = EntityManager.PedidoToEntity(pedidoDto);
+		
+		SucursalDTO sucursalActual = obtenerSucursalPorId(pedido.getSucursalActualId());
+		SucursalDTO sucursalDestino = obtenerSucursalPorId(pedido.getSucursalDestinoId());
+		Date mejorFechaLLegada = RemoteObjectHelper.calcularMejorFechaLlegada(sucursalActual, sucursalDestino);
+
+		if (mejorFechaLLegada != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(mejorFechaLLegada);
+			cal.add(Calendar.DATE, -1);
+			Date mejorFechaLLegadaMenosUnDia = cal.getTime();
+
+			if (pedido.getFechaMaxima().before(mejorFechaLLegada)) {
+				return contratarTercero(pedido);
+			} else if (pedido.getFechaMaxima().before(mejorFechaLLegadaMenosUnDia)) {
+				return controlarEnvioUrgente(pedido);
+			}
+		}
+
+		return false;
+	}
+	
+	//Envios
+	public void controlarEstadoDeEnvios() throws RemoteException {
 		List<PedidoDTO> pedidos = obtenerPedidos();
 		pedidos = RemoteObjectHelper.ordenarPedidosPorPrioridad(pedidos);
 
@@ -114,7 +140,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		ArrayList<PedidoDTO> pedidosEsperandoSerBuscadas = new ArrayList<PedidoDTO>();
 
 		for (PedidoDTO pedido : pedidos) {
-
 			System.out.println("-----Controlando Pedido " + pedido.getIdPedido() + "-----");
 
 			VehiculoTerceroDTO vehiculoTerceroDTO = obtenerVehiculoTerceroConPedido(pedido.getIdPedido()).toDTO();
@@ -163,56 +188,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		
 		System.out.println("-----Actualizacion Finalizada-----");
 	}
-
-	private boolean controlarPedidoLLegoADestinoFinal(EnvioDTO envioDto, PedidoDTO pedido) throws RemoteException {
-
-		if (envioDto.getSucursalDestino().getIdSucursal() == pedido.getSucursalDestinoId()) {
-			System.out.println("-----Pedido llego a Destino Final-----");
-
-			envioDto.setEstado("listo");
-			hbtDAO.modificar(EntityManager.EnvioToEntity(envioDto));
-
-			for (PedidoDTO pedidosDeEnvios : envioDto.getPedidos()) {
-				pedidosDeEnvios.setEstado("finalizado");
-				hbtDAO.modificar(EntityManager.PedidoToEntity(pedidosDeEnvios));
-			}
-			return true;
-
-		} else {
-			System.out.println("-----Pedido llego a Destino Intermediario-----");
-			return false;
-		}
-	}
-
-	private void controlarLLegadaDeTercero(VehiculoTerceroDTO vehiculoTerceroDto, PedidoDTO pedido)
-			throws RemoteException {
-
-		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
-		
-		// Se asume que el tercero siempre llega en el horario predeterminado
-		if (vehiculoTerceroDto.getFechaLlegada().before(fechaActual)) {
-			System.out.println("-----Pedido LLego a su destino final-----");
-			
-			vehiculoTerceroDto.setEstado("Libre");
-			vehiculoTerceroDto.setPedidos(new ArrayList<PedidoDTO>());
-			vehiculoTerceroDto.setFechaLlegada(null);
-			hbtDAO.modificar(EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDto));
-			
-			SucursalDTO sucursalDestino = obtenerSucursalPorId(pedido.getSucursalDestinoId());
-			
-			pedido.setSucursalActualId(sucursalDestino.getIdSucursal());
-			hbtDAO.modificar(EntityManager.PedidoToEntity(pedido));
-
-			List<PedidoDTO> pedidos = sucursalDestino.getPedidos();
-			pedidos.add(pedido);
-			sucursalDestino.setPedidos(pedidos);
-			hbtDAO.modificar(EntityManager.SucursalToEntity(sucursalDestino));
-
-		} else {
-			System.out.println("-----Pedido Sigue en camino-----");
-		}
-	}
-
+	
 	private void controlarLLegadaDeEnvio(EnvioDTO envioDto) throws RemoteException {
 
 		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
@@ -276,28 +252,83 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			System.out.println("-----Envio Creado-----");
 		}
 	}
+	
+	//Vehiculos
+	public boolean controlarVehiculo(VehiculoDTO vehiculoDTO) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(vehiculoDTO.getFechaUltimoControl());
+		c.add(Calendar.DATE, vehiculoDTO.getPlanDeMantenimiento().getDiasProxControl());
+		Date fecha = c.getTime();
 
-	public boolean controlarPedidoUrgenteNecesario(PedidoDTO pedido) throws RemoteException {
-
-		SucursalDTO sucursalActual =obtenerSucursalPorId(pedido.getSucursalActualId());
-		SucursalDTO sucursalDestino = obtenerSucursalPorId(pedido.getSucursalDestinoId());
-		Date mejorFechaLLegada = RemoteObjectHelper.calcularMejorFechaLlegada(sucursalActual, sucursalDestino);
-
-		if (mejorFechaLLegada != null) {
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(mejorFechaLLegada);
-			cal.add(Calendar.DATE, -1);
-			Date mejorFechaLLegadaMenosUnDia = cal.getTime();
-
-			if (pedido.getFechaMaxima().before(mejorFechaLLegada)) {
-				return contratarTercero(pedido);
-			} else if (pedido.getFechaMaxima().before(mejorFechaLLegadaMenosUnDia)) {
-				return controlarEnvioUrgente(pedido);
+		boolean Boolean = false;
+		if (vehiculoDTO.getEstado().equals("En Deposito")) {
+			System.out.println(vehiculoDTO.getKilometraje() + vehiculoDTO.getPlanDeMantenimiento().getKmProxControl());
+			if (vehiculoDTO.getKilometraje() >= vehiculoDTO.getPlanDeMantenimiento().getKmProxControl()) {
+				Boolean = true;
+				if (vehiculoDTO.isEnGarantia()) {
+					politicaMantenimiento = new PoliticaGarantia();
+					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
+				} else if (vehiculoDTO.isTrabajoEspecifico()) {
+					politicaMantenimiento = new PoliticaEspecificidad();
+					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
+				} else {
+					politicaMantenimiento = new PoliticaGeneral();
+					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
+				}
+				vehiculoDTO.getPlanDeMantenimiento().setKmProxControl(vehiculoDTO.getKilometraje() + 200);
+				vehiculoDTO.getPlanDeMantenimiento().setDiasProxControl(60);
+				hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculoDTO));
+			} else if (fecha.before(new Date())) {
+				Boolean = true;
+				if (vehiculoDTO.isEnGarantia()) {
+					politicaMantenimiento = new PoliticaGarantia();
+					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
+				} else if (vehiculoDTO.isTrabajoEspecifico()) {
+					politicaMantenimiento = new PoliticaEspecificidad();
+					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
+				} else {
+					politicaMantenimiento = new PoliticaGeneral();
+					politicaMantenimiento.mandarAMantenimiento(vehiculoDTO);
+				}
+				vehiculoDTO.getPlanDeMantenimiento().setKmProxControl(vehiculoDTO.getKilometraje() + 200);
+				vehiculoDTO.getPlanDeMantenimiento().setDiasProxControl(60);
+				hbtDAO.modificar(EntityManager.VehiculoToEntity(vehiculoDTO));
 			}
 		}
-
-		return false;
+		return Boolean;
 	}
+
+	//Vehiculos de Terceros
+	private void controlarLLegadaDeTercero(VehiculoTerceroDTO vehiculoTerceroDto, PedidoDTO pedido)
+			throws RemoteException {
+
+		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
+		
+		// Se asume que el tercero siempre llega en el horario predeterminado
+		if (vehiculoTerceroDto.getFechaLlegada().before(fechaActual)) {
+			System.out.println("-----Pedido LLego a su destino final-----");
+			
+			vehiculoTerceroDto.setEstado("Libre");
+			vehiculoTerceroDto.setPedidos(new ArrayList<PedidoDTO>());
+			vehiculoTerceroDto.setFechaLlegada(null);
+			hbtDAO.modificar(EntityManager.VehiculoTerceroToEntity(vehiculoTerceroDto));
+			
+			SucursalDTO sucursalDestino = obtenerSucursalPorId(pedido.getSucursalDestinoId());
+			
+			pedido.setSucursalActualId(sucursalDestino.getIdSucursal());
+			hbtDAO.modificar(EntityManager.PedidoToEntity(pedido));
+
+			List<PedidoDTO> pedidos = sucursalDestino.getPedidos();
+			pedidos.add(pedido);
+			sucursalDestino.setPedidos(pedidos);
+			hbtDAO.modificar(EntityManager.SucursalToEntity(sucursalDestino));
+
+		} else {
+			System.out.println("-----Pedido Sigue en camino-----");
+		}
+	}
+
+	
 
 	private boolean controlarEnvioUrgente(PedidoDTO pedido) throws RemoteException {
 
@@ -834,18 +865,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		factura.setPrecio(p.getPrecio());
 		altaFactura(factura);
 
-	}
-
-	/**
-	 * Devuelve una lista de dto pedidos
-	 */
-	public List<PedidoDTO> obtenerPedidos() {
-		List<Pedido> pedidos = hbtDAO.obtenerPedidos();
-		List<PedidoDTO> pedidosDto = new ArrayList<PedidoDTO>();
-		for (Pedido pedido : pedidos) {
-			pedidosDto.add(pedido.toDTO());
-		}
-		return pedidosDto;
 	}
 
 	// Envio

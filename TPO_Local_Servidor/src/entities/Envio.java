@@ -173,4 +173,12 @@ public class Envio extends PersistentObject {
 					cumpleCondicionesCarga, estado, null, prioridad, sucursalOrigen.toDTO(), sucursalDestino.toDTO(), idVehiculo);
 		
 	}
+	
+	public void setListo() {
+		this.setEstado("Listo");
+	}
+	
+	public int getSucursalDestinoId() {
+		return this.getSucursalDestino().getIdSucursal();
+	}
 }
