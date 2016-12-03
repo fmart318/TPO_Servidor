@@ -1,6 +1,5 @@
 package dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -130,31 +129,32 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Sucursal> obtenerSucursales() {
-		List<Sucursal> sucursales = new ArrayList<Sucursal>();
 		Session s = this.getSession();
 		try {
-			sucursales = s.createQuery("FROM Sucursal").list();
+			List<Sucursal> sucursales = s.createQuery("FROM Sucursal").list();
+			return sucursales;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return sucursales;
+		return null;
 	}
 	
 	/**
 	 * Devuelve una entity sucursal buscada por id
 	 */
 	public Sucursal obtenerSucursalPorId(int idSucursal) {
-		Sucursal sucursal = new Sucursal();
+		
 		Session s = this.getSession();
 		try {
-			sucursal = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id")
+			Sucursal sucursal = (Sucursal) s.createQuery("FROM Sucursal c where c.id=:id")
 					.setParameter("id", idSucursal).uniqueResult();
+			return sucursal;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return sucursal;
+		return null;
 	}
 	
 	//Cargas
@@ -163,30 +163,32 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Carga> listarCargas() {
-		List<Carga> cargas = new ArrayList<Carga>();
+		
 		Session s = this.getSession();
 		try {
-			cargas = s.createQuery("FROM Carga").list();
+			List<Carga> cargas = s.createQuery("FROM Carga").list();
+			return cargas;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return cargas;
+		return null;
 	}
 	
 	/**
 	 * Devuelve una entity carga buscada por id
 	 */
 	public Carga buscarCargaPorId(int idCarga) {
-		Carga carga = new Carga();
+		
 		Session s = this.getSession();
 		try {
-			carga = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
+			Carga carga = (Carga) s.createQuery("FROM Carga c where c.id=:id").setParameter("id", idCarga).uniqueResult();
+			return carga;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return carga;
+		return null;
 	}
 
 	/**
@@ -194,16 +196,17 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Carga> listarCargasSinDespachar() {
-		List<Carga> cargas = new ArrayList<Carga>();
+		
 		Session s = this.getSession();
 		try {
-			cargas = s.createQuery("FROM Carga as c where c.despachado=:desp")
+			List<Carga> cargas = s.createQuery("FROM Carga as c where c.despachado=:desp")
 					.setParameter("desp", false).list();
+			return cargas;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return cargas;
+		return null;
 	}
 
 	//Direcciones
@@ -212,31 +215,33 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Direccion> obtenerDirecciones() {
-		List<Direccion> direcciones = new ArrayList<Direccion>();
+		
 		Session s = this.getSession();
 		try {
-			direcciones = s.createQuery("FROM Direccion").list();
+			List<Direccion> direcciones = s.createQuery("FROM Direccion").list();
+			return direcciones;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return direcciones;
+		return null;
 	}
 	
 	/**
 	 * Devuelve una entity direecion buscada por id
 	 */
 	public Direccion obtenerDireccionPorId(int idDireccion) {
-		Direccion direccion = new Direccion();
+		
 		Session s = this.getSession();
 		try {
-			direccion = (Direccion) s.createQuery("FROM Direccion c where c.id=:id")
+			Direccion direccion = (Direccion) s.createQuery("FROM Direccion c where c.id=:id")
 					.setParameter("id", idDireccion).uniqueResult();
+			return direccion;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return direccion;
+		return null;
 	}
 
 	//Vehiculos
@@ -245,32 +250,34 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Vehiculo> obtenerVehiculos() {
-		List<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
+		
 		Session s = this.getSession();
 		try {
-			vehiculos = s.createQuery("FROM Vehiculo").list();
+			List<Vehiculo> vehiculos = s.createQuery("FROM Vehiculo").list();
+			return vehiculos;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return vehiculos;
+		return null;
 	}
 
 	/**
 	 * Devuelve un entity vehiculo buscado por id
 	 */
 	public Vehiculo obtenerVehiculo(int id) {
-		Vehiculo vehiculo = new Vehiculo();
+		
 		Session s = this.getSession();
 		try {
-			vehiculo = (Vehiculo) s.createQuery("FROM Vehiculo v where v.id = :vehiculo")
+			Vehiculo vehiculo = (Vehiculo) s.createQuery("FROM Vehiculo v where v.id = :vehiculo")
 					.setParameter("vehiculo", id).uniqueResult();
+			return vehiculo;
 
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return vehiculo;
+		return null;
 	}
 
 	//Vehiculo de tercero
@@ -279,31 +286,33 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<VehiculoTercero> listarVTerceros() {
-		List<VehiculoTercero> vehiculos = new ArrayList<VehiculoTercero>();
+		
 		Session s = this.getSession();
 		try {
-			vehiculos = s.createQuery("FROM VehiculoTercero").list();
+			List<VehiculoTercero> vehiculos = s.createQuery("FROM VehiculoTercero").list();
+			return vehiculos;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return vehiculos;
+		return null;
 	}
 	
 	/**
 	 * Devuelve una entity vehiculo de tercero buscado por id
 	 */
 	public VehiculoTercero buscarVehiculoTerceroDTO(int idVehiculoTercero) {
-		VehiculoTercero vehiculoTercero = new VehiculoTercero();
+		
 		Session s = this.getSession();
 		try {
-			vehiculoTercero = (VehiculoTercero) s.createQuery("FROM VehiculoTercero c where c.id=:id")
+			VehiculoTercero vehiculoTercero = (VehiculoTercero) s.createQuery("FROM VehiculoTercero c where c.id=:id")
 					.setParameter("id", idVehiculoTercero).uniqueResult();
+			return vehiculoTercero;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return vehiculoTercero;
+		return null;
 	}
 
 	// Plan de Mantenimiento
@@ -312,30 +321,32 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<PlanDeMantenimiento> listarPlanesDeMantenimiento() {
-		List<PlanDeMantenimiento> planes = new ArrayList<PlanDeMantenimiento>();
+		
 		Session s = this.getSession();
 		try {
-			planes = s.createQuery("FROM PlanDeMantenimiento").list();
+			List<PlanDeMantenimiento> planes = s.createQuery("FROM PlanDeMantenimiento").list();
+			return planes;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return planes;
+		return null;
 	}
 
 	/**
 	 * Devuelve una entity plan de mantenimiento buscada por id
 	 */
 	public PlanDeMantenimiento obtenerPlanDeMantenimientoPorId(int idPlanDeMantenimiento) {
-		PlanDeMantenimiento plan = new PlanDeMantenimiento();
+		
 		Session s = this.getSession();
 		try {
-			plan = (PlanDeMantenimiento) s.createQuery("FROM PlanDeMantenimiento c where c.id=:id")
+			PlanDeMantenimiento plan = (PlanDeMantenimiento) s.createQuery("FROM PlanDeMantenimiento c where c.id=:id")
 					.setParameter("id", idPlanDeMantenimiento).uniqueResult();
+			return plan;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return plan;
+		return null;
 	}
 	
 	//Rutas
@@ -344,15 +355,16 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Ruta> obtenerRutas() {
-		List<Ruta> rutas = new ArrayList<Ruta>();
+		
 		Session s = this.getSession();
 		try {
-			rutas = s.createQuery("FROM Ruta").list();
+			List<Ruta> rutas = s.createQuery("FROM Ruta").list();
+			return rutas;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return rutas;
+		return null;
 	}
 	
 	//Trayectos
@@ -361,15 +373,16 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Trayecto> obtenerTrayectos() {
-		List<Trayecto> trayectos = new ArrayList<Trayecto>();
+		
 		Session s = this.getSession();
 		try {
-			trayectos = s.createQuery("FROM Trayecto").list();
+			List<Trayecto> trayectos = s.createQuery("FROM Trayecto").list();
+			return trayectos;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return trayectos;
+		return null;
 	}
 
 	//Pedidos
@@ -378,31 +391,33 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Pedido> obtenerPedidos() {
-		List<Pedido> pedidos = new ArrayList<Pedido>();
+		
 		Session s = this.getSession();
 		try {
-			pedidos = s.createQuery("FROM Pedido").list();
+			List<Pedido> pedidos = s.createQuery("FROM Pedido").list();
+			return pedidos;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return pedidos;
+		return null;
 	}
 	
 	/**
 	 * Devuelve un entity pedido buscado por id
 	 */
 	public Pedido buscarPedidoPorId(int idPedido) {
-		Pedido pedido = new Pedido();
+		
 		Session s = this.getSession();
 		try {
-			pedido = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido)
+			Pedido pedido = (Pedido) s.createQuery("FROM Pedido c where c.id=:id").setParameter("id", idPedido)
 					.uniqueResult();
+			return pedido;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return pedido;
+		return null;
 	}
 
 	//Clientes
@@ -411,15 +426,16 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Cliente> obtenerClientes() {
-		List<Cliente> clientes = new ArrayList<Cliente>();
+		
 		Session s = this.getSession();
 		try {
-			clientes = s.createQuery("FROM Cliente").list();
+			List<Cliente> clientes = s.createQuery("FROM Cliente").list();
+			return clientes;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return clientes;
+		return null;
 	}
 
 	//Cliente Empresa
@@ -428,15 +444,16 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Empresa> obtenerClientesEmpresa() {
-		List<Empresa> clientes = new ArrayList<Empresa>();
+		
 		Session s = this.getSession();
 		try {
-			clientes = s.createQuery("FROM Empresa").list();
+			List<Empresa> clientes = s.createQuery("FROM Empresa").list();
+			return clientes;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return clientes;
+		return null;
 	}
 
 	//Cliente Particular
@@ -445,15 +462,16 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Particular> obtenerClientesParticular() {
-		List<Particular> clientes = new ArrayList<Particular>();
+		
 		Session s = this.getSession();
 		try {
-			clientes = s.createQuery("FROM Particular").list();
+			List<Particular> clientes = s.createQuery("FROM Particular").list();
+			return clientes;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return clientes;
+		return null;
 	}
 
 	//Envios
@@ -462,15 +480,16 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Envio> obtenerEnvios() {
-		List<Envio> envios = new ArrayList<Envio>();
+		
 		Session session = this.getSession();
 		try {
-			envios = session.createQuery("FROM Envio").list();
+			List<Envio> envios = session.createQuery("FROM Envio").list();
+			return envios;
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		this.closeSession();
-		return envios;
+		return null;
 	}
 	
 	// Facturas
@@ -479,14 +498,15 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Factura> listarFacturas() {
-		List<Factura> facturas = new ArrayList<Factura>();
+		
 		Session s = this.getSession();
 		try {
-			facturas = s.createQuery("FROM Factura").list();
+			List<Factura> facturas = s.createQuery("FROM Factura").list();
+			return facturas;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return facturas;
+		return null;
 	}
 
 	// Remitos
@@ -495,14 +515,15 @@ public class HibernateDAO {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Remito> listarRemitos() {
-		List<Remito> remitos = new ArrayList<Remito>();
+		
 		Session s = this.getSession();
 		try {
-			remitos = s.createQuery("FROM Remito").list();
+			List<Remito> remitos = s.createQuery("FROM Remito").list();
+			return remitos;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return remitos;
+		return null;
 	}
 
 	/**
