@@ -195,7 +195,14 @@ public class Envio extends PersistentObject {
 		this.setEstado("parado");
 	}
 	
-	public boolean llegoADestino(Timestamp fechaActual) {
+	public boolean llegoADestino() {
+		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
 		return fechaActual.after(this.getFechaLlegada());
+	}
+	
+	public void setllegoADestino() {
+		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
+		this.setParado();
+		this.setFechaLlegada(fechaActual);
 	}
 }

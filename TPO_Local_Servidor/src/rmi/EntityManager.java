@@ -1,7 +1,6 @@
 package rmi;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import dto.CargaDTO;
@@ -172,36 +171,35 @@ public class EntityManager {
 	}
 
 	public static Trayecto TrayectoToEntity(TrayectoDTO trayectoDTO) {
-		Sucursal so, sd;
-		if (trayectoDTO.getSucursalOrigen() != null)
-			so = SucursalToEntity(trayectoDTO.getSucursalOrigen());
-		else
-			so = null;
-		if (trayectoDTO.getSucursalDestino() != null)
-			sd = SucursalToEntity(trayectoDTO.getSucursalDestino());
-		else
-			sd = null;
-		return new Trayecto(trayectoDTO.getIdTrayecto(), so, sd, trayectoDTO.getTiempo(), trayectoDTO.getKm(),
+		Sucursal sucursalOrigen = null, sucursalDestino = null;
+		
+		if (trayectoDTO.getSucursalOrigen() != null) {
+			sucursalOrigen = SucursalToEntity(trayectoDTO.getSucursalOrigen());
+		}
+		
+		if (trayectoDTO.getSucursalDestino() != null) {
+			sucursalDestino = SucursalToEntity(trayectoDTO.getSucursalDestino());
+		}
+		
+		return new Trayecto(trayectoDTO.getIdTrayecto(), sucursalOrigen, sucursalDestino, trayectoDTO.getTiempo(), trayectoDTO.getKm(),
 				trayectoDTO.getPrecio());
 	}
 
 	public static Vehiculo VehiculoToEntity(VehiculoDTO vehiculoDTO) {
-		PlanDeMantenimiento p;
-		if (vehiculoDTO.getPlanDeMantenimiento() != null)
-			
+		if (vehiculoDTO.getPlanDeMantenimiento() != null) {
 			return new Vehiculo(vehiculoDTO.getIdVehiculo(), vehiculoDTO.getTipo(), vehiculoDTO.getVolumen(),
 					vehiculoDTO.getPeso(), vehiculoDTO.getAncho(), vehiculoDTO.getAlto(), vehiculoDTO.getProfundidad(),
 					vehiculoDTO.getTara(), vehiculoDTO.getKilometraje(), vehiculoDTO.getEstado(),
 					vehiculoDTO.isTrabajoEspecifico(), vehiculoDTO.isEnGarantia(), vehiculoDTO.getFechaUltimoControl(),
-					PlanDeMantenimientoToEntity(vehiculoDTO.getPlanDeMantenimiento()),vehiculoDTO.getSucursalIdActual());
-		else
+					PlanDeMantenimientoToEntity(vehiculoDTO.getPlanDeMantenimiento()),
+					vehiculoDTO.getSucursalIdActual());
+		} else {
 			return new Vehiculo(vehiculoDTO.getIdVehiculo(), vehiculoDTO.getTipo(), vehiculoDTO.getVolumen(),
 					vehiculoDTO.getPeso(), vehiculoDTO.getAncho(), vehiculoDTO.getAlto(), vehiculoDTO.getProfundidad(),
 					vehiculoDTO.getTara(), vehiculoDTO.getKilometraje(), vehiculoDTO.getEstado(),
 					vehiculoDTO.isEnGarantia(), vehiculoDTO.isTrabajoEspecifico(), vehiculoDTO.getFechaUltimoControl(),
-					null,vehiculoDTO.getSucursalIdActual());
-			
-		
+					null, vehiculoDTO.getSucursalIdActual());
+		}
 	}
 
 }

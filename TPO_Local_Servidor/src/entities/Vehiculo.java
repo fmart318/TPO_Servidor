@@ -308,4 +308,9 @@ public class Vehiculo extends PersistentObject {
 	public void setEstadoMantenimientoGeneral() {
 		this.setEstado("En mantenimiento general.");
 	}
+	
+	public void setLlegoADestino(int sucursalDestino) {
+		this.setSucursalIdActual(sucursalDestino);
+		this.setEstadoLibre();
+	}
 }

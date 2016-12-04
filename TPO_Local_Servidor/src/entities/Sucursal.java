@@ -110,4 +110,16 @@ public class Sucursal extends PersistentObject {
 		SucursalDTO sucursalDTO = new SucursalDTO(idSucursal, nombre, getUbicacion().toDTO(), null);
 		return sucursalDTO;
 	}
+	
+	public void addNuevoPedido(Pedido pedidoNuevo) {
+		List<Pedido> pedidosActuales = this.getPedidos();
+		pedidosActuales.add(pedidoNuevo);
+		this.setPedidos(pedidosActuales);
+	}
+	
+	public void addNuevoPedidos(List<Pedido> pedidosNuevos) {
+		List<Pedido> pedidosActuales = this.getPedidos();
+		pedidosActuales.addAll(pedidosNuevos);
+		this.setPedidos(pedidosActuales);
+	}
 }

@@ -13,7 +13,6 @@ import dto.VehiculoTerceroDTO;
 import entities.Pedido;
 import entities.Ruta;
 import entities.Sucursal;
-import entities.Trayecto;
 import entities.Vehiculo;
 import entities.VehiculoTercero;
 
@@ -25,7 +24,7 @@ public class RemoteObjectHelper {
 		super();
 		hbtDAO = HibernateDAO.getInstancia();
 	}
-	
+
 	/**
 	 * Devuelve una entity sucursal buscada por el id
 	 */
@@ -39,29 +38,24 @@ public class RemoteObjectHelper {
 		System.out.println("-----No esxiste sucursal en el sistema-----");
 		return null;
 	}
-	
+
 	/**
-	 * Calcula la mejor fecha de llegada desde una sucursal de origen a la sucursal de destino
-	 * utilizando los ids de las mismas
+	 * Calcula la mejor fecha de llegada desde una sucursal de origen a la
+	 * sucursal de destino utilizando los ids de las mismas
 	 */
 	public static Date calcularMejorFechaLlegada(int sucursalOrigen, int sucursalDestino) {
-		return calcularMejorFechaLlegada(getSucursalPorIdEntity(sucursalOrigen), getSucursalPorIdEntity(sucursalOrigen));
+		return calcularMejorFechaLlegada(getSucursalPorIdEntity(sucursalOrigen),
+				getSucursalPorIdEntity(sucursalOrigen));
 	}
 
 	/**
-	 * Calcula la mejor fecha de llegada desde una sucursal de origen a la sucursal de destino
+	 * Calcula la mejor fecha de llegada desde una sucursal de origen a la
+	 * sucursal de destino
 	 */
 	public static Date calcularMejorFechaLlegada(Sucursal sucursalOrigen, Sucursal sucursalDestino) {
-
 		Ruta mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
-		
 		if (mejorRuta != null) {
-			
-			float tiempo = 0;
-			for (Trayecto trayecto : mejorRuta.getTrayectos()) {
-				tiempo = trayecto.getTiempo() + tiempo;
-			}
-
+			float tiempo = mejorRuta.getTiempoTotal();
 			Date fechaActual = Calendar.getInstance().getTime();
 			long minutosRuta = (long) tiempo * 60000;
 			return new Date(fechaActual.getTime() + minutosRuta);
@@ -105,24 +99,8 @@ public class RemoteObjectHelper {
 				}
 			}
 		}
-		
-		if (mejorRuta == null) {
-			System.out.println("-----No hay ruta disponible para sucursales-----");
-		}
-		
+
 		return mejorRuta;
-	}
-	
-	/**
-	 * Calcula el prescio de una sucursal a otra
-	 */
-	public static float calcularPrecio(Sucursal sucursalOrigen, Sucursal sucursalDestino) {
-		Ruta mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
-		float precio = 0;
-		for (Trayecto t : mejorRuta.getTrayectos()) {
-			precio = precio + t.getPrecio();
-		}
-		return precio;
 	}
 
 	/**
@@ -155,10 +133,10 @@ public class RemoteObjectHelper {
 
 			boolean todosCompartenElMismoDestino = true;
 
-			for (Pedido pedido2 : respuesta) {
+			for (Pedido pedidoAux : respuesta) {
 
-				Sucursal sucursalPedidoActual = getSucursalPorIdEntity(pedido2.getSucursalActualId());
-				Sucursal sucursalPedidoDestino = getSucursalPorIdEntity(pedido2.getSucursalDestinoId());
+				Sucursal sucursalPedidoActual = getSucursalPorIdEntity(pedidoAux.getSucursalActualId());
+				Sucursal sucursalPedidoDestino = getSucursalPorIdEntity(pedidoAux.getSucursalDestinoId());
 				Ruta mejorRutaActual = obtenerMejorRuta(sucursalPedidoActual, sucursalPedidoDestino);
 				int proximoDestinoActualId = mejorRutaActual.getNextSucursal(sucursalPedidoActual).getIdSucursal();
 
@@ -228,14 +206,14 @@ public class RemoteObjectHelper {
 		}
 	}
 
-	//Vehiculos
+	// Vehiculos
 	/**
 	 * Devuelve una lista de dto vehiculos disponibles en una sucursal dada
 	 */
 	public static List<Vehiculo> obtenerVehiculosDisponiblesEnSucursal(int sucursalId) {
 		return obtenerVehiculosDisponiblesEnSucursalEntity(sucursalId);
 	}
-	
+
 	/**
 	 * Devuelve una lista de entities vehiculos disponibles en una sucursal dada
 	 */
@@ -249,10 +227,11 @@ public class RemoteObjectHelper {
 		}
 		return vehiculosDisponibles;
 	}
-	
-	//Vehiculos de Tercero
+
+	// Vehiculos de Tercero
 	/**
-	 * Convierte una lista de VehiculosTercero entity a una lista de VehiculosTerceroDTO
+	 * Convierte una lista de VehiculosTercero entity a una lista de
+	 * VehiculosTerceroDTO
 	 */
 	private static List<VehiculoTerceroDTO> vehiculosTercerosToDTO(List<VehiculoTercero> vehiculos) {
 		List<VehiculoTerceroDTO> vehiculosDto = new ArrayList<VehiculoTerceroDTO>();
@@ -261,12 +240,12 @@ public class RemoteObjectHelper {
 		}
 		return vehiculosDto;
 	}
-	
+
 	/**
 	 * Devuelve una lista de entities vehiculos de tercero disponibles
 	 */
 	public static List<VehiculoTercero> obtenerVehiculosTerceroDisponiblesEntity() {
-		List<VehiculoTercero> vehiculosTerceros =  hbtDAO.listarVTerceros();
+		List<VehiculoTercero> vehiculosTerceros = hbtDAO.listarVTerceros();
 		List<VehiculoTercero> disponibles = new ArrayList<VehiculoTercero>();
 		for (VehiculoTercero vehiculo : vehiculosTerceros) {
 			if (vehiculo.isLibre()) {
@@ -275,7 +254,7 @@ public class RemoteObjectHelper {
 		}
 		return disponibles;
 	}
-	
+
 	/**
 	 * Devuelve una lista de dto vehiculos de tercero disponibles
 	 */
@@ -283,7 +262,7 @@ public class RemoteObjectHelper {
 		return vehiculosTercerosToDTO(obtenerVehiculosTerceroDisponiblesEntity());
 	}
 
-	//Pedidos
+	// Pedidos
 	/**
 	 * Devuelve una lista de pedidos ordenado por su prioridad
 	 */

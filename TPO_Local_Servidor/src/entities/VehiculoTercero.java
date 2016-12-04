@@ -145,7 +145,17 @@ public class VehiculoTercero extends PersistentObject {
 		this.setFechaLlegada(null);
 	}
 	
-	public boolean llego(Timestamp fechaActual) {
+	public boolean llegoADestino() {
+		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
 		return this.getFechaLlegada().before(fechaActual);
+	}
+
+	public void cargarPerdido(Pedido pedido) {
+		this.setEnUso();
+		this.setFechaLlegada(pedido.getFechaMaxima());
+
+		List<Pedido> pedidoList = new ArrayList<Pedido>();
+		pedidoList.add(pedido);
+		this.setPedidos(pedidoList);
 	}
 }

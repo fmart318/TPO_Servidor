@@ -59,15 +59,15 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	// Funciones del Negocio
-	
-	//Pedidos
+
+	// Pedidos
 	/**
 	 * Devuelve una lista de entities pedidos
 	 */
 	private List<Pedido> obtenerPedidosEntity() {
 		return hbtDAO.obtenerPedidos();
 	}
-	
+
 	/**
 	 * Devuelve una lista de dto pedidos
 	 */
@@ -81,7 +81,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	}
 
 	/**
-	 * Chequea si el pedido debe ser enviado como urgente 
+	 * Chequea si el pedido debe ser enviado como urgente
 	 */
 	public boolean controlarPedidoUrgenteNecesario(Pedido pedido) throws RemoteException {
 		Date mejorFechaLLegada = RemoteObjectHelper.calcularMejorFechaLlegada(pedido.getSucursalActualId(),
@@ -102,7 +102,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		return false;
 	}
-	
+
 	/**
 	 * Controla que el pedido haya llegado a la sucursal de destino
 	 */
@@ -124,89 +124,76 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Crea un nuevo pedido
 	 */
 	@Override
-	public void crearPedido(PedidoDTO pe) throws RemoteException {
-		Pedido p = new Pedido();
-		Direccion dC = new Direccion();
-		Direccion dD = new Direccion();
-		dC.setCalle(pe.getDireccionCarga().getCalle());
-		dC.setCP(pe.getDireccionCarga().getCP());
-		dC.setDepartamento(pe.getDireccionCarga().getDepartamento());
-		dC.setNumero(pe.getDireccionCarga().getNumero());
-		dC.setPiso(pe.getDireccionCarga().getPiso());
-
-		dD.setCalle(pe.getDireccionDestino().getCalle());
-		dD.setCP(pe.getDireccionDestino().getCP());
-		dD.setDepartamento(pe.getDireccionDestino().getDepartamento());
-		dD.setNumero(pe.getDireccionDestino().getNumero());
-		dD.setPiso(pe.getDireccionDestino().getPiso());
-
-		hbtDAO.guardar(dD);
-		hbtDAO.guardar(dC);
+	public void crearPedido(PedidoDTO pedidoDto) throws RemoteException {
+		Pedido pedido = new Pedido();
+		Direccion direccionCarga = new Direccion(pedidoDto.getDireccionCarga().getIdDireccion(), pedidoDto.getDireccionCarga().getCalle(),
+				pedidoDto.getDireccionCarga().getNumero(), pedidoDto.getDireccionCarga().getPiso(),
+				pedidoDto.getDireccionCarga().getDepartamento(), pedidoDto.getDireccionCarga().getCP());
+		hbtDAO.guardar(direccionCarga);
+		Direccion direccionDestino = new Direccion(pedidoDto.getDireccionDestino().getIdDireccion(), pedidoDto.getDireccionDestino().getCalle(),
+				pedidoDto.getDireccionDestino().getNumero(), pedidoDto.getDireccionDestino().getPiso(),
+				pedidoDto.getDireccionDestino().getDepartamento(), pedidoDto.getDireccionDestino().getCP());
+		hbtDAO.guardar(direccionDestino);
+		
 		ArrayList<Carga> cargas = new ArrayList<Carga>();
-		for (CargaDTO c : pe.getCargas()) {
-			Carga carg = EntityManager.CargaToEntity(c);
-			carg.setDespachado(true);
-			cargas.add(carg);
+		for (CargaDTO cargaDto : pedidoDto.getCargas()) {
+			Carga carga = EntityManager.CargaToEntity(cargaDto);
+			carga.setDespachado(true);
+			cargas.add(carga);
 		}
-
-		p.setCargas(cargas);
+		pedido.setCargas(cargas);
 
 		List<EmpresaDTO> empresas = obtenerClientesEmpresa();
-		for (EmpresaDTO e : empresas) {
-			if (e.getIdCliente() == pe.getCliente().getIdCliente()) {
-				Empresa empresa = new Empresa();
-				empresa.setIdCliente(e.getIdCliente());
-				p.setCliente(empresa);
+		for (EmpresaDTO empresaDto : empresas) {
+			if (empresaDto.getIdCliente() == pedidoDto.getCliente().getIdCliente()) {
+				pedido.setCliente(EntityManager.EmpresaToEntity(empresaDto));
 			}
 		}
 
 		List<ParticularDTO> particulares = obtenerClientesParticular();
-		for (ParticularDTO pa : particulares) {
-			if (pa.getIdCliente() == pe.getCliente().getIdCliente()) {
-				Particular particular = new Particular();
-				particular.setIdCliente(pe.getCliente().getIdCliente());
-				p.setCliente(particular);
+		for (ParticularDTO particularDto : particulares) {
+			if (particularDto.getIdCliente() == pedidoDto.getCliente().getIdCliente()) {
+				pedido.setCliente(EntityManager.ParticularToEntity(particularDto));
 			}
 		}
 
-		p.setFechaCarga(pe.getFechaCarga());
-		p.setFechaMaxima(pe.getFechaMaxima());
-		p.setHoraInicio(pe.getHoraInicio());
-		p.setHoraFin(pe.getHoraFin());
+		pedido.setFechaCarga(pedidoDto.getFechaCarga());
+		pedido.setFechaMaxima(pedidoDto.getFechaMaxima());
+		pedido.setHoraInicio(pedidoDto.getHoraInicio());
+		pedido.setHoraFin(pedidoDto.getHoraFin());
 
-		p.setDireccionCarga(dC);
-		p.setDireccionDestino(dD);
-		p.setPrecio(pe.getPrecio());
-		p.setSucursalOrigenId(pe.getSucursalOrigenId());
-		p.setSucursalDestinoId(pe.getSucursalDestinoId());
-		p.setSolicitaAvionetaParticular(pe.isSolicitaAvionetaParticular());
-		p.setSolicitaTransporteDirecto(pe.isSolicitaTransporteDirecto());
-		
-		p.setEstadoPendiente();
-		
-		p.setSucursalActualId(pe.getSucursalActualId());
-		p.setSucursalDestinoId(pe.getSucursalDestinoId());
-		p.setSucursalOrigenId(pe.getSucursalOrigenId());
-		
-		hbtDAO.guardar(p);
+		pedido.setDireccionCarga(direccionCarga);
+		pedido.setDireccionDestino(direccionDestino);
+		pedido.setPrecio(pedidoDto.getPrecio());
+		pedido.setSucursalOrigenId(pedidoDto.getSucursalOrigenId());
+		pedido.setSucursalDestinoId(pedidoDto.getSucursalDestinoId());
+		pedido.setSolicitaAvionetaParticular(pedidoDto.isSolicitaAvionetaParticular());
+		pedido.setSolicitaTransporteDirecto(pedidoDto.isSolicitaTransporteDirecto());
+
+		pedido.setEstadoPendiente();
+
+		pedido.setSucursalActualId(pedidoDto.getSucursalActualId());
+		pedido.setSucursalDestinoId(pedidoDto.getSucursalDestinoId());
+		pedido.setSucursalOrigenId(pedidoDto.getSucursalOrigenId());
+
+		hbtDAO.guardar(pedido);
 
 		Factura factura = new Factura();
-		factura.setPedido(p);
-		factura.setPrecio(p.getPrecio());
+		factura.setPedido(pedido);
+		factura.setPrecio(pedido.getPrecio());
 		hbtDAO.guardar(factura);
-		
-		Remito remito = new Remito();
-		remito.setPedido(p);
-		hbtDAO.guardar(remito);
 
+		Remito remito = new Remito();
+		remito.setPedido(pedido);
+		hbtDAO.guardar(remito);
 	}
 
-	//Envios
+	// Envios
 	/**
 	 * Chequea si un envio debe ser enviad de forma urgente
 	 */
@@ -301,24 +288,21 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		}
 		System.out.println("-----Actualizacion Finalizada-----");
 	}
-	
+
 	/**
 	 * Chequea la llegada el envio
 	 */
 	private void controlarLLegadaDeEnvio(Envio envio) throws RemoteException {
-		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
 
 		// Vamos a asumir que el envio siempre llega a tiempo a su destino.
-		if (envio.llegoADestino(fechaActual)) {
+		if (envio.llegoADestino()) {
 			Sucursal sucursalDestino = envio.getSucursalDestino();
-
 			Vehiculo vehiculo = hbtDAO.obtenerVehiculo(envio.getIdVehiculo());
-			vehiculo.setSucursalIdActual(sucursalDestino.getIdSucursal());
-			vehiculo.setEstadoLibre();
+
+			vehiculo.setLlegoADestino(sucursalDestino.getIdSucursal());
 			hbtDAO.modificar(vehiculo);
 
-			envio.setParado();
-			envio.setFechaLlegada(fechaActual);
+			envio.setllegoADestino();
 			hbtDAO.modificar(envio);
 
 			for (Pedido pedido : envio.getPedidos()) {
@@ -326,9 +310,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 				hbtDAO.modificar(pedido);
 			}
 
-			List<Pedido> pedidos = sucursalDestino.getPedidos();
-			pedidos.addAll(envio.getPedidos());
-			sucursalDestino.setPedidos(pedidos);
+			sucursalDestino.addNuevoPedidos(envio.getPedidos());
 			hbtDAO.modificar(sucursalDestino);
 
 			System.out.println("-----Envio llego a su destino-----");
@@ -350,20 +332,19 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			vehiculo.setEnUso();
 			hbtDAO.modificar(vehiculo);
 
-			long minutosFechaLlegadaEnvio = (long) rutaVehiculo.getTrayectos().get(0).getTiempo() * 60000;
+			long minutosFechaLlegadaEnvio = rutaVehiculo.getTiempoDelPrimerTrayectoEnMinutos();
 			Timestamp fechaInicialEnvio = new Timestamp(System.currentTimeMillis());
 			Timestamp fechaLlegadaEnvio = new Timestamp(System.currentTimeMillis() + minutosFechaLlegadaEnvio);
 
 			List<Envio> envios = getEnvios();
-			Envio envio = new Envio(envios.size() + 1, fechaInicialEnvio, fechaLlegadaEnvio, true,
-					"despachado", pedidos, 1, sucursalActual, rutaVehiculo.getNextSucursal(sucursalActual),
-					vehiculo.getIdVehiculo());
+			Envio envio = new Envio(envios.size() + 1, fechaInicialEnvio, fechaLlegadaEnvio, true, "despachado",
+					pedidos, 1, sucursalActual, rutaVehiculo.getNextSucursal(sucursalActual), vehiculo.getIdVehiculo());
 			hbtDAO.guardar(envio);
 
 			System.out.println("-----Envio Creado-----");
 		}
 	}
-	
+
 	/**
 	 * Crea un nuevo envio directo
 	 */
@@ -372,7 +353,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		Pedido pedido = hbtDAO.buscarPedidoPorId(idPedido);
 		controlarEnvioUrgente(pedido);
 	}
-	
+
 	/**
 	 * Devuelve una lista de dto envios
 	 */
@@ -391,9 +372,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	private List<Envio> getEnvios() {
 		return hbtDAO.obtenerEnvios();
 	}
-	
+
 	/**
-	 * Devuelve un entity envio el cual es el envio actual de una pedido dado 
+	 * Devuelve un entity envio el cual es el envio actual de una pedido dado
 	 */
 	public Envio obtenerEnvioActualDePedido(int idPedido) {
 		Envio envioEntity = null;
@@ -409,15 +390,15 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		}
 		return envioEntity;
 	}
-	
-	//Vehiculos
-	//No cambiar el param a vehiculo
+
+	// Vehiculos
+	// No cambiar el param a vehiculo
 	/**
 	 * Chequea si hay que mandar un vehiculo a mantenimiento
 	 */
 	public boolean controlarVehiculo(VehiculoDTO vehiculoDto) {
 		Vehiculo vehiculo = EntityManager.VehiculoToEntity(vehiculoDto);
-		
+
 		Calendar c = Calendar.getInstance();
 		c.setTime(vehiculo.getFechaUltimoControl());
 		c.add(Calendar.DATE, vehiculo.getPlanDeMantenimiento().getDiasProxControl());
@@ -441,7 +422,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 				vehiculo.getPlanDeMantenimiento().setKmProxControl(vehiculo.getKilometraje() + 200);
 				vehiculo.getPlanDeMantenimiento().setDiasProxControl(60);
 				hbtDAO.modificar(vehiculo);
-				
+
 			} else if (fecha.before(new Date())) {
 				Boolean = true;
 				if (vehiculo.isEnGarantia()) {
@@ -497,7 +478,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public void eliminarVehiculo(VehiculoDTO v) throws RemoteException {
 		hbtDAO.borrar(EntityManager.VehiculoToEntity(v));
 	}
-	
+
 	/**
 	 * Devuelve una lista de Vehiculos a mantener
 	 */
@@ -509,14 +490,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			vehiculos = hbtDAO.obtenerVehiculos();
 			for (Vehiculo vehiculo : vehiculos) {
 				if (vehiculo.hayQueMantener()) {
-					aMantener = new VehiculoAMantenerDTO();
-					aMantener.setIdVehiculo(vehiculo.getIdVehiculo());
-					aMantener.setHayQueMantener();
-					aMantener.setTipoDeTrabajo(vehiculo.getTipoTrabajo());
-					aMantener.setPuntoAControlar(vehiculo.getPlanDeMantenimiento().getPuntoAControlar());
-					aMantener.setTareas(vehiculo.getPlanDeMantenimiento().getTareas());
-					aMantener.setEstado(vehiculo.getEstado());
-					aMantener.setVehiculo(vehiculo.toDTO());
+					aMantener = new VehiculoAMantenerDTO(vehiculo.getIdVehiculo(), true, vehiculo.getTipoTrabajo(),
+							vehiculo.getPlanDeMantenimiento().getPuntoAControlar(),
+							vehiculo.getPlanDeMantenimiento().getTareas(), vehiculo.getEstado(), vehiculo.toDTO());
 					mantener.add(aMantener);
 				}
 			}
@@ -525,66 +501,47 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		}
 		return mantener;
 	}
-	
-	//Vehiculos de Terceros
+
+	// Vehiculos de Terceros
 	/**
 	 * Controla la llegada de los vehiculos de terceros
 	 */
-	private void controlarLLegadaDeTercero(VehiculoTercero vehiculoTercero, Pedido pedido)
-			throws RemoteException {
+	private void controlarLLegadaDeTercero(VehiculoTercero vehiculoTercero, Pedido pedido) throws RemoteException {
 
-		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
-		
 		// Se asume que el tercero siempre llega en el horario predeterminado
-		if (vehiculoTercero.llego(fechaActual)) {
+		if (vehiculoTercero.llegoADestino()) {
 			System.out.println("-----Pedido LLego a su destino final-----");
-			
-			vehiculoTercero.setEstadoLibre();
-			vehiculoTercero.setPedidos(new ArrayList<Pedido>());
-			vehiculoTercero.setFechaLlegada(null);
+
+			vehiculoTercero.liberarVehiculoTercero();
 			hbtDAO.modificar(vehiculoTercero);
-			
+
 			Sucursal sucursalDestino = RemoteObjectHelper.getSucursalPorIdEntity(pedido.getSucursalDestinoId());
-			
+
 			pedido.setSucursalActualId(sucursalDestino.getIdSucursal());
 			hbtDAO.modificar(pedido);
 
-			List<Pedido> pedidos = sucursalDestino.getPedidos();
-			pedidos.add(pedido);
-			sucursalDestino.setPedidos(pedidos);
+			sucursalDestino.addNuevoPedido(pedido);
 			hbtDAO.modificar(sucursalDestino);
 
 		} else {
 			System.out.println("-----Pedido Sigue en camino-----");
 		}
 	}
-	
+
 	/**
-	 * Realiza la contratacion de un vehiculo de tercero 
+	 * Realiza la contratacion de un vehiculo de tercero
 	 */
 	private boolean contratarTercero(Pedido pedido) throws RemoteException {
 
 		System.out.println("-----Contratando un Tercero-----");
-
-		float cargaTotalPedido = 0;
-		for (Carga carga : pedido.getCargas()) {
-			cargaTotalPedido = carga.getVolumen() + cargaTotalPedido;
-		}
 
 		List<VehiculoTercero> vehiculosTercerosDisponibles = RemoteObjectHelper
 				.obtenerVehiculosTerceroDisponiblesEntity();
 
 		if (vehiculosTercerosDisponibles.size() > 0) {
 			VehiculoTercero vehiculoTercero = vehiculosTercerosDisponibles.get(0);
-			vehiculoTercero.setEnUso();
-			vehiculoTercero.setFechaLlegada(pedido.getFechaMaxima());
-
-			List<Pedido> pedidoList = new ArrayList<Pedido>();
-			pedidoList.add(pedido);
-			vehiculoTercero.setPedidos(pedidoList);
-
+			vehiculoTercero.cargarPerdido(pedido);
 			hbtDAO.modificar(vehiculoTercero);
-
 			return true;
 		} else {
 			System.out.println("-----No hay Tercero Disponible-----");
@@ -636,7 +593,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public VehiculoTerceroDTO buscarVehiculoTerceroDTO(int idVehiculoTerceroDTO) throws RemoteException {
 		return hbtDAO.buscarVehiculoTercero(idVehiculoTerceroDTO).toDTO();
 	}
-	
+
 	/**
 	 * Devuelve una entity vehiculo de tercero que pertenece a un pedido
 	 */
@@ -653,12 +610,11 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		}
 		return vehiculoTercero;
 	}
-	
+
 	/**
 	 * Asigna los pedidos pendientes
 	 */
-	public void asignarPedidosPendientesATransporteLibre(ArrayList<Pedido> pedidosPendientes)
-			throws RemoteException {
+	public void asignarPedidosPendientesATransporteLibre(ArrayList<Pedido> pedidosPendientes) throws RemoteException {
 
 		List<Vehiculo> vehiculosDisponibles = RemoteObjectHelper
 				.obtenerVehiculosDisponiblesEnSucursalEntity(pedidosPendientes.get(0).getSucursalActualId());
@@ -686,7 +642,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		}
 	}
 
-	//Cliente Empresa
+	// Cliente Empresa
 	/**
 	 * Devuelve una lista de dto empresas
 	 */
@@ -737,7 +693,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(clienteEmpresa);
 	}
 
-	//Cliente Particular
+	// Cliente Particular
 	/**
 	 * Devuelve una lista de dto particulares
 	 */
@@ -755,10 +711,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public void altaClienteParticular(ParticularDTO particularDto) throws RemoteException {
-		Particular clienteParticular = new Particular();
-		clienteParticular.setApellido(particularDto.getApellido());
-		clienteParticular.setDNI(particularDto.getDNI());
-		clienteParticular.setNombre(particularDto.getNombre());
+		Particular clienteParticular = new Particular(particularDto.getIdCliente(), particularDto.getNombre(),
+				particularDto.getDNI(), particularDto.getApellido());
 		hbtDAO.guardar(clienteParticular);
 	}
 
@@ -766,11 +720,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 * Actualiza un cliente particular
 	 */
 	public void updateClienteParticular(ParticularDTO particularDto) throws RemoteException {
-		Particular clienteParticular = new Particular();
-		clienteParticular.setIdCliente(particularDto.getIdCliente());
-		clienteParticular.setApellido(particularDto.getApellido());
-		clienteParticular.setDNI(particularDto.getDNI());
-		clienteParticular.setNombre(particularDto.getNombre());
+		Particular clienteParticular = new Particular(particularDto.getIdCliente(), particularDto.getNombre(),
+				particularDto.getDNI(), particularDto.getApellido());
 		hbtDAO.modificar(clienteParticular);
 	}
 
@@ -783,7 +734,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(clienteParticular);
 	}
 
-	//Sucursal
+	// Sucursal
 	/**
 	 * Devuelve una lista de dto sucursales
 	 */
@@ -801,8 +752,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public void altaSucursal(SucursalDTO sucursalDto) throws RemoteException {
-		Sucursal sucursal = new Sucursal();
-		sucursal = EntityManager.SucursalToEntity(sucursalDto);
+		Sucursal sucursal = EntityManager.SucursalToEntity(sucursalDto);
 		hbtDAO.guardar(sucursal);
 	}
 
@@ -834,7 +784,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 
 		hbtDAO.modificar(sucursal);
 	}
-	
+
 	/**
 	 * Busca una sucursal por el id
 	 */
@@ -847,7 +797,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		return null;
 	}
 
-	//Trayecto
+	// Trayecto
 	/**
 	 * Devuelve una lista de dto trayectos
 	 */
@@ -866,7 +816,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public void altaTrayecto(TrayectoDTO trayectDto) throws RemoteException {
-
 		hbtDAO.guardar(EntityManager.TrayectoToEntity(trayectDto));
 	}
 
@@ -888,7 +837,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(trayecto);
 	}
 
-	//Ruta
+	// Ruta
 	/**
 	 * Devuelve una lista de dto rutas
 	 */
@@ -907,8 +856,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public void altaRuta(RutaDTO rutaDto) throws RemoteException {
-		Ruta ruta = new Ruta();
-		ruta = EntityManager.RutaToEntity(rutaDto);
+		Ruta ruta = EntityManager.RutaToEntity(rutaDto);
 		hbtDAO.guardar(ruta);
 	}
 
@@ -917,7 +865,6 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public void updateRuta(RutaDTO rutaDto) throws RemoteException {
-
 		hbtDAO.modificar(EntityManager.RutaToEntity(rutaDto));
 	}
 
@@ -931,7 +878,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(ruta);
 	}
 
-	//Cargas
+	// Cargas
 	/**
 	 * Devuelve una lista de dto cargas
 	 */
@@ -949,44 +896,26 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 * Crea una nueva carga
 	 */
 	@Override
-	public void createCarga(CargaDTO cd) throws RemoteException {
-		Carga c = new Carga();
-		c.setAlto(cd.getAlto());
-		c.setAncho(cd.getAncho());
-		c.setApilable(cd.getApilable());
-		c.setCondiciones(cd.getCondiciones());
-		c.setDespachado(cd.isDespachado());
-		c.setFragilidad(cd.getFragilidad());
-		c.setMercaderia(cd.getTipoMercaderia());
-		c.setPeso(cd.getPeso());
-		c.setProfundidad(cd.getProfundidad());
-		c.setRefrigerable(cd.isRefrigerable());
-		c.setTratamiento(cd.getTratamiento());
-		c.setVolumen(cd.getAlto() * cd.getAncho() * cd.getProfundidad());
-		hbtDAO.guardar(c);
+	public void createCarga(CargaDTO cargaDto) throws RemoteException {
+		float volumenCarga = cargaDto.getAlto() * cargaDto.getAncho() * cargaDto.getProfundidad();
+		Carga carga = new Carga(cargaDto.getIdCarga(), cargaDto.getPeso(), cargaDto.getAncho(), cargaDto.getAlto(),
+				cargaDto.getProfundidad(), volumenCarga, cargaDto.getFragilidad(), cargaDto.getTratamiento(),
+				cargaDto.getApilable(), cargaDto.isRefrigerable(), cargaDto.getCondiciones(), cargaDto.isDespachado(),
+				cargaDto.getTipoMercaderia());
+		hbtDAO.guardar(carga);
 	}
 
 	/**
 	 * Actualiza una carga
 	 */
 	@Override
-	public void updateCarga(CargaDTO cd) throws RemoteException {
-		// TODO Auto-generated method stub
-		Carga c = new Carga();
-		c.setIdCarga(cd.getIdCarga());
-		c.setAlto(cd.getAlto());
-		c.setAncho(cd.getAncho());
-		c.setApilable(cd.getApilable());
-		c.setCondiciones(cd.getCondiciones());
-		c.setDespachado(cd.isDespachado());
-		c.setFragilidad(cd.getFragilidad());
-		c.setMercaderia(cd.getTipoMercaderia());
-		c.setPeso(cd.getPeso());
-		c.setProfundidad(cd.getProfundidad());
-		c.setRefrigerable(cd.isRefrigerable());
-		c.setTratamiento(cd.getTratamiento());
-		c.setVolumen(cd.getVolumen());
-		hbtDAO.modificar(c);
+	public void updateCarga(CargaDTO cargaDto) throws RemoteException {
+		float volumenCarga = cargaDto.getAlto() * cargaDto.getAncho() * cargaDto.getProfundidad();
+		Carga carga = new Carga(cargaDto.getIdCarga(), cargaDto.getPeso(), cargaDto.getAncho(), cargaDto.getAlto(),
+				cargaDto.getProfundidad(), volumenCarga, cargaDto.getFragilidad(), cargaDto.getTratamiento(),
+				cargaDto.getApilable(), cargaDto.isRefrigerable(), cargaDto.getCondiciones(), cargaDto.isDespachado(),
+				cargaDto.getTipoMercaderia());
+		hbtDAO.modificar(carga);
 	}
 
 	/**
@@ -994,9 +923,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public void deleteCarga(int idCarga) throws RemoteException {
-		Carga c = new Carga();
-		c.setIdCarga(idCarga);
-		hbtDAO.borrar(c);
+		Carga carga = new Carga();
+		carga.setIdCarga(idCarga);
+		hbtDAO.borrar(carga);
 	}
 
 	/**
@@ -1020,7 +949,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		return cargasDto;
 	}
 
-	//Direcciones
+	// Direcciones
 	/**
 	 * Devuelve una lista de dto direcciones
 	 */
@@ -1057,7 +986,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	public void eliminarDireccion(DireccionDTO d) throws RemoteException {
 		hbtDAO.borrar(EntityManager.DireccionToEntity(d));
 	}
-	
+
 	/**
 	 * Devuelve un dto direccion buscado por el id
 	 */
@@ -1067,7 +996,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		return direccion.toDTO();
 	}
 
-	//Plan de Mantenimiento
+	// Plan de Mantenimiento
 	/**
 	 * Devuelve una lista de dto plan de mantenimiento
 	 */
@@ -1114,7 +1043,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		return hbtDAO.obtenerPlanDeMantenimientoPorId(idPlanDeMantenimiento).toDTO();
 	}
 
-	//Facturas
+	// Facturas
 	/**
 	 * Devuvle una lista de dto facturas
 	 */
@@ -1145,7 +1074,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		hbtDAO.borrar(factura);
 	}
 
-	//Remitos
+	// Remitos
 	/**
 	 * Devuelve una lista de dto remitos
 	 */
@@ -1175,8 +1104,8 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		remito.setIdRemito(idRemito);
 		hbtDAO.borrar(remito);
 	}
-	
-	//Datos Iniciales
+
+	// Datos Iniciales
 	/**
 	 * Crea los datos iniciales para el programa
 	 */
@@ -1258,9 +1187,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 		cargasC.add(cargaC);
 		hbtDAO.guardar(cargaC);
 
-		Pedido pedidoC = new Pedido(5, direccionA, direccionC, fechaActual, 12, 13, fecahActualMasTresMinutos, cargasC, 1500,
-				sucursal1.getIdSucursal(), sucursal3.getIdSucursal(), sucursal1.getIdSucursal(), false, false, cliente,
-				"pendiente");
+		Pedido pedidoC = new Pedido(5, direccionA, direccionC, fechaActual, 12, 13, fecahActualMasTresMinutos, cargasC,
+				1500, sucursal1.getIdSucursal(), sucursal3.getIdSucursal(), sucursal1.getIdSucursal(), false, false,
+				cliente, "pendiente");
 		hbtDAO.guardar(pedidoC);
 
 		pedidosA.add(pedidoC);

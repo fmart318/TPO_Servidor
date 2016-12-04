@@ -179,7 +179,7 @@ public class Ruta extends PersistentObject {
 	public Sucursal getDestino() {
 		return sucursalDestino;
 	}
-
+	
 	public float getTiempoTotal() {
 		float total = 0;
 		for (Trayecto trayecto : this.getTrayectos()) {
@@ -195,5 +195,9 @@ public class Ruta extends PersistentObject {
 			}
 		}
 		return null;
+	}
+	
+	public long getTiempoDelPrimerTrayectoEnMinutos() {
+		return (long) trayectos.get(0).getTiempo() * 60000;
 	}
 }
