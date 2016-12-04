@@ -1,5 +1,6 @@
 package entities;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -221,5 +222,90 @@ public class Vehiculo extends PersistentObject {
 		else
 			return new VehiculoDTO(idVehiculo, tipo, volumen, peso, ancho, alto, profundidad, tara, kilometraje, estado,
 					enGarantia, trabajoEspecifico, fechaUltimoControl, sucursalIdActual, null);
+	}
+	
+	public boolean isInSucursal(int sucursalId) {
+		return this.getSucursalIdActual() == sucursalId;
+	}
+	
+	public void setEnUso() {
+		this.setEstado("En Uso");
+		this.setSucursalIdActual(-1);
+	}
+	
+	public void setEstadoLibre() {
+		this.setEstado("Libre");
+	}
+	
+	public boolean isEnUso() {
+		return this.getEstado().equals("En Uso");
+	}
+	
+	public boolean isLibre() {
+		return this.getEstado().equals("Libre");
+	}
+	
+	public boolean isEnDeposito() {
+		return this.getEstado().equals("En Deposito");
+	}
+	
+	public float getMinimoVolumenAceptado() {
+		return (this.getVolumen() * 70) / 100;
+	}
+	
+	public boolean necesitaMantenimiento() {
+		return this.getKilometraje() >= this.getPlanDeMantenimiento().getKmProxControl();
+	}
+	
+	public boolean hayQueMantener() {
+		PlanDeMantenimiento plan = this.getPlanDeMantenimiento();
+		long time = Calendar.getInstance().getTimeInMillis();
+		long planTime;
+		if (this.getFechaUltimoControl() != null) {
+			planTime = plan.getDiasProxControl() + this.getFechaUltimoControl().getTime();
+		} else {
+			planTime = time + 1;
+		}
+		if (this.getKilometraje() % 10000 == 0 || this.getKilometraje() >= plan.getKmProxControl()
+				|| time >= planTime) {
+			return true;
+		}
+		return false;
+	}
+	
+	public String getTipoTrabajo() {
+		String tipo;
+		if (this.isEnGarantia()) {
+			tipo = "En Garantia: Llevar a la agencia oficial";
+		} else if (this.isTrabajoEspecifico()) {
+			tipo = "Trabajo Especifico: Llevar a taller";
+		} else {
+			tipo = "Trabajo General: Llevar a lubricentro";
+		}
+		return tipo;
+	}
+	
+	public boolean alcanzaLugar(float volumen) {
+		return this.getVolumen() > volumen;
+	}
+	
+	public void setDiasProximoControl(int diasProxControl) {
+		this.getPlanDeMantenimiento().setDiasProxControl(diasProxControl);
+	}
+	
+	public void setKmProximoControl(int kmProximoControl) {
+		this.getPlanDeMantenimiento().setKmProxControl(kmProximoControl);
+	}
+	
+	public void setEstadoMantenimientoEspecifico() {
+		this.setEstado("En mantenimiento por trabajo especifico.");
+	}
+	
+	public void setEstadoMantenimientoGarantia() {
+		this.setEstado("En mantenimiento por garantia.");
+	}
+	
+	public void setEstadoMantenimientoGeneral() {
+		this.setEstado("En mantenimiento general.");
 	}
 }

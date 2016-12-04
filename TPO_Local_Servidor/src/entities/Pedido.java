@@ -242,4 +242,37 @@ public class Pedido extends PersistentObject {
 				solicitaTransporteDirecto, solicitaAvionetaParticular, cliente.toDTO() , estado);
 		return pedidoDTO;
 	}
+	
+	public float getVolumenTotalDeCargas() {
+		float cargaTotalPedido = 0;
+		for (Carga carga : this.cargas) {
+			cargaTotalPedido = carga.getVolumen() + cargaTotalPedido;
+		}
+		return cargaTotalPedido;
+	}
+	
+	public float setVolumenCargaTotal() {
+		float total = 0;
+		for (Carga carga : this.getCargas()) {
+			total = total + carga.getVolumen();
+		}
+		return total;
+	}
+	
+	public void setEstadoFinalizado() {
+		this.setEstado("finalizado");
+	}
+	
+	public void setEstadoPendiente() {
+		this.setEstado("pendiente");
+	}
+	
+	public boolean llegoDestinoFinal() {
+		return this.getSucursalActualId() == this.getSucursalDestinoId();
+	}
+	
+	public boolean hayQueMandarUrgente(Date mejorFechaLlegada) {
+		return this.getFechaMaxima().before(mejorFechaLlegada);
+	}
+	
 }

@@ -9,12 +9,13 @@ import java.util.Date;
 import java.util.List;
 
 import dao.HibernateDAO;
-import dto.PedidoDTO;
-import dto.RutaDTO;
-import dto.SucursalDTO;
-import dto.TrayectoDTO;
-import dto.VehiculoDTO;
 import dto.VehiculoTerceroDTO;
+import entities.Pedido;
+import entities.Ruta;
+import entities.Sucursal;
+import entities.Trayecto;
+import entities.Vehiculo;
+import entities.VehiculoTercero;
 
 public class RemoteObjectHelper {
 
@@ -24,15 +25,61 @@ public class RemoteObjectHelper {
 		super();
 		hbtDAO = HibernateDAO.getInstancia();
 	}
+	
+	/**
+	 * Devuelve una entity sucursal buscada por el id
+	 */
+	public static Sucursal getSucursalPorIdEntity(int idSucursal) {
+		List<Sucursal> sucursales = hbtDAO.obtenerSucursales();
+		for (Sucursal sucursal : sucursales) {
+			if (sucursal.getIdSucursal() == idSucursal) {
+				return sucursal;
+			}
+		}
+		System.out.println("-----No esxiste sucursal en el sistema-----");
+		return null;
+	}
+	
+	/**
+	 * Calcula la mejor fecha de llegada desde una sucursal de origen a la sucursal de destino
+	 * utilizando los ids de las mismas
+	 */
+	public static Date calcularMejorFechaLlegada(int sucursalOrigen, int sucursalDestino) {
+		return calcularMejorFechaLlegada(getSucursalPorIdEntity(sucursalOrigen), getSucursalPorIdEntity(sucursalOrigen));
+	}
 
-	public static RutaDTO obtenerMejorRuta(SucursalDTO origen, SucursalDTO destino) {
+	/**
+	 * Calcula la mejor fecha de llegada desde una sucursal de origen a la sucursal de destino
+	 */
+	public static Date calcularMejorFechaLlegada(Sucursal sucursalOrigen, Sucursal sucursalDestino) {
 
-		RutaDTO mejorRuta = null;
+		Ruta mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
+		
+		if (mejorRuta != null) {
+			
+			float tiempo = 0;
+			for (Trayecto trayecto : mejorRuta.getTrayectos()) {
+				tiempo = trayecto.getTiempo() + tiempo;
+			}
+
+			Date fechaActual = Calendar.getInstance().getTime();
+			long minutosRuta = (long) tiempo * 60000;
+			return new Date(fechaActual.getTime() + minutosRuta);
+		}
+		return null;
+	}
+
+	/**
+	 * Busca la mejor ruta de una sucursal de origen a la sucursal de destino
+	 */
+	public static Ruta obtenerMejorRuta(Sucursal origen, Sucursal destino) {
+
+		Ruta mejorRuta = null;
 		float precioMin = -1;
 		int kmMin = -1;
 
-		List<RutaDTO> rutas = hbtDAO.obtenerRutas();
-		for (RutaDTO ruta : rutas) {
+		List<Ruta> rutas = hbtDAO.obtenerRutas();
+		for (Ruta ruta : rutas) {
 			if (ruta.getOrigen().getIdSucursal() == origen.getIdSucursal()
 					&& ruta.getDestino().getIdSucursal() == destino.getIdSucursal()) {
 
@@ -66,77 +113,53 @@ public class RemoteObjectHelper {
 		return mejorRuta;
 	}
 	
-	public static Date calcularMejorFechaLlegada(int sucursalOrigen, int sucursalDestino) {
-		return calcularMejorFechaLlegada(obtenerSucursal(sucursalOrigen) , obtenerSucursal(sucursalOrigen));
-	}
-
-	public static Date calcularMejorFechaLlegada(SucursalDTO sucursalOrigen, SucursalDTO sucursalDestino) {
-
-		RutaDTO mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
-		
-		if (mejorRuta != null) {
-			
-			float tiempo = 0;
-			for (TrayectoDTO trayecto : mejorRuta.getTrayectos()) {
-				tiempo = trayecto.getTiempo() + tiempo;
-			}
-
-			Date fechaActual = Calendar.getInstance().getTime();
-			long minutosRuta = (long) tiempo * 60000;
-			return new Date(fechaActual.getTime() + minutosRuta);
-		}
-		return null;
-	}
-
-	public static SucursalDTO obtenerSucursal(int sucursalId) {
-		List<SucursalDTO> sucursales = hbtDAO.obtenerSucursales();
-		for (SucursalDTO sucursal : sucursales) {
-			if (sucursal.getIdSucursal() == sucursalId) {
-				return sucursal;
-			}
-		}
-		System.out.println("-----No esxiste sucursal en el sistema-----");
-		return null;
-	}
-
-	public static float calcularPrecio(SucursalDTO sucursalOrigen, SucursalDTO sucursalDestino) {
-		RutaDTO mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
+	/**
+	 * Calcula el prescio de una sucursal a otra
+	 */
+	public static float calcularPrecio(Sucursal sucursalOrigen, Sucursal sucursalDestino) {
+		Ruta mejorRuta = obtenerMejorRuta(sucursalOrigen, sucursalDestino);
 		float precio = 0;
-		for (TrayectoDTO t : mejorRuta.getTrayectos()) {
+		for (Trayecto t : mejorRuta.getTrayectos()) {
 			precio = precio + t.getPrecio();
 		}
 		return precio;
 	}
 
-	public static ArrayList<PedidoDTO> obtenerCombinacionPedidosPendientesMasConveniente(ArrayList<PedidoDTO> pedidos,
+	/**
+	 * Busca la combinacion de pedidos mas convienente para enviar
+	 */
+	public static ArrayList<Pedido> obtenerCombinacionPedidosPendientesMasConveniente(ArrayList<Pedido> pedidos,
 			float volumenIdeal, float volumenTotal) {
-		ArrayList<ArrayList<PedidoDTO>> respuestasPosibles = new ArrayList<ArrayList<PedidoDTO>>();
+		ArrayList<ArrayList<Pedido>> respuestasPosibles = new ArrayList<ArrayList<Pedido>>();
 		obtenerCombinacionPedidosPendientesMasConvenienteRecursivo(pedidos, volumenIdeal, volumenTotal,
-				new ArrayList<PedidoDTO>(), respuestasPosibles);
+				new ArrayList<Pedido>(), respuestasPosibles);
 		respuestasPosibles = obtenerRespuestasQueCompartenSucursalDestino(respuestasPosibles);
 		return obtenerRespuestaMasGrande(respuestasPosibles);
 	}
 
-	private static ArrayList<ArrayList<PedidoDTO>> obtenerRespuestasQueCompartenSucursalDestino(
-			ArrayList<ArrayList<PedidoDTO>> respuestasPosibles) {
+	/**
+	 * 
+	 */
+	private static ArrayList<ArrayList<Pedido>> obtenerRespuestasQueCompartenSucursalDestino(
+			ArrayList<ArrayList<Pedido>> respuestasPosibles) {
 
-		ArrayList<ArrayList<PedidoDTO>> respuestasPosiblesConDestinoCompartido = new ArrayList<ArrayList<PedidoDTO>>();
+		ArrayList<ArrayList<Pedido>> respuestasPosiblesConDestinoCompartido = new ArrayList<ArrayList<Pedido>>();
 
-		for (ArrayList<PedidoDTO> respuesta : respuestasPosibles) {
+		for (ArrayList<Pedido> respuesta : respuestasPosibles) {
 
-			PedidoDTO pedidoDto = respuesta.get(0);
-			SucursalDTO sucursalActual = obtenerSucursal(pedidoDto.getSucursalActualId());
-			SucursalDTO sucursalDestino = obtenerSucursal(pedidoDto.getSucursalDestinoId());
-			RutaDTO mejorRuta = obtenerMejorRuta(sucursalActual, sucursalDestino);
+			Pedido pedido = respuesta.get(0);
+			Sucursal sucursalActual = getSucursalPorIdEntity(pedido.getSucursalActualId());
+			Sucursal sucursalDestino = getSucursalPorIdEntity(pedido.getSucursalDestinoId());
+			Ruta mejorRuta = obtenerMejorRuta(sucursalActual, sucursalDestino);
 			int proximoDestinoId = mejorRuta.getNextSucursal(sucursalActual).getIdSucursal();
 
 			boolean todosCompartenElMismoDestino = true;
 
-			for (PedidoDTO pedido : respuesta) {
+			for (Pedido pedido2 : respuesta) {
 
-				SucursalDTO sucursalPedidoActual = obtenerSucursal(pedido.getSucursalActualId());
-				SucursalDTO sucursalPedidoDestino = obtenerSucursal(pedido.getSucursalDestinoId());
-				RutaDTO mejorRutaActual = obtenerMejorRuta(sucursalPedidoActual, sucursalPedidoDestino);
+				Sucursal sucursalPedidoActual = getSucursalPorIdEntity(pedido2.getSucursalActualId());
+				Sucursal sucursalPedidoDestino = getSucursalPorIdEntity(pedido2.getSucursalDestinoId());
+				Ruta mejorRutaActual = obtenerMejorRuta(sucursalPedidoActual, sucursalPedidoDestino);
 				int proximoDestinoActualId = mejorRutaActual.getNextSucursal(sucursalPedidoActual).getIdSucursal();
 
 				if (proximoDestinoActualId != proximoDestinoId) {
@@ -153,10 +176,13 @@ public class RemoteObjectHelper {
 		return respuestasPosiblesConDestinoCompartido;
 	}
 
-	private static ArrayList<PedidoDTO> obtenerRespuestaMasGrande(ArrayList<ArrayList<PedidoDTO>> respuestasPosibles) {
+	/**
+	 * 
+	 */
+	private static ArrayList<Pedido> obtenerRespuestaMasGrande(ArrayList<ArrayList<Pedido>> respuestasPosibles) {
 		int max = -1;
-		ArrayList<PedidoDTO> respuestaMax = new ArrayList<PedidoDTO>();
-		for (ArrayList<PedidoDTO> respuesta : respuestasPosibles) {
+		ArrayList<Pedido> respuestaMax = new ArrayList<Pedido>();
+		for (ArrayList<Pedido> respuesta : respuestasPosibles) {
 			if (max == -1 || max < respuesta.size()) {
 				max = respuesta.size();
 				respuestaMax = respuesta;
@@ -165,14 +191,17 @@ public class RemoteObjectHelper {
 		return respuestaMax;
 	}
 
-	private static void obtenerCombinacionPedidosPendientesMasConvenienteRecursivo(ArrayList<PedidoDTO> pedidos,
-			float volumenIdeal, float volumenTotal, ArrayList<PedidoDTO> respuestaParcial,
-			ArrayList<ArrayList<PedidoDTO>> respuestas) {
+	/**
+	 * 
+	 */
+	private static void obtenerCombinacionPedidosPendientesMasConvenienteRecursivo(ArrayList<Pedido> pedidos,
+			float volumenIdeal, float volumenTotal, ArrayList<Pedido> respuestaParcial,
+			ArrayList<ArrayList<Pedido>> respuestas) {
 
 		int volumenActual = 0;
 
-		for (PedidoDTO pedido : respuestaParcial) {
-			volumenActual += pedido.getVolumenoTotalCargas();
+		for (Pedido pedido : respuestaParcial) {
+			volumenActual += pedido.getVolumenTotalDeCargas();
 		}
 
 		if (volumenActual >= volumenIdeal && volumenActual < volumenTotal) {
@@ -185,49 +214,86 @@ public class RemoteObjectHelper {
 
 		for (int i = 0; i < pedidos.size(); i++) {
 
-			ArrayList<PedidoDTO> pedidosFaltantes = new ArrayList<PedidoDTO>();
-			PedidoDTO ultimoPedido = pedidos.get(i);
+			ArrayList<Pedido> pedidosFaltantes = new ArrayList<Pedido>();
+			Pedido ultimoPedido = pedidos.get(i);
 
 			for (int j = i + 1; j < pedidos.size(); j++) {
 				pedidosFaltantes.add(pedidos.get(j));
 			}
 
-			ArrayList<PedidoDTO> respuestaParcial_rec = new ArrayList<PedidoDTO>(respuestaParcial);
+			ArrayList<Pedido> respuestaParcial_rec = new ArrayList<Pedido>(respuestaParcial);
 			respuestaParcial_rec.add(ultimoPedido);
 			obtenerCombinacionPedidosPendientesMasConvenienteRecursivo(pedidosFaltantes, volumenIdeal, volumenTotal,
 					respuestaParcial_rec, respuestas);
 		}
 	}
 
-	public static List<VehiculoDTO> obtenerVehiculosDisponiblesEnSucursal(int sucursalId) {
-		List<VehiculoDTO> vehiculosDisponibles = new ArrayList<VehiculoDTO>();
-		List<VehiculoDTO> vehiculos = hbtDAO.obtenerVehiculos();
-		for (VehiculoDTO vehiculo : vehiculos) {
-			if (vehiculo.getEstado().equals("Libre") && vehiculo.getSucursalIdActual() == sucursalId) {
+	//Vehiculos
+	/**
+	 * Devuelve una lista de dto vehiculos disponibles en una sucursal dada
+	 */
+	public static List<Vehiculo> obtenerVehiculosDisponiblesEnSucursal(int sucursalId) {
+		return obtenerVehiculosDisponiblesEnSucursalEntity(sucursalId);
+	}
+	
+	/**
+	 * Devuelve una lista de entities vehiculos disponibles en una sucursal dada
+	 */
+	public static List<Vehiculo> obtenerVehiculosDisponiblesEnSucursalEntity(int sucursalId) {
+		List<Vehiculo> vehiculosDisponibles = new ArrayList<Vehiculo>();
+		List<Vehiculo> vehiculos = hbtDAO.obtenerVehiculos();
+		for (Vehiculo vehiculo : vehiculos) {
+			if (vehiculo.isLibre() && vehiculo.isInSucursal(sucursalId)) {
 				vehiculosDisponibles.add(vehiculo);
 			}
 		}
 		return vehiculosDisponibles;
 	}
 	
-	public static List<VehiculoTerceroDTO> obtenerVehiculosTercerosDisponibles() {
-		List<VehiculoTerceroDTO> vehiculosTercerosDisponibles = new ArrayList<VehiculoTerceroDTO>();
-		List<VehiculoTerceroDTO> vehiculosTerceros = hbtDAO.listarVTerceros();
-		for (VehiculoTerceroDTO vehiculo : vehiculosTerceros) {
-			if (vehiculo.getEstado().equals("Libre")) {
-				vehiculosTercerosDisponibles.add(vehiculo);
+	//Vehiculos de Tercero
+	/**
+	 * Convierte una lista de VehiculosTercero entity a una lista de VehiculosTerceroDTO
+	 */
+	private static List<VehiculoTerceroDTO> vehiculosTercerosToDTO(List<VehiculoTercero> vehiculos) {
+		List<VehiculoTerceroDTO> vehiculosDto = new ArrayList<VehiculoTerceroDTO>();
+		for (VehiculoTercero vehiculo : vehiculos) {
+			vehiculosDto.add(vehiculo.toDTO());
+		}
+		return vehiculosDto;
+	}
+	
+	/**
+	 * Devuelve una lista de entities vehiculos de tercero disponibles
+	 */
+	public static List<VehiculoTercero> obtenerVehiculosTerceroDisponiblesEntity() {
+		List<VehiculoTercero> vehiculosTerceros =  hbtDAO.listarVTerceros();
+		List<VehiculoTercero> disponibles = new ArrayList<VehiculoTercero>();
+		for (VehiculoTercero vehiculo : vehiculosTerceros) {
+			if (vehiculo.isLibre()) {
+				disponibles.add(vehiculo);
 			}
 		}
-		return vehiculosTercerosDisponibles;
+		return disponibles;
+	}
+	
+	/**
+	 * Devuelve una lista de dto vehiculos de tercero disponibles
+	 */
+	public static List<VehiculoTerceroDTO> obtenerVehiculosTercerosDisponibles() {
+		return vehiculosTercerosToDTO(obtenerVehiculosTerceroDisponiblesEntity());
 	}
 
-	public static List<PedidoDTO> ordenarPedidosPorPrioridad(List<PedidoDTO> pedidos) {
+	//Pedidos
+	/**
+	 * Devuelve una lista de pedidos ordenado por su prioridad
+	 */
+	public static List<Pedido> ordenarPedidosPorPrioridad(List<Pedido> pedidos) {
 
-		List<PedidoDTO> pedidosAux = new ArrayList<PedidoDTO>();
+		List<Pedido> pedidosAux = new ArrayList<Pedido>();
 
 		// Ordeno pedidos por fecha de carga
-		Collections.sort(pedidos, new Comparator<PedidoDTO>() {
-			public int compare(PedidoDTO pedido1, PedidoDTO pedido2) {
+		Collections.sort(pedidos, new Comparator<Pedido>() {
+			public int compare(Pedido pedido1, Pedido pedido2) {
 				Date fechaCargaPedido1 = pedido1.getFechaCarga();
 				Date fechaCargaPedido2 = pedido2.getFechaCarga();
 				return fechaCargaPedido1.before(fechaCargaPedido2) ? -1 : 1;
@@ -236,7 +302,7 @@ public class RemoteObjectHelper {
 
 		// ELimino vacios
 		for (int i = 0; i < pedidos.size(); i++) {
-			PedidoDTO pedido = pedidos.get(i);
+			Pedido pedido = pedidos.get(i);
 			if (pedido != null) {
 				pedidosAux.add(pedido);
 			}
@@ -245,10 +311,13 @@ public class RemoteObjectHelper {
 		return pedidosAux;
 	}
 
-	public static ArrayList<PedidoDTO> obtenerPedidosConMismoSucursalActual(List<PedidoDTO> pedidosPendientes,
+	/**
+	 * Devuelve la lista de pedidos que se encuentran en la misma sucursal
+	 */
+	public static ArrayList<Pedido> obtenerPedidosConMismoSucursalActual(List<Pedido> pedidosPendientes,
 			int sucursalActual) {
-		ArrayList<PedidoDTO> pedidosDeSucursalActual = new ArrayList<PedidoDTO>();
-		for (PedidoDTO pedido : pedidosPendientes) {
+		ArrayList<Pedido> pedidosDeSucursalActual = new ArrayList<Pedido>();
+		for (Pedido pedido : pedidosPendientes) {
 			if (sucursalActual == pedido.getSucursalActualId()) {
 				pedidosDeSucursalActual.add(pedido);
 			}

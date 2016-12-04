@@ -180,4 +180,20 @@ public class Ruta extends PersistentObject {
 		return sucursalDestino;
 	}
 
+	public float getTiempoTotal() {
+		float total = 0;
+		for (Trayecto trayecto : this.getTrayectos()) {
+			total = total + trayecto.getTiempo();
+		}
+		return total;
+	}
+	
+	public Sucursal getNextSucursal(Sucursal sucursal) {
+		for (Trayecto trayecto : trayectos) {
+			if (trayecto.getSucursalOrigen().getIdSucursal() ==  sucursal.getIdSucursal()) {
+				return trayecto.getSucursalDestino();
+			}
+		}
+		return null;
+	}
 }
