@@ -317,6 +317,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		this.closeSession();
 		return null;
 	}
 
@@ -484,6 +485,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		this.closeSession();
 		return null;
 	}
 
@@ -500,6 +502,7 @@ public class HibernateDAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		this.closeSession();
 		return null;
 	}
 
