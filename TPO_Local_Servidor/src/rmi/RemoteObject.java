@@ -634,7 +634,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	@Override
 	public VehiculoTerceroDTO buscarVehiculoTerceroDTO(int idVehiculoTerceroDTO) throws RemoteException {
-		return hbtDAO.buscarVehiculoTerceroDTO(idVehiculoTerceroDTO).toDTO();
+		return hbtDAO.buscarVehiculoTercero(idVehiculoTerceroDTO).toDTO();
 	}
 	
 	/**

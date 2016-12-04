@@ -1,6 +1,5 @@
 package dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -292,7 +291,7 @@ public class HibernateDAO {
 	/**
 	 * Devuelve una entity vehiculo de tercero buscado por id
 	 */
-	public VehiculoTercero buscarVehiculoTerceroDTO(int idVehiculoTercero) {
+	public VehiculoTercero buscarVehiculoTercero(int idVehiculoTercero) {
 		Session s = this.getSession();
 		try {
 			VehiculoTercero vehiculoTercero = (VehiculoTercero) s.createQuery("FROM VehiculoTercero c where c.id=:id")
