@@ -294,15 +294,19 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 	 */
 	private void controlarLLegadaDeEnvio(Envio envio) throws RemoteException {
 
+		Timestamp fechaActual = new Timestamp(System.currentTimeMillis());
+
 		// Vamos a asumir que el envio siempre llega a tiempo a su destino.
 		if (envio.llegoADestino()) {
 			Sucursal sucursalDestino = envio.getSucursalDestino();
-			Vehiculo vehiculo = hbtDAO.obtenerVehiculo(envio.getIdVehiculo());
 
-			vehiculo.setLlegoADestino(sucursalDestino.getIdSucursal());
+			Vehiculo vehiculo = hbtDAO.obtenerVehiculo(envio.getIdVehiculo());
+			vehiculo.setSucursalIdActual(sucursalDestino.getIdSucursal());
+			vehiculo.setEstadoLibre();
 			hbtDAO.modificar(vehiculo);
 
-			envio.setllegoADestino();
+			envio.setParado();
+			envio.setFechaLlegada(fechaActual);
 			hbtDAO.modificar(envio);
 
 			for (Pedido pedido : envio.getPedidos()) {
@@ -310,7 +314,9 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 				hbtDAO.modificar(pedido);
 			}
 
-			sucursalDestino.addNuevoPedidos(envio.getPedidos());
+			List<Pedido> pedidos = sucursalDestino.getPedidos();
+			pedidos.addAll(envio.getPedidos());
+			sucursalDestino.setPedidos(pedidos);
 			hbtDAO.modificar(sucursalDestino);
 
 			System.out.println("-----Envio llego a su destino-----");
@@ -318,6 +324,7 @@ public class RemoteObject extends UnicastRemoteObject implements RemoteInterface
 			System.out.println("-----Envio Sigue en transito-----");
 		}
 	}
+
 
 	/**
 	 * Genera un nuevo envio
